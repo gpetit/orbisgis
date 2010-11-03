@@ -36,15 +36,54 @@
  */
 package org.orbisgis.core.layerModel;
 
-public class LayerListenerEvent {
-	private IDisplayable affectedLayer;
+import java.util.ArrayList;
 
-	public LayerListenerEvent(IDisplayable affectedLayer) {
-		super();
-		this.affectedLayer = affectedLayer;
+/**
+ * This abstract class contains methods that can be used by both <code>ILayer</code>s
+ * and <code>LayerCollection</code>s.
+ * @author alexis
+ */
+public abstract class AbstractDisplayable implements IDisplayable {
+
+	protected ArrayList<LayerListener> listeners;
+	protected MapContext context;
+
+	public AbstractDisplayable(MapContext mc) {
+		context = mc;
+		listeners = new ArrayList<LayerListener>();
 	}
 
-	public IDisplayable getAffectedLayer() {
-		return affectedLayer;
+////////////////protected methods.//////////////////////
+	protected void fireNameChanged() {
+		if (null != listeners) {
+			for (LayerListener listener : listeners) {
+				listener.nameChanged(new LayerListenerEvent(this));
+			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void fireVisibilityChanged() {
+		if (null != listeners) {
+			ArrayList<LayerListener> l = (ArrayList<LayerListener>) listeners.clone();
+			for (LayerListener listener : l) {
+				listener.visibilityChanged(new LayerListenerEvent(this));
+			}
+		}
+	}
+
+	protected void fireLayerMovedEvent(LayerCollection parent, ILayer layer) {
+		for (LayerListener listener : listeners) {
+			listener.layerMoved(new LayerCollectionEvent(parent,
+				new ILayer[]{layer}));
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void fireStyleChanged() {
+		ArrayList<LayerListener> l = (ArrayList<LayerListener>) listeners.clone();
+		for (LayerListener listener : l) {
+			listener.styleChanged(new LayerListenerEvent(this));
+		}
 	}
 }

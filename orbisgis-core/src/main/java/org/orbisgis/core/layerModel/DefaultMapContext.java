@@ -38,9 +38,13 @@ package org.orbisgis.core.layerModel;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.gdms.driver.DriverException;
 
 import org.gdms.source.SourceEvent;
 import org.gdms.source.SourceListener;
@@ -63,98 +67,299 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
+import java.util.Collections;
+import java.util.Set;
+import org.orbisgis.core.layerModel.persistence.AbstractLayerType;
 
 /**
  * Class that contains the status of the map view.
- * 
- * 
- * 
  */
 public class DefaultMapContext implements MapContext {
-	private ILayer root;
+	//The IDisplayable realizations that will be displayed. (Layer or LayerCollection
 
+	private List<IDisplayable> displayableArtifacts;
+	//The layers that have been selected to be displayed.
 	private ILayer[] selectedLayers = new ILayer[0];
-
+	//The listeners associated to this MapContext.
 	private ArrayList<MapContextListener> listeners = new ArrayList<MapContextListener>();
-
+	//A Listener dedicated to listen to new sources.
 	private OpenerListener openerListener;
-
+	//A Listener dedicated to listen to new sources removal.
 	private LayerRemovalSourceListener sourceListener;
-
-	private ILayer activeLayer;
-
+	//The currently active layer.
+	private IDisplayable activeLayer;
+	//A boolean chich determines if this map is open or not.
 	private boolean open = false;
-
+	//The associated jaxb context
 	private org.orbisgis.core.layerModel.persistence.MapContext jaxbMapContext;
-
+	//The bounding box of the map.
 	private Envelope boundingBox;
-
+	//An ID based on the creation date of the map context.
 	private long idTime;
 
 	/**
+	 * Create a new DefaultMapContext
 	 */
 	public DefaultMapContext() {
 		openerListener = new OpenerListener();
 		sourceListener = new LayerRemovalSourceListener();
-		DataManager dataManager = (DataManager) Services
-				.getService(DataManager.class);
-		setRoot(dataManager.createLayerCollection("root"));
+		DataManager dataManager = (DataManager) Services.getService(DataManager.class);
+		displayableArtifacts = new ArrayList<IDisplayable>();
 		this.jaxbMapContext = null;
 		idTime = System.currentTimeMillis();
 	}
 
-	private void setRoot(ILayer newRoot) {
-		if (this.root != null) {
-			this.root.removeLayerListenerRecursively(openerListener);
-		}
-		this.root = newRoot;
-		this.root.addLayerListenerRecursively(openerListener);
-	}
-
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void addMapContextListener(MapContextListener listener) {
 		listeners.add(listener);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void removeMapContextListener(MapContextListener listener) {
 		listeners.remove(listener);
 	}
 
-	public ILayer getLayerModel() {
-		checkIsOpen();
-		return root;
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public List<IDisplayable> getLayerModel() throws IllegalStateException {
+		if (isOpen()) {
+			return this.displayableArtifacts;
+		} else {
+			throw new IllegalStateException("you can't get the model of a context which is not open !");
+		}
 	}
 
+	/**
+	 * Add a new Layer or LayerCollection in this context
+	 * @param layer
+	 * @throws LayerException
+	 */
+	@Override
+	public void add(IDisplayable layer) throws LayerException {
+		if (layer != null && !displayableArtifacts.contains(layer)) {
+			displayableArtifacts.add(layer);
+		} else {
+			if (layer == null) {
+				throw new LayerException("How did you manage to add a null layer ?");
+			}
+			if (displayableArtifacts.contains(layer)) {
+				throw new LayerException("This Layer is already contained in this Map");
+			}
+		}
+	}
+
+	/**
+	 * Remove a Layer or LayerCollection from this context
+	 * @param layer
+	 * @throws LayerException
+	 */
+	@Override
+	public void remove(IDisplayable layer) throws LayerException {
+		if (layer != null && displayableArtifacts.contains(layer)) {
+			displayableArtifacts.remove(layer);
+		} else {
+			throw new LayerException("You can't remove a Layer that is not in the Map");
+		}
+	}
+
+	@Override
+	public void insertLayer(IDisplayable dis, int i) throws IndexOutOfBoundsException {
+		displayableArtifacts.add(i, dis);
+	}
+
+	/**
+	 * Move a Layer or LayerCollection in this context.
+	 * @param layer
+	 * @param i
+	 * @throws LayerException
+	 */
+	@Override
+	public void moveLayerBefore(IDisplayable layer, IDisplayable position) throws LayerException {
+		if(displayableArtifacts.contains(layer) && displayableArtifacts.contains(position)){
+			displayableArtifacts.remove(layer);
+			int i = displayableArtifacts.indexOf(position);
+			displayableArtifacts.add(i, layer);
+		}
+	}
+
+	@Override
 	public long getIdTime() {
 		return idTime;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public Envelope getBoundingBox() {
-		if (boundingBox != null) {
-			return boundingBox;
-		} else {
-			return null;
-		}
+		return boundingBox;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void setBoundingBox(Envelope envelope) {
 		this.boundingBox = envelope;
 	}
 
-	public ILayer[] getLayers() {
-		checkIsOpen();
-		return getLayerModel().getLayersRecursively();
+	@Override
+	public Envelope getEnvelope() {
+		Envelope env = new Envelope();
+		for (IDisplayable dis : displayableArtifacts) {
+			env.expandToInclude(dis.getEnvelope());
+		}
+		return env;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public IDisplayable getLayer(int i){
+		return displayableArtifacts.get(i);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public ILayer[] getLayers() {
+		checkIsOpen();
+		ArrayList<IDisplayable> layers = new ArrayList<IDisplayable>();
+		for (IDisplayable dis : this.displayableArtifacts) {
+			layers.addAll(dis.getLayerList());
+		}
+		return layers.toArray(new ILayer[layers.size()]);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public ILayer[] getSelectedLayers() {
 		checkIsOpen();
 		return selectedLayers;
 	}
 
-	public void setSelectedLayers(ILayer[] selectedLayers) {
+	/**
+	 * Get all the raster layers of this map context
+	 * @return
+	 * @throws IllegalStateException
+	 */
+	@Override
+	public ILayer[] getRasterLayers() throws IllegalStateException {
 		checkIsOpen();
-		ArrayList<ILayer> filtered = new ArrayList<ILayer>();
-		for (ILayer layer : selectedLayers) {
-			if (root.getLayerByName(layer.getName()) != null) {
+		ArrayList<ILayer> list = new ArrayList<ILayer>();
+		for (ILayer lay : getLayers()) {
+			try {
+				if (lay.isRaster()) {
+					list.add(lay);
+				}
+			} catch (DriverException ex) {
+				Logger.getLogger("Problem while evaluating the state of this Layer");
+			}
+		}
+		return list.toArray(new ILayer[list.size()]);
+	}
+
+	/**
+	 * Get all the raster layers of this map context
+	 * @return
+	 * @throws IllegalStateException
+	 */
+	@Override
+	public ILayer[] getVectorLayers() throws IllegalStateException {
+		checkIsOpen();
+		ArrayList<ILayer> list = new ArrayList<ILayer>();
+		for (ILayer lay : getLayers()) {
+			try {
+				if (lay.isVectorial()) {
+					list.add(lay);
+				}
+			} catch (DriverException ex) {
+				Logger.getLogger("Problem while evaluating the state of this Layer");
+			}
+		}
+		return list.toArray(new ILayer[list.size()]);
+	}
+
+	/**
+	 * Get all the raster layers of this map context
+	 * @return
+	 * @throws IllegalStateException
+	 */
+	@Override
+	public ILayer[] getWMSLayers() throws IllegalStateException {
+		checkIsOpen();
+		ArrayList<ILayer> list = new ArrayList<ILayer>();
+		for (ILayer lay : getLayers()) {
+			if (lay.isWMS()) {
+				list.add(lay);
+			}
+		}
+		return list.toArray(new ILayer[list.size()]);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public IDisplayable getLayerByName(String name) {
+		for (IDisplayable dis : this.displayableArtifacts) {
+			if (name.contentEquals(dis.getName())) {
+				return dis;
+			}
+			if (dis instanceof LayerCollection) {
+				ILayer lay = ((LayerCollection) dis).getLayerByName(name);
+				if (lay != null) {
+					return lay;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Get the number of layers in the root level of this MapContext
+	 * @return
+	 */
+	@Override
+	public int getLayerCount() {
+		return displayableArtifacts.size();
+	}
+
+	@Override
+	public int getAllLayersCount() {
+		int c = 0;
+		if (displayableArtifacts != null) {
+			c = displayableArtifacts.size();
+			for (IDisplayable dis : displayableArtifacts) {
+				if (dis.isCollection()) {
+					c = c + dis.getLayerList().size();
+				}
+			}
+		}
+		return c;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setSelectedLayers(IDisplayable[] selectedLayers) {
+		checkIsOpen();
+		ArrayList<IDisplayable> filtered = new ArrayList<IDisplayable>();
+		for (IDisplayable layer : selectedLayers) {
+			if (getLayerByName(layer.getName()) != null) {
 				filtered.add(layer);
 			}
 		}
@@ -162,62 +367,6 @@ public class DefaultMapContext implements MapContext {
 
 		for (MapContextListener listener : listeners) {
 			listener.layerSelectionChanged(this);
-		}
-	}
-
-	private final class OpenerListener extends LayerListenerAdapter implements
-			LayerListener {
-
-		public void layerAdded(LayerCollectionEvent e) {
-			if (isOpen()) {
-				for (final ILayer layer : e.getAffected()) {
-					try {
-						layer.open();
-						layer.addLayerListenerRecursively(openerListener);
-						// checkLayerCRS(layer);
-					} catch (LayerException ex) {
-						Services.getErrorManager().error(
-								"Cannot open layer: " + layer.getName()
-										+ ". The layer is removed from view.",
-								ex);
-						try {
-							layer.getParent().remove(layer);
-						} catch (LayerException e1) {
-							Services.getErrorManager().error(
-									"Cannot remove layer: " + layer.getName(),
-									ex);
-						}
-					}
-				}
-			}
-		}
-
-		public void layerRemoved(LayerCollectionEvent e) {
-			HashSet<ILayer> newSelection = new HashSet<ILayer>();
-			for (ILayer selectedLayer : selectedLayers) {
-				newSelection.add(selectedLayer);
-			}
-			ILayer[] affected = e.getAffected();
-			for (final ILayer layer : affected) {
-				// Check active
-				if (activeLayer == layer) {
-					setActiveLayer(null);
-				}
-
-				// Check selection
-				newSelection.remove(layer);
-				layer.removeLayerListenerRecursively(openerListener);
-				if (isOpen()) {
-					try {
-						layer.close();
-					} catch (LayerException e1) {
-						Services.getErrorManager().warning(
-								"Cannot close layer: " + layer.getName(), e1);
-					}
-				}
-			}
-
-			selectedLayers = newSelection.toArray(new ILayer[newSelection.size()]);
 		}
 	}
 
@@ -241,77 +390,109 @@ public class DefaultMapContext implements MapContext {
 	 * 
 	 * }
 	 */
-
 	/**
-	 * Creates a layer from the information obtained in the specified XML mapped
+	 * Fill the context from the information obtained in the specified XML mapped
 	 * object. Layers that cannot be created are removed from the layer tree and
 	 * an error message is sent to the ErrorManager service
 	 * 
 	 * @param layer
 	 * @return
 	 */
-	public ILayer recoverTree(LayerType layer,
-			HashMap<ILayer, LayerType> layerPersistenceMap) {
-		DataManager dataManager = (DataManager) Services
-				.getService(DataManager.class);
-		ILayer ret = null;
-		if (layer instanceof LayerCollectionType) {
-			LayerCollectionType xmlLayerCollection = (LayerCollectionType) layer;
-			ret = dataManager.createLayerCollection(layer.getName());
-			List<LayerType> xmlChildren = xmlLayerCollection.getLayer();
-			for (LayerType layerType : xmlChildren) {
-				ILayer lyr = recoverTree(layerType, layerPersistenceMap);
-				if (lyr != null) {
+	public void recoverContext(List<AbstractLayerType> layerList,
+		HashMap<ILayer, LayerType> layerPersistenceMap) {
+		DataManager dataManager = (DataManager) Services.getService(DataManager.class);
+		IDisplayable ret;
+		for (AbstractLayerType layer : layerList) {
+			ret = null;
+			if (layer instanceof LayerCollectionType) {
+				//We have a LayerCollection, we instanciate it.
+				LayerCollectionType xmlLayerCollection = (LayerCollectionType) layer;
+				ret = dataManager.createLayerCollection(layer.getName(), this);
+				//We try to recover the children of this collection. They are supposed to
+				//be Layer instances.
+				List<LayerType> xmlChildren = xmlLayerCollection.getLayer();
+				for (LayerType layerType : xmlChildren) {
+					ILayer lyr = null;
 					try {
-						ret.addLayer(lyr);
-					} catch (Exception e) {
+						lyr = dataManager.createLayer(layerType.getSourceName(), this);
+					} catch (LayerException e) {
 						Services.getErrorManager().error(
+							"Cannot recover layer: " + layer.getName(), e);
+					}
+					if (lyr != null) {
+						try {
+							((LayerCollection) ret).addLayer(lyr);
+						} catch (Exception e) {
+							Services.getErrorManager().error(
 								"Cannot add layer to collection: "
-										+ lyr.getName(), e);
+								+ lyr.getName(), e);
+						}
 					}
 				}
-			}
-		} else {
-			try {
-				ret = dataManager.createLayer(layer.getSourceName());
-				layerPersistenceMap.put(ret, layer);
-			} catch (LayerException e) {
-				Services.getErrorManager().error(
+			} else {//This layer is not a collection.
+				try {
+					ret = dataManager.createLayer(((LayerType) layer).getSourceName(), this);
+					layerPersistenceMap.put((ILayer) ret, (LayerType) layer);
+				} catch (LayerException e) {
+					Services.getErrorManager().error(
 						"Cannot recover layer: " + layer.getName(), e);
+				}
+			}
+			if (ret != null) {
+				displayableArtifacts.add(ret);
 			}
 		}
-		return ret;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void draw(BufferedImage inProcessImage, Envelope extent,
-			IProgressMonitor pm) {
+		IProgressMonitor pm) {
 		checkIsOpen();
 		Renderer renderer = new Renderer();
 		renderer.draw(inProcessImage, extent, getLayerModel(), pm);
 	}
 
-	private void checkIsOpen() {
-		if (!isOpen()) {
-			throw new IllegalStateException(
-					I18N
-							.getText("orbisgis.core.ui.plugins.views.geocognition.wizards.newMap"));
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Set<String> getAllLayersNames() {
+		ILayer[] layers = getLayers();
+		final Set<String> allLayersNames = new HashSet<String>();
+		for (ILayer layer : layers) {
+			allLayersNames.add(layer.getName());
 		}
+		return allLayersNames;
 	}
 
-	public ILayer getActiveLayer() {
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public IDisplayable getActiveLayer() {
 		checkIsOpen();
 		return activeLayer;
 	}
 
-	public void setActiveLayer(ILayer activeLayer) {
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setActiveLayer(IDisplayable activeLayer) {
 		checkIsOpen();
-		ILayer lastActive = this.activeLayer;
+		IDisplayable lastActive = this.activeLayer;
 		this.activeLayer = activeLayer;
 		for (MapContextListener listener : listeners) {
 			listener.activeLayerChanged(lastActive, this);
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Object getJAXBObject() {
 		if (jaxbMapContext != null) {
@@ -341,10 +522,26 @@ public class DefaultMapContext implements MapContext {
 				sl.setName(selected.getName());
 				xmlMapContext.getSelectedLayer().add(sl);
 			}
-			LayerType xmlRootLayer = root.saveLayer();
-			xmlMapContext
-					.setLayerCollection((LayerCollectionType) xmlRootLayer);
-
+			List<AbstractLayerType> listALT = xmlMapContext.getAbstractLayer();
+			AbstractLayerType abstrLayer;
+			for (IDisplayable dis : displayableArtifacts) {
+				abstrLayer = null;
+				if (dis instanceof LayerCollection) {
+					LayerCollectionType lct = new LayerCollectionType();
+					List<LayerType> list = lct.getLayer();
+					List<ILayer> layerList = ((LayerCollection) dis).getLayerCollection();
+					for (ILayer lay : layerList) {
+						list.add(lay.saveLayer());
+					}
+					abstrLayer = lct;
+				} else {
+					LayerType layType = ((ILayer) dis).saveLayer();
+					abstrLayer = layType;
+				}
+				if (abstrLayer != null) {
+					listALT.add(abstrLayer);
+				}
+			}
 			/*
 			 * OgcCrs ogcCrs = new OgcCrs(); if (getCoordinateReferenceSystem()
 			 * == null) { ogcCrs.setName(""); } else { //
@@ -355,17 +552,23 @@ public class DefaultMapContext implements MapContext {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void setJAXBObject(Object jaxbObject) {
 		if (isOpen()) {
 			throw new IllegalStateException("The map must"
-					+ " be closed to invoke this method");
+				+ " be closed to invoke this method");
 		}
 		org.orbisgis.core.layerModel.persistence.MapContext mapContext = (org.orbisgis.core.layerModel.persistence.MapContext) jaxbObject;
 
 		this.jaxbMapContext = mapContext;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void close(IProgressMonitor pm) {
 
@@ -377,20 +580,17 @@ public class DefaultMapContext implements MapContext {
 		if (pm == null) {
 			pm = new NullProgressMonitor();
 		}
-		ILayer[] layers = this.root.getLayersRecursively();
+		ILayer[] layers = this.getLayers();
 		for (int i = 0; i < layers.length; i++) {
 			pm.progressTo(i * 100 / layers.length);
-			if (!layers[i].acceptsChilds()) {
-				try {
-					layers[i].close();
-				} catch (LayerException e) {
-					Services.getErrorManager().error(
-							"Could not close layer: " + layers[i].getName());
-				}
+			try {
+				layers[i].close();
+			} catch (LayerException e) {
+				Services.getErrorManager().error(
+					"Could not close layer: " + layers[i].getName());
 			}
 		}
-		this.root.removeLayerListenerRecursively(openerListener);
-
+		removeLayerListenerRecursively(openerListener);
 		// Listen source removal events
 		DataManager dm = Services.getService(DataManager.class);
 		dm.getSourceManager().removeSourceListener(sourceListener);
@@ -398,6 +598,33 @@ public class DefaultMapContext implements MapContext {
 		this.open = false;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * @param ll
+	 */
+	@Override
+	public void removeLayerListenerRecursively(LayerListener ll) {
+		for (IDisplayable dis : displayableArtifacts) {
+			dis.removeLayerListenerRecursively(openerListener);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void addLayerListenerRecursively(LayerListener ll) {
+		for (IDisplayable dis : displayableArtifacts) {
+			dis.addLayerListenerRecursively(openerListener);
+		}
+	}
+
+	/**
+	 * Open the map. If an XML config file has been given before, this method will try to
+	 * recreate te context from it.
+	 * @param pm
+	 * @throws LayerException
+	 */
 	@Override
 	public void open(IProgressMonitor pm) throws LayerException {
 
@@ -407,31 +634,28 @@ public class DefaultMapContext implements MapContext {
 
 		this.activeLayer = null;
 
-		// Recover layer tree
+		// Recover IDisplayable collection
 		HashMap<ILayer, LayerType> layerPersistenceMap = null;
 		if (jaxbMapContext != null) {
-			LayerType layer = jaxbMapContext.getLayerCollection();
+			List<AbstractLayerType> layer = jaxbMapContext.getAbstractLayer();
 			layerPersistenceMap = new HashMap<ILayer, LayerType>();
-			ILayer newRoot = recoverTree(layer, layerPersistenceMap);
-			setRoot(newRoot);
+			recoverContext(layer, layerPersistenceMap);
 			try {
 
 				if (jaxbMapContext.getIdTime() != null) {
 					idTime = jaxbMapContext.getIdTime().getName();
 				}
 
-				String boundingBoxValue = jaxbMapContext.getBoundingBox()
-						.getName();
+				String boundingBoxValue = jaxbMapContext.getBoundingBox().getName();
 
 				if (!boundingBoxValue.equals("")) {
-					boundingBox = new WKTReader().read(boundingBoxValue)
-							.getEnvelopeInternal();
+					boundingBox = new WKTReader().read(boundingBoxValue).getEnvelopeInternal();
 				} else {
 					boundingBox = null;
 				}
 			} catch (ParseException e) {
 				Services.getErrorManager().error(
-						"Cannot read the bounding box", e);
+					"Cannot read the bounding box", e);
 			}
 			/*
 			 * /String wkt = jaxbMapContext.getOgcCrs().getName(); if (wkt !=
@@ -448,31 +672,30 @@ public class DefaultMapContext implements MapContext {
 		if (pm == null) {
 			pm = new NullProgressMonitor();
 		}
-		ILayer[] layers = this.root.getLayersRecursively();
+		ILayer[] layers = this.getLayers();
 		int i = 0;
 		try {
 			ArrayList<ILayer> toRemove = new ArrayList<ILayer>();
-			for (; i < layers.length; i++) {
+			for (i = 0; i < layers.length; i++) {
 				pm.progressTo(i * 100 / layers.length);
-				if (!layers[i].acceptsChilds()) {
+				if (!(layers[i] instanceof LayerCollection)) {
 					try {
 						layers[i].open();
 					} catch (LayerException e) {
 						Services.getService(ErrorManager.class).warning(
-								"Cannot open '" + layers[i].getName()
-										+ "'. Layer is removed", e);
+							"Cannot open '" + layers[i].getName()
+							+ "'. Layer is removed", e);
 						toRemove.add(layers[i]);
 					}
 				}
 				if (layerPersistenceMap != null) {
 					if (!toRemove.contains(layers[i])) {
 						try {
-							layers[i].restoreLayer(layerPersistenceMap
-									.get(layers[i]));
+							layers[i].restoreLayer(layerPersistenceMap.get(layers[i]));
 						} catch (LayerException e) {
 							Services.getService(ErrorManager.class).warning(
-									"Cannot restore '" + layers[i].getName()
-											+ "'. Layer is removed", e);
+								"Cannot restore '" + layers[i].getName()
+								+ "'. Layer is removed", e);
 							toRemove.add(layers[i]);
 						}
 					}
@@ -485,7 +708,7 @@ public class DefaultMapContext implements MapContext {
 		} catch (LayerException e) {
 			for (int j = 0; j < i; j++) {
 				pm.progressTo(j * 100 / i);
-				if (!layers[j].acceptsChilds()) {
+				if (layers[j] instanceof ILayer) {
 					try {
 						layers[j].close();
 					} catch (LayerException e1) {
@@ -500,19 +723,18 @@ public class DefaultMapContext implements MapContext {
 
 		if (jaxbMapContext != null) {
 			// Recover selected layers
-			List<SelectedLayer> selectedLayerList = jaxbMapContext
-					.getSelectedLayer();
-			final ArrayList<ILayer> selected = new ArrayList<ILayer>();
+			List<SelectedLayer> selectedLayerList = jaxbMapContext.getSelectedLayer();
+			final ArrayList<IDisplayable> selected = new ArrayList<IDisplayable>();
 			for (final SelectedLayer selectedLayer : selectedLayerList) {
-				LayerCollection.processLayersNodes(root, new ILayerAction() {
+				processLayersNodes(new ILayerAction() {
 
-					public void action(ILayer layer) {
+					@Override
+					public void action(IDisplayable layer) {
 						if (selectedLayer.getName().equals(layer.getName())) {
 							selected.add(layer);
 							return;
 						}
 					}
-
 				});
 			}
 			setSelectedLayers(selected.toArray(new ILayer[selected.size()]));
@@ -525,48 +747,159 @@ public class DefaultMapContext implements MapContext {
 		return open;
 	}
 
+	/**
+	 * Apply action to each leave of this layer tree
+	 * @param root
+	 * @param action
+	 */
+	public void processLayersLeaves(List<IDisplayable> root, ILayerAction action) {
+		for (IDisplayable layer : root) {
+			action.action(layer);
+		}
+	}
+
+	/**
+	 * Performs action on every IDisplayable element in this map context.
+	 * @param action
+	 */
+	public void processLayersNodes(ILayerAction action) {
+		for (IDisplayable dis : displayableArtifacts) {
+			action.action(dis);
+			if (dis instanceof LayerCollection) {
+				for (ILayer lay : ((LayerCollection) dis).getLayerCollection()) {
+					action.action(lay);
+				}
+				action.action(dis);
+			}
+		}
+	}
+
+	/**********************************************************************/
+	/***********************Private Methods********************************/
+	/**********************************************************************/
+	private void checkIsOpen() throws IllegalStateException {
+		if (!isOpen()) {
+			throw new IllegalStateException(
+				I18N.getText("orbisgis.core.ui.plugins.views.geocognition.wizards.newMap"));
+		}
+	}
+
+	/**********************************************************************/
+	/***********************Private Classes********************************/
+	/**********************************************************************/
+	/*
+	 * A listener for removal actions
+	 */
 	private final class LayerRemovalSourceListener implements SourceListener {
 
+		@Override
 		public void sourceRemoved(final SourceRemovalEvent e) {
-			LayerCollection.processLayersLeaves(root,
-					new DeleteLayerFromResourceAction(e));
+			processLayersLeaves(displayableArtifacts,
+				new DeleteLayerFromResourceAction(e));
 		}
 
+		@Override
 		public void sourceNameChanged(SourceEvent e) {
 		}
 
+		@Override
 		public void sourceAdded(SourceEvent e) {
 		}
 	}
 
+	/*
+	 * A listener for deleting actions
+	 */
 	private final class DeleteLayerFromResourceAction implements
-			org.orbisgis.core.layerModel.ILayerAction {
+		org.orbisgis.core.layerModel.ILayerAction {
 
 		private ArrayList<String> resourceNames = new ArrayList<String>();
 
 		private DeleteLayerFromResourceAction(SourceRemovalEvent e) {
 			String[] aliases = e.getNames();
-			for (String string : aliases) {
-				resourceNames.add(string);
-			}
-
+			resourceNames.addAll(Arrays.asList(aliases));
 			resourceNames.add(e.getName());
 		}
 
-		public void action(ILayer layer) {
+		@Override
+		public void action(IDisplayable layer) {
 			String layerName = layer.getName();
 			if (resourceNames.contains(layerName)) {
 				try {
-					layer.getParent().remove(layer);
+					if (layer instanceof LayerCollection) {
+						LayerCollection lc = ((ILayer) layer).getParent();
+						if (lc != null) {
+							lc.remove((ILayer) layer);
+						} else {
+							layer.getMapContext().remove(layer);
+						}
+					}
 				} catch (LayerException e) {
 					Services.getErrorManager().error(
-							"Cannot associate layer: " + layer.getName()
-									+ ". The layer must be removed manually.");
+						"Cannot associate layer: " + layer.getName()
+						+ ". The layer must be removed manually.");
 				}
 			}
 		}
 	}
 
+	/*
+	 * A listener dedicated to opening operations.
+	 */
+	private final class OpenerListener extends LayerListenerAdapter implements
+		LayerListener {
+
+		@Override
+		public void layerAdded(LayerCollectionEvent e) {
+			if (isOpen()) {
+				for (final IDisplayable layer : e.getAffected()) {
+					try {
+						layer.open();
+						layer.addLayerListenerRecursively(openerListener);
+						// checkLayerCRS(layer);
+					} catch (LayerException ex) {
+						Services.getErrorManager().error(
+							"Cannot open layer: " + layer.getName()
+							+ ". The layer is removed from view.", ex);
+						try {
+							remove(layer);
+						} catch (LayerException e1) {
+							Services.getErrorManager().error(
+								"Cannot remove layer: " + layer.getName(), ex);
+						}
+					}
+				}
+			}
+		}
+
+		@Override
+		public void layerRemoved(LayerCollectionEvent e) {
+			HashSet<IDisplayable> newSelection = new HashSet<IDisplayable>();
+			for (ILayer selectedLayer : selectedLayers) {
+				newSelection.add(selectedLayer);
+			}
+			IDisplayable[] affected = e.getAffected();
+			for (final IDisplayable layer : affected) {
+				// Check active
+				if (activeLayer == layer) {
+					setActiveLayer(null);
+				}
+
+				// Check selection
+				newSelection.remove(layer);
+				layer.removeLayerListenerRecursively(openerListener);
+				if (isOpen()) {
+					try {
+						layer.close();
+					} catch (LayerException e1) {
+						Services.getErrorManager().warning(
+							"Cannot close layer: " + layer.getName(), e1);
+					}
+				}
+			}
+			selectedLayers = newSelection.toArray(new ILayer[newSelection.size()]);
+		}
+	}
 	/**
 	 * A mapcontext must have only one {@link CoordinateReferenceSystem} By
 	 * default the crs is set to null.
@@ -579,7 +912,8 @@ public class DefaultMapContext implements MapContext {
 	 * 
 	 * @param crs
 	 *//*
-		 * public void setCoordinateReferenceSystem(CoordinateReferenceSystem
-		 * crs) { this.crs = crs; }
-		 */
+	 * public void setCoordinateReferenceSystem(CoordinateReferenceSystem
+	 * crs) { this.crs = crs; }
+	 */
+
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * OrbisGIS is a GIS application dedicated to scientific spatial simulation.
  * This cross-platform GIS is developed at French IRSTV institute and is able to
  * manipulate and create vector and raster spatial information. OrbisGIS is
@@ -35,7 +35,7 @@
  *
  * or contact directly:
  * info@orbisgis.org
- **/
+ */
 package org.orbisgis.core.layerModel;
 
 import java.awt.image.BufferedImage;
@@ -43,6 +43,8 @@ import java.awt.image.BufferedImage;
 import org.orbisgis.progress.IProgressMonitor;
 
 import com.vividsolutions.jts.geom.Envelope;
+import java.util.List;
+import java.util.Set;
 
 /**
  * This interface provides information to the tool system and receives
@@ -58,7 +60,21 @@ public interface MapContext {
 	 * @throws IllegalStateException
 	 *             If the map is closed
 	 */
-	ILayer getLayerModel() throws IllegalStateException;
+	List<IDisplayable> getLayerModel() throws IllegalStateException;
+
+        /**
+         * Try to retrieve a layer by its name.
+         * @param name
+         * @return
+         */
+        public IDisplayable getLayerByName(String name);
+
+	/**
+	 * Get the layer at index i
+	 * @param i
+	 * @return
+	 */
+	public IDisplayable getLayer(int i);
 
 	/**
 	 * Gets all the layers in the map context
@@ -69,6 +85,26 @@ public interface MapContext {
 	 */
 	public ILayer[] getLayers() throws IllegalStateException;
 
+        /**
+         * Get all the raster layers of this map context as an array of ILayer. 
+         * @return
+         * @throws IllegalStateException
+         */
+        public ILayer[] getRasterLayers() throws IllegalStateException;
+
+        /**
+         * Get all the vectorial layers of this map context as an array of ILayer.
+         * @return
+         * @throws IllegalStateException
+         */
+        public ILayer[] getVectorLayers() throws IllegalStateException;
+
+        /**
+         * Get all the WMS layers of this map context as an array of ILayer.
+         * @return
+         * @throws IllegalStateException
+         */
+        public ILayer[] getWMSLayers() throws IllegalStateException;
 	/**
 	 * Gets the selected layers
 	 * 
@@ -77,6 +113,19 @@ public interface MapContext {
 	 *             If the map is closed
 	 */
 	public ILayer[] getSelectedLayers() throws IllegalStateException;
+
+        /**
+         * Get the number of layers in this MapContext. We just consider the first level
+         * of layers, i.e. inner layers of the layercollections are not counted.
+         * @return
+         */
+        public int getLayerCount();
+
+        /**
+         * Count all the layers of this context, ie in both levels.
+         * @return
+         */
+        public int getAllLayersCount();
 
 	/**
 	 * Adds a listener for map context events
@@ -107,6 +156,18 @@ public interface MapContext {
 	 */
 	void setBoundingBox(Envelope extent);
 
+        /**
+         * Get the envelope of the layers of this map context
+         * @return
+         */
+        public Envelope getEnvelope();
+
+        /**
+         * Retrieve the names of all the layers in this MapContext
+         * @return
+         */
+        public Set<String> getAllLayersNames();
+
 	/**
 	 * Removes a listener for map context events
 	 * 
@@ -122,7 +183,7 @@ public interface MapContext {
 	 * @throws IllegalStateException
 	 *             If the map is closed
 	 */
-	public void setSelectedLayers(ILayer[] selectedLayers)
+	public void setSelectedLayers(IDisplayable[] selectedLayers)
 			throws IllegalStateException;
 
 	/**
@@ -196,7 +257,7 @@ public interface MapContext {
 	 * @throws IllegalStateException
 	 *             If the map is closed
 	 */
-	ILayer getActiveLayer() throws IllegalStateException;
+	IDisplayable getActiveLayer() throws IllegalStateException;
 
 	/**
 	 * Sets the layer where all the edition actions take place
@@ -205,7 +266,7 @@ public interface MapContext {
 	 * @throws IllegalStateException
 	 *             If the map is closed
 	 */
-	void setActiveLayer(ILayer activeLayer) throws IllegalStateException;
+	void setActiveLayer(IDisplayable activeLayer) throws IllegalStateException;
 
 	/**
 	 * get the mapcontext {@link CoordinateReferenceSystem}
@@ -222,4 +283,48 @@ public interface MapContext {
 	 */
 	// void setCoordinateReferenceSystem(CoordinateReferenceSystem crs);
 
+        /**
+         * Add a new Layer or LayerCollection in this context
+         * @param layer
+         * @throws LayerException
+         */
+        public void add(IDisplayable layer) throws LayerException;
+
+        /**
+         * Remove a Layer or LayerCollection from this context
+         * @param layer
+         * @throws LayerException
+         */
+        public void remove(IDisplayable layer) throws LayerException;
+
+        /**
+         * Move a Layer or LayerCollection in this context. <code>layer</code> will be placed
+	 * just before <code>position</code> in this list.
+         * @param layer
+         * @param i
+         * @throws LayerException
+         */
+        public void moveLayerBefore(IDisplayable layer, IDisplayable position) throws LayerException;
+
+        /**
+         * Remove the layer listener ll from all the LayerListeners associated to
+         * the layers and layer collections in this map context.
+         * @param ll
+         */
+        public void removeLayerListenerRecursively(LayerListener ll);
+
+         /**
+         * Add the layer listener ll to all the LayerListeners associated to
+         * the layers and layer collections in this map context.
+         * @param ll
+         */
+        public void addLayerListenerRecursively(LayerListener ll);
+
+        /**
+         * Insert the displayable artifact dis at the index i in the collection of layers.
+         * @param dis
+         * @param i
+         * @throws IndexOutOfBoundsException
+         */
+        public void insertLayer(IDisplayable dis, int i) throws IndexOutOfBoundsException;
 }

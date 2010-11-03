@@ -56,6 +56,6 @@ public interface MapContextListener {
 	 *            layer is setted
 	 * @param mapContext
 	 */
-	void activeLayerChanged(ILayer previousActiveLayer, MapContext mapContext);
+	void activeLayerChanged(IDisplayable previousActiveLayer, MapContext mapContext);
 
 }

@@ -5,15 +5,17 @@
  * distributed under GPL 3 license. It is produced by the "Atelier SIG" team of
  * the IRSTV Institute <http://www.irstv.cnrs.fr/> CNRS FR 2488.
  *
- * 
  *  Team leader Erwan BOCHER, scientific researcher,
- * 
+ *
  *  User support leader : Gwendall Petit, geomatic engineer.
  *
+ * Previous computer developer : Pierre-Yves FADET, computer engineer,
+Thomas LEDUC, scientific researcher, Fernando GONZALEZ
+ * CORTES, computer engineer.
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
- * Copyright (C) 2010 Erwan BOCHER, Pierre-Yves FADET, Alexis GUEGANNO, Maxence LAURENT
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT
  *
  * This file is part of OrbisGIS.
  *
@@ -32,8 +34,7 @@
  * For more information, please consult: <http://www.orbisgis.org/>
  *
  * or contact directly:
- * erwan.bocher _at_ ec-nantes.fr
- * gwendall.petit _at_ ec-nantes.fr
+ * info@orbisgis.org
  */
 package org.orbisgis.core.layerModel;
 
@@ -54,15 +55,20 @@ public abstract class GdmsLayer extends AbstractLayer {
 	private String mainName;
 	private SourceListener listener = new NameSourceListener();
 
-	public GdmsLayer(String name) {
-		super(name);
+	public GdmsLayer(String name, MapContext mc) {
+		super(name, mc);
 		this.mainName = name;
 	}
 
+    @Override
+        public int getIndex(ILayer layer){
+            return -1;
+        }
 	/**
 	 * 
 	 * @see org.orbisgis.core.layerModel.ILayer#isVisible()
 	 */
+    @Override
 	public boolean isVisible() {
 		return isVisible;
 	}
@@ -71,79 +77,10 @@ public abstract class GdmsLayer extends AbstractLayer {
 	 * @throws LayerException
 	 * @see org.orbisgis.core.layerModel.ILayer#setVisible(boolean)
 	 */
+    @Override
 	public void setVisible(boolean isVisible) throws LayerException {
 		this.isVisible = isVisible;
 		fireVisibilityChanged();
-	}
-
-	public void addLayer(ILayer layer) {
-		throw new IllegalArgumentException("This layer cannot have children");
-	}
-
-	public ILayer remove(ILayer layer) {
-		throw new IllegalArgumentException("This layer does not have children");
-	}
-
-	public ILayer remove(String layerName) {
-		throw new IllegalArgumentException("This layer does not have children");
-	}
-
-	public boolean acceptsChilds() {
-		return false;
-	}
-
-	public ILayer[] getChildren() {
-		return new ILayer[0];
-	}
-
-	public int getIndex(ILayer targetLayer) {
-		return -1;
-	}
-
-	public void insertLayer(ILayer layer, int index) throws LayerException {
-		throw new IllegalArgumentException("This layer cannot have children");
-	}
-
-	public void addLayerListenerRecursively(LayerListener listener) {
-		addLayerListener(listener);
-	}
-
-	public void removeLayerListenerRecursively(LayerListener listener) {
-		removeLayerListener(listener);
-	}
-
-	public void addLayer(ILayer layer, boolean isMoving) throws LayerException {
-		throw new IllegalArgumentException("This layer cannot have children");
-	}
-
-	public ILayer remove(ILayer layer, boolean isMoving) throws LayerException {
-		throw new IllegalArgumentException("This layer cannot have children");
-	}
-
-	public void insertLayer(ILayer layer, int index, boolean isMoving)
-			throws LayerException {
-		throw new IllegalArgumentException("This layer cannot have children");
-	}
-
-	public int getLayerCount() {
-		return 0;
-	}
-
-	public ILayer getLayer(final int index) {
-		throw new ArrayIndexOutOfBoundsException(
-				"This layer doesn't contain any child");
-	}
-
-	public ILayer getLayerByName(String layerName) {
-		return null;
-	}
-
-	public ILayer[] getRasterLayers() {
-		return new ILayer[0];
-	}
-
-	public ILayer[] getVectorLayers() throws DriverException {
-		return new ILayer[0];
 	}
 
 	@Override
@@ -169,6 +106,7 @@ public abstract class GdmsLayer extends AbstractLayer {
 		}
 	}
 
+    @Override
 	public void close() throws LayerException {
 		SourceManager sourceManager = Services.getService(DataManager.class)
 				.getSourceManager();

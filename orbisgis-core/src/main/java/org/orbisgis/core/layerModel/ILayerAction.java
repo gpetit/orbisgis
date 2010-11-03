@@ -40,5 +40,5 @@
 package org.orbisgis.core.layerModel;
 
 public interface ILayerAction {
-	void action(ILayer layer);
+	void action(IDisplayable layer);
 }

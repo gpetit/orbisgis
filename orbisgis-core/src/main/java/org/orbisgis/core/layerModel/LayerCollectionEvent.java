@@ -37,20 +37,20 @@
 package org.orbisgis.core.layerModel;
 
 public class LayerCollectionEvent {
-	private ILayer parent;
-	private ILayer[] affected;
+	private LayerCollection parent;
+	private IDisplayable[] affected;
 
-	public LayerCollectionEvent(ILayer parent, ILayer[] affected) {
+	public LayerCollectionEvent(LayerCollection parent, IDisplayable[] affected) {
 		super();
 		this.parent = parent;
 		this.affected = affected;
 	}
 
-	public ILayer[] getAffected() {
+	public IDisplayable[] getAffected() {
 		return affected;
 	}
 
-	public ILayer getParent() {
+	public LayerCollection getParent() {
 		return parent;
 	}
 

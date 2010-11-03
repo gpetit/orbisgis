@@ -10,12 +10,10 @@
  *
  *  User support leader : Gwendall Petit, geomatic engineer.
  *
- * Previous computer developer : Pierre-Yves FADET, computer engineer, Thomas LEDUC, scientific researcher, Fernando GONZALEZ
- * CORTES, computer engineer.
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
- * Copyright (C) 2010 Erwan BOCHER, Pierre-Yves FADET, Alexis GUEGANNO, Maxence LAURENT
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT
  *
  * This file is part of OrbisGIS.
  *
@@ -34,9 +32,8 @@
  * For more information, please consult: <http://www.orbisgis.org/>
  *
  * or contact directly:
- * erwan.bocher _at_ ec-nantes.fr
- * gwendall.petit _at_ ec-nantes.fr
- **/
+ * info@orbisgis.org
+ */
 package org.orbisgis.core.layerModel;
 
 import java.util.ArrayList;
@@ -45,69 +42,81 @@ import java.util.Set;
 
 import org.gdms.data.SpatialDataSourceDecorator;
 import org.gdms.driver.DriverException;
-import org.grap.model.GeoRaster;
 import org.orbisgis.core.layerModel.persistence.LayerCollectionType;
 import org.orbisgis.core.layerModel.persistence.LayerType;
-import org.orbisgis.core.renderer.legend.Legend;
-import org.orbisgis.core.renderer.legend.RasterLegend;
-import org.orbisgis.core.renderer.legend.WMSLegend;
 
 import com.vividsolutions.jts.geom.Envelope;
+import org.orbisgis.core.layerModel.persistence.AbstractLayerType;
+import org.orbisgis.core.renderer.legend.Legend;
 
-public class LayerCollection extends AbstractLayer {
+public class LayerCollection extends AbstractDisplayable implements IDisplayable {
+
+	private String name;
 	private List<ILayer> layerCollection;
 
-        /**
-         * Create a new LayerCollection with the name name.
-         * @param name
-         */
-	public LayerCollection(String name) {
-		super(name);
+	/**
+	 * Create a new LayerCollection with the name name.
+	 * @param name
+	 */
+	public LayerCollection(String name, MapContext con) {
+		super(con);
+		this.name = name;
 		layerCollection = new ArrayList<ILayer>();
 	}
 
-        /**
-         * Retrieve the layer collection as a list of layers.
-         * @return
-         */
-	List<ILayer> getLayerCollection() {
+	/**
+	 * Retrieve the layer collection as a list of layers.
+	 * @return
+	 */
+	public List<ILayer> getLayerCollection() {
 		return layerCollection;
 	}
 
-        /**
-         * Returns the index of the first occurrence of the specified element in this list,
-         * or -1 if this list does not contain the element.
-         * @param layer
-         * @return
-         */
-	public int getIndex(ILayer layer) {
-		return layerCollection.indexOf(layer);
-	}
-
-        /**
-         * Get the layer stored at the given index in the collection.
-         * @param index
-         * @return
-         */
+	/**
+	 * Get the layer stored at the given index in the collection.
+	 * @param index
+	 * @return
+	 */
 	public ILayer getLayer(final int index) {
-            //TODO : get will throw a IndexOutOfBoundsException which is nor catch neither managed here...
+		//TODO : get will throw a IndexOutOfBoundsException which is nor catch neither managed here...
 		return layerCollection.get(index);
 	}
 
+	/**
+	 * Get the name of the layer collection
+	 * @return
+	 */
+	@Override
+	public String getName() {
+		return this.name;
+	}
 
+	/**
+	 * Set the name of the layer collection
+	 * @param name
+	 */
+	@Override
+	public void setName(String name) {
+		this.name = name;
+	}
 
+	/**
+	 * Add a ILayer to this collection.
+	 * @param layer
+	 * @throws LayerException
+	 */
 	public void addLayer(final ILayer layer) throws LayerException {
 		addLayer(layer, false);
 	}
 
 	/**
-         * Insert layer at the given index.
-         * @param layer
-         * @param index
-         * @throws LayerException
-         */
+	 * Insert layer at the given index.
+	 * @param layer
+	 * @param index
+	 * @throws LayerException
+	 */
 	public void insertLayer(final ILayer layer, int index)
-			throws LayerException {
+		throws LayerException {
 		insertLayer(layer, index, false);
 	}
 
@@ -128,10 +137,10 @@ public class LayerCollection extends AbstractLayer {
 		return null;
 	}
 
-        /**
-         * Retrieve the children of this node as an array.
-         * @return
-         */
+	/**
+	 * Retrieve the children of this node as an array.
+	 * @return
+	 */
 	public ILayer[] getChildren() {
 		if (null != layerCollection) {
 			ILayer[] result = new ILayer[size()];
@@ -141,126 +150,45 @@ public class LayerCollection extends AbstractLayer {
 		}
 	}
 
-        /**
-         * Return the number of children in this collection.
-         * @return
-         */
+	/**
+	 * Return the number of children in this collection.
+	 * @return
+	 */
 	private int size() {
 		return layerCollection.size();
-	}
-
-	/**
-	 * Check if this layer is visible or not. It is visible if at least one of its children is visible,
-         * false otherwise.
-	 * @see org.orbisgis.core.layerModel.ILayer#isVisible()
-	 */
-	public boolean isVisible() {
-		for (ILayer layer : getChildren()) {
-			if (layer.isVisible()) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Set the visible attribute. We don't see this object (which is a collection,
-         * not a layer) but its leaves. Consequently, whe using this method, we set
-         * the visible attribute to isVisible for all the leaves of this collection.
-	 * @throws LayerException
-	 * @see org.orbisgis.core.layerModel.ILayer#setVisible(boolean)
-	 */
-	public void setVisible(boolean isVisible) throws LayerException {
-		for (ILayer layer : getChildren()) {
-			layer.setVisible(isVisible);
-		}
-		fireVisibilityChanged();
-	}
-
-        /**
-         *
-         * @return
-         */
-	public Envelope getEnvelope() {
-		final GetEnvelopeLayerAction tmp = new GetEnvelopeLayerAction();
-		processLayersLeaves(this, tmp);
-		return tmp.getGlobalEnvelope();
 	}
 
 	public ILayer remove(ILayer layer) throws LayerException {
 		return remove(layer, false);
 	}
 
-        /**
-         * Inform if children can be added to this layer. It is a collection, so they are.
-         * @return true.
-         */
-	public boolean acceptsChilds() {
-		return true;
-	}
-
-        /**Add the LayerListener listener to this, and to each child of this.
-         *
-         * @param listener
-         */
-	public void addLayerListenerRecursively(LayerListener listener) {
-		this.addLayerListener(listener);
-		for (ILayer layer : layerCollection) {
-			layer.addLayerListenerRecursively(listener);
-		}
-	}
-
-        /**
-         * Remove the LayerListener listener of this' listeners, and of its children's listeners
-         * @param listener
-         */
-	public void removeLayerListenerRecursively(LayerListener listener) {
-		this.removeLayerListener(listener);
-		for (ILayer layer : layerCollection) {
-			layer.removeLayerListenerRecursively(listener);
-		}
-	}
-
-        /**
-         * Close this layer and all its children.
-         * @throws LayerException
-         */
-	public void close() throws LayerException {
-		for (ILayer layer : layerCollection) {
-			layer.close();
-		}
-	}
-        /**
-         * Open the layer and all its children.
-         * @throws LayerException
-         */
-	public void open() throws LayerException {
-		for (ILayer layer : layerCollection) {
-			layer.open();
-		}
-	}
-        /**
-         * Add a new layer to this collection.
-         * @param layer
-         * @param isMoving
-         * @throws LayerException
-         */
-
+	/**
+	 * Add a new layer to this collection.
+	 * @param layer
+	 * @param isMoving
+	 * @throws LayerException
+	 */
 	public void addLayer(ILayer layer, boolean isMoving) throws LayerException {
 		if (null != layer) {
 			if (isMoving) {
 				layerCollection.add(layer);
 				layer.setParent(this);
 			} else {
-				setNamesRecursively(layer, getRoot().getAllLayersNames());
+				setNamesRecursively(layer, context.getAllLayersNames());
 				layerCollection.add(layer);
 				layer.setParent(this);
-				fireLayerAddedEvent(new ILayer[] { layer });
+				fireLayerAddedEvent(new ILayer[]{layer});
 			}
 		}
 	}
 
-
+	/**
+	 * Remove the ILayer layer from this collection.
+	 * @param layer
+	 * @param isMoving
+	 * @return
+	 * @throws LayerException
+	 */
 	public ILayer remove(ILayer layer, boolean isMoving) throws LayerException {
 		if (layerCollection.contains(layer)) {
 			if (isMoving) {
@@ -270,7 +198,7 @@ public class LayerCollection extends AbstractLayer {
 					return null;
 				}
 			} else {
-				ILayer[] toRemove = new ILayer[] { layer };
+				ILayer[] toRemove = new ILayer[]{layer};
 				if (fireLayerRemovingEvent(toRemove)) {
 					if (layerCollection.remove(layer)) {
 						fireLayerRemovedEvent(toRemove);
@@ -287,17 +215,24 @@ public class LayerCollection extends AbstractLayer {
 		}
 	}
 
+	/**
+	 * Try to insert the ILayer layer at the index index.
+	 * @param layer
+	 * @param index
+	 * @param isMoving
+	 * @throws LayerException
+	 */
 	public void insertLayer(ILayer layer, int index, boolean isMoving)
-			throws LayerException {
+		throws LayerException {
 		if (null != layer) {
 			if (isMoving) {
 				layerCollection.add(index, layer);
 				layer.setParent(this);
 			} else {
-				setNamesRecursively(layer, getRoot().getAllLayersNames());
+				setNamesRecursively(layer, context.getAllLayersNames());
 				layerCollection.add(index, layer);
 				layer.setParent(this);
-				fireLayerAddedEvent(new ILayer[] { layer });
+				fireLayerAddedEvent(new ILayer[]{layer});
 			}
 		}
 
@@ -307,7 +242,7 @@ public class LayerCollection extends AbstractLayer {
 		return layerCollection.size();
 	}
 
-	public LayerType saveLayer() {
+	public AbstractLayerType saveLayer() {
 		LayerCollectionType xmlLayer = new LayerCollectionType();
 		xmlLayer.setName(getName());
 		for (ILayer child : layerCollection) {
@@ -325,206 +260,297 @@ public class LayerCollection extends AbstractLayer {
 		for (ILayer layer : layerCollection) {
 			if (layer.getName().equals(layerName)) {
 				return layer;
-			} else {
-				ILayer ret = layer.getLayerByName(layerName);
-				if (ret != null) {
-					return ret;
-				}
 			}
 		}
 		return null;
 	}
-        /**
-         * Retrieve the children of this collection that are raster layers
-         * @return
-         * @throws DriverException
-         */
+
+	/**
+	 * Retrieve the children of this collection that are raster layers
+	 * @return
+	 * @throws DriverException
+	 */
+	@Override
 	public ILayer[] getRasterLayers() throws DriverException {
-		ILayer[] allLayers = getLayersRecursively();
-
 		ArrayList<ILayer> filterLayer = new ArrayList<ILayer>();
 
-		for (int i = 0; i < allLayers.length; i++) {
-			if (allLayers[i].isRaster()) {
-				filterLayer.add(allLayers[i]);
-
+		for (ILayer l : this.layerCollection) {
+			if (l.isRaster()) {
+				filterLayer.add(l);
 			}
 		}
-
 		return filterLayer.toArray(new ILayer[filterLayer.size()]);
 	}
 
-        /**
-         * Retrieve the children of this collection that are vector layers
-         * @return
-         * @throws DriverException
-         */
+	/**
+	 * Retrieve the children of this collection that are vector layers
+	 * @return
+	 * @throws DriverException
+	 */
+	@Override
 	public ILayer[] getVectorLayers() throws DriverException {
-		ILayer[] allLayers = getLayersRecursively();
-
 		ArrayList<ILayer> filterLayer = new ArrayList<ILayer>();
-
-		for (int i = 0; i < allLayers.length; i++) {
-			if (allLayers[i].isVectorial()) {
-				filterLayer.add(allLayers[i]);
-
+		for (ILayer l : this.layerCollection) {
+			if (l.isVectorial()) {
+				filterLayer.add(l);
 			}
 		}
-
 		return filterLayer.toArray(new ILayer[filterLayer.size()]);
 	}
 
-        /**
-         * Used to determine if this layer is a raster layer. It is not, it is a layer collection.
-         * @return false
-         */
+	/**
+	 * Retrieve the children of this collection that are vector layers
+	 * @return
+	 * @throws DriverException
+	 */
+	@Override
+	public ILayer[] getWMSLayers() throws DriverException {
+		ArrayList<ILayer> filterLayer = new ArrayList<ILayer>();
+		for (ILayer l : this.layerCollection) {
+			if (l.isWMS()) {
+				filterLayer.add(l);
+			}
+		}
+		return filterLayer.toArray(new ILayer[filterLayer.size()]);
+	}
+
+	/**
+	 * Used to determine if this layer is a raster layer. It is not, it is a layer collection.
+	 * @return false
+	 */
 	public boolean isRaster() {
 		return false;
 	}
 
-        /**
-         * Used to determine if this layer is a vector layer. It is not, it is a layer collection.
-         * @return false
-         */
+	/**
+	 * Used to determine if this layer is a vector layer. It is not, it is a layer collection.
+	 * @return false
+	 */
 	public boolean isVectorial() {
 		return false;
 	}
 
-        /**
-         * Supposed to return the datasource associated to this layer. But it's a collection,
-         * so it is null. 
-         * @return
-         */
+	///////******************************************///////
+	///////******IDisplayable interface/*************///////
+	///////******************************************///////
+
+	/**
+	 * This IDisplayable can't have a Parent. Returns null.
+	 * @return
+	 */
+	@Override
+	public LayerCollection getParent(){
+		return null;
+	}
+	/**
+	 * Close this layer and all its children.
+	 * @throws LayerException
+	 */
+	@Override
+	public void close() throws LayerException {
+		for (ILayer layer : layerCollection) {
+			layer.close();
+		}
+	}
+
+	/**
+	 * Open the layer and all its children.
+	 * @throws LayerException
+	 */
+	@Override
+	public void open() throws LayerException {
+		for (ILayer layer : layerCollection) {
+			layer.open();
+		}
+	}
+	
+	/**
+	 * Return the layers that are contained in that collection in an array of ILayer.
+	 * @return
+	 */
+	@Override
+	public ILayer[] getLayers() {
+		if (layerCollection != null) {
+			return this.layerCollection.toArray(new ILayer[layerCollection.size()]);
+		} else {
+			return null;
+		}
+	}
+
+	@Override
+	public List<ILayer> getLayerList() {
+		return this.getLayerCollection();
+	}
+
+	@Override
+	public List<IDisplayable> getDisplayableList() {
+		ArrayList<IDisplayable> list = new ArrayList<IDisplayable>(layerCollection);
+		list.add(this);
+		return list;
+	}
+
+	@Override
+	public IDisplayable[] getLayerPath(){
+		return null;
+	}
+	/**
+	 * Check if this layer is visible or not. It is visible if at least one of its children is visible,
+	 * false otherwise.
+	 * @see org.orbisgis.core.layerModel.ILayer#isVisible()
+	 */
+	@Override
+	public boolean isVisible() {
+		for (ILayer layer : getChildren()) {
+			if (layer.isVisible()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Set the visible attribute. We don't see this object (which is a collection,
+	 * not a layer) but its leaves. Consequently, whe using this method, we set
+	 * the visible attribute to isVisible for all the leaves of this collection.
+	 * @throws LayerException
+	 * @see org.orbisgis.core.layerModel.ILayer#setVisible(boolean)
+	 */
+	@Override
+	public void setVisible(boolean isVisible) throws LayerException {
+		for (ILayer layer : getChildren()) {
+			layer.setVisible(isVisible);
+		}
+		fireVisibilityChanged();
+	}
+
+	/**
+	 * Returns the index of the first occurrence of the specified element in this list,
+	 * or -1 if this list does not contain the element.
+	 * @param layer
+	 * @return
+	 */
+	@Override
+	public int getIndex(ILayer layer) {
+		return layerCollection.indexOf(layer);
+	}
+
+	/**
+	 * Add a listener to the list of listeners associated to this LayerCollection.
+	 * @param listener
+	 */
+	@Override
+	public void addLayerListener(LayerListener listener) {
+		this.listeners.add(listener);
+	}
+
+	@Override
+	public void removeLayerListener(LayerListener listener) {
+		listeners.remove(listener);
+	}
+
+	/**
+	 * Add the LayerListener listener to this, and to each child of this.
+	 *
+	 * @param listener
+	 */
+	@Override
+	public void addLayerListenerRecursively(LayerListener listener) {
+		this.addLayerListener(listener);
+		for (ILayer layer : layerCollection) {
+			layer.addLayerListener(listener);
+		}
+	}
+
+	/**
+	 * Remove the LayerListener listener of this' listeners, and of its children's listeners
+	 * @param listener
+	 */
+	@Override
+	public void removeLayerListenerRecursively(LayerListener listener) {
+		this.removeLayerListener(listener);
+		for (ILayer layer : layerCollection) {
+			layer.removeLayerListener(listener);
+		}
+	}
+
+	/**
+	 * Get the context in which this collection is.
+	 * @return
+	 */
+	@Override
+	public MapContext getMapContext() {
+		return this.context;
+	}
+
+	/**
+	 * Set the context in which this collection lives.
+	 * @param mc
+	 */
+	@Override
+	public void setMapContext(MapContext mc) {
+		this.context = mc;
+	}
+
+	@Override
+	public Envelope getEnvelope() {
+		Envelope tmp = new Envelope();
+		for (ILayer layer : layerCollection) {
+			tmp.expandToInclude(layer.getEnvelope());
+		}
+		return tmp;
+	}
+
+	/**
+	 * Supposed to return the datasource associated to this layer. But it's a collection,
+	 * so it is null.
+	 * @return
+	 */
+	@Override
 	public SpatialDataSourceDecorator getDataSource() {
 		return null;
 	}
 
-        //////////////////Unsupported methods////////////////////////
-
-	public RasterLegend[] getRasterLegend() throws DriverException,
-			UnsupportedOperationException {
-		throw new UnsupportedOperationException("Cannot set "
-				+ "a legend on a layer collection");
+	@Override
+	public boolean isCollection() {
+		return true;
 	}
 
-	public RasterLegend[] getRasterLegend(String fieldName)
-			throws IllegalArgumentException {
-		throw new UnsupportedOperationException("Cannot set "
-				+ "a legend on a layer collection");
-	}
-
-	public Legend[] getVectorLegend() throws DriverException,
-			UnsupportedOperationException {
-		throw new UnsupportedOperationException("Cannot set "
-				+ "a legend on a layer collection");
-	}
-
-	public Legend[] getVectorLegend(String fieldName)
-			throws IllegalArgumentException {
-		throw new UnsupportedOperationException("Cannot set "
-				+ "a legend on a layer collection");
-	}
-
-	public void setLegend(String fieldName, Legend... legends)
-			throws DriverException {
-		throw new UnsupportedOperationException("Cannot set "
-				+ "a legend on a layer collection");
-	}
-
-	public void setLegend(Legend... l) throws DriverException {
-		throw new UnsupportedOperationException("Cannot set "
-				+ "a legend on a layer collection");
-	}
-
-	public GeoRaster getRaster() throws DriverException {
-		throw new UnsupportedOperationException("Cannot do this "
-				+ "operation on a layer collection");
-	}
-
+	@Override
 	public int[] getSelection() {
 		return new int[0];
 	}
 
+	@Override
 	public void setSelection(int[] newSelection) {
 	}
 
+	/**
+	 * Supposed to return a legend... but we are working on a LayerCollection, so it doesn't
+	 * have one.
+	 * @return
+	 * @throws DriverException
+	 */
 	public Legend[] getRenderingLegend() throws DriverException {
-		throw new UnsupportedOperationException(
-				"Cannot draw a layer collection");
+		throw new UnsupportedOperationException("Cannot draw a layer collection");
 	}
 
-	@Override
-	public WMSConnection getWMSConnection()
-			throws UnsupportedOperationException {
-		throw new UnsupportedOperationException("Cannot do this "
-				+ "operation on a layer collection");
+	///////////Static methods///////////////////////////////
+	/**
+	 * Count the number of LayerCollection.
+	 * @param root
+	 * @return
+	 */
+	public static int getNumberOfLeaves(final LayerCollection root) {
+		return root.layerCollection.size();
 	}
+	///////////Private methods//////////////////////////
 
-	@Override
-	public boolean isWMS() {
-		return false;
-	}
-
-	@Override
-	public WMSLegend getWMSLegend() {
-		throw new UnsupportedOperationException("Cannot set "
-				+ "a legend on a layer collection");
-	}
-        
-        ///////////Static methods///////////////////////////////
-
-        /**
-         * Aooky action to each leave of this layer tree
-         * @param root
-         * @param action
-         */
-        public static void processLayersLeaves(ILayer root, ILayerAction action) {
-		if (root instanceof LayerCollection) {
-			ILayer lc = (ILayer) root;
-			ILayer[] layers = lc.getChildren();
-			for (ILayer layer : layers) {
-				processLayersLeaves(layer, action);
-			}
-		} else {
-			action.action(root);
-		}
-	}
-
-        /**
-         * Apply action to each node of this tree of layers.
-         * @param root
-         * @param action
-         */
-	public static void processLayersNodes(ILayer root, ILayerAction action) {
-		if (root instanceof LayerCollection) {
-			ILayer lc = (ILayer) root;
-			ILayer[] layers = lc.getChildren();
-			for (ILayer layer : layers) {
-				processLayersNodes(layer, action);
-			}
-		}
-		action.action(root);
-	}
-
-
-        /**
-         * Count the number of leaves in this tree of layers.
-         * @param root
-         * @return
-         */
-        public static int getNumberOfLeaves(final ILayer root) {
-		CountLeavesAction ila = new CountLeavesAction();
-		LayerCollection.processLayersLeaves(root, ila);
-		return ila.getNumberOfLeaves();
-	}
-        ///////////Private methods//////////////////////////
-        
-        /*
-         * This method will guarantee that layer, and all its potential inner
-         * layers, will have names that are not already owned by another, declared, layer.
-         */
+	/*
+	 * This method will guarantee that layer, and all its potential inner
+	 * layers, will have names that are not already owned by another, declared, layer.
+	 */
 	private void setNamesRecursively(final ILayer layer,
-			final Set<String> allLayersNames) throws LayerException {
+		final Set<String> allLayersNames) throws LayerException {
 		layer.setName(provideNewLayerName(layer.getName(), allLayersNames));
 		if (layer instanceof LayerCollection) {
 			LayerCollection lc = (LayerCollection) layer;
@@ -536,13 +562,13 @@ public class LayerCollection extends AbstractLayer {
 		}
 	}
 
-        /*
-         * Check that name is not already contained in allLayersNames.
-         * If it is in, a new String is created and returned, with the form name_i
-         * where i is as small as possible.
-         */
+	/*
+	 * Check that name is not already contained in allLayersNames.
+	 * If it is in, a new String is created and returned, with the form name_i
+	 * where i is as small as possible.
+	 */
 	private String provideNewLayerName(final String name,
-			final Set<String> allLayersNames) {
+		final Set<String> allLayersNames) {
 		String tmpName = name;
 		if (allLayersNames.contains(tmpName)) {
 			int i = 1;
@@ -554,13 +580,41 @@ public class LayerCollection extends AbstractLayer {
 		allLayersNames.add(tmpName);
 		return tmpName;
 	}
-        
-        //////////Private classes//////////////////////////
+
+	@SuppressWarnings("unchecked")
+	protected void fireLayerAddedEvent(ILayer[] added) {
+		ArrayList<LayerListener> l = (ArrayList<LayerListener>) listeners.clone();
+		for (LayerListener listener : l) {
+			listener.layerAdded(new LayerCollectionEvent(this, added));
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void fireLayerRemovedEvent(ILayer[] removed) {
+		ArrayList<LayerListener> l = (ArrayList<LayerListener>) listeners.clone();
+		for (LayerListener listener : l) {
+			listener.layerRemoved(new LayerCollectionEvent(this, removed));
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	protected boolean fireLayerRemovingEvent(ILayer[] toRemove) {
+		ArrayList<LayerListener> l = (ArrayList<LayerListener>) listeners.clone();
+		for (LayerListener listener : l) {
+			if (!listener.layerRemoving(new LayerCollectionEvent(this, toRemove))) {
+				return false;
+			}
+		}
+		return true;
+	}
+	//////////Private classes//////////////////////////
 
 	private class GetEnvelopeLayerAction implements ILayerAction {
+
 		private Envelope globalEnvelope;
 
-		public void action(ILayer layer) {
+		@Override
+		public void action(IDisplayable layer) {
 			if (null == globalEnvelope) {
 				globalEnvelope = new Envelope(layer.getEnvelope());
 			} else {
@@ -574,9 +628,11 @@ public class LayerCollection extends AbstractLayer {
 	}
 
 	private static class CountLeavesAction implements ILayerAction {
+
 		private int numberOfLeaves = 0;
 
-		public void action(ILayer layer) {
+		@Override
+		public void action(IDisplayable layer) {
 			numberOfLeaves++;
 		}
 
