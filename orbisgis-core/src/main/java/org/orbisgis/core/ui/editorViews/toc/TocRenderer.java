@@ -1,38 +1,40 @@
 /*
  * OrbisGIS is a GIS application dedicated to scientific spatial simulation.
- * This cross-platform GIS is developed at French IRSTV institute and is able
- * to manipulate and create vector and raster spatial information. OrbisGIS
- * is distributed under GPL 3 license. It is produced  by the geo-informatic team of
- * the IRSTV Institute <http://www.irstv.cnrs.fr/>, CNRS FR 2488:
- *    Erwan BOCHER, scientific researcher,
- *    Thomas LEDUC, scientific researcher,
- *    Fernando GONZALEZ CORTES, computer engineer.
+ * This cross-platform GIS is developed at French IRSTV institute and is able to
+ * manipulate and create vector and raster spatial information. OrbisGIS is
+ * distributed under GPL 3 license. It is produced by the "Atelier SIG" team of
+ * the IRSTV Institute <http://www.irstv.cnrs.fr/> CNRS FR 2488.
+ *
+ *  Team leader Erwan BOCHER, scientific researcher,
+ *
+ *  User support leader : Gwendall Petit, geomatic engineer.
+ *
+ * Previous computer developer : Pierre-Yves FADET, computer engineer,
+ * Thomas LEDUC, scientific researcher, Fernando GONZALEZ
+ * CORTES, computer engineer.
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT
+ *
  * This file is part of OrbisGIS.
  *
- * OrbisGIS is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * OrbisGIS is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  *
- * OrbisGIS is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * OrbisGIS is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with OrbisGIS. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * OrbisGIS. If not, see <http://www.gnu.org/licenses/>.
  *
- * For more information, please consult:
- *    <http://orbisgis.cerma.archi.fr/>
- *    <http://sourcesup.cru.fr/projects/orbisgis/>
+ * For more information, please consult: <http://www.orbisgis.org/>
  *
  * or contact directly:
- *    erwan.bocher _at_ ec-nantes.fr
- *    fergonco _at_ gmail.com
- *    thomas.leduc _at_ cerma.archi.fr
+ * info@orbisgis.org
  */
 package org.orbisgis.core.ui.editorViews.toc;
 
@@ -57,6 +59,7 @@ import javax.swing.tree.TreeCellRenderer;
 import org.gdms.data.SpatialDataSourceDecorator;
 import org.gdms.driver.DriverException;
 import org.orbisgis.core.Services;
+import org.orbisgis.core.layerModel.IDisplayable;
 import org.orbisgis.core.layerModel.ILayer;
 import org.orbisgis.core.renderer.legend.Legend;
 import org.orbisgis.core.sif.CRFlowLayout;
@@ -90,36 +93,39 @@ public class TocRenderer extends TocAbstractRenderer implements
 			return ourJPanel.getJPanel();
 		} else {
 			TocTreeModel.LegendNode legendNode = (TocTreeModel.LegendNode) value;
-			ILayer layer = legendNode.getLayer();
+			IDisplayable lay = legendNode.getLayer();
 
-			try {
-				if (layer.isVectorial()) {
-					ourJPanel = new LegendRenderPanel();
-					ourJPanel.setNodeCosmetic(tree, layer, legendNode
-							.getLegendIndex(), selected, expanded, leaf, row,
-							hasFocus);
-					return ourJPanel.getJPanel();
-				}
+                        if(!lay.isCollection()){
+                            try {
+                                    ILayer layer = (ILayer) lay;
+                                    if (layer.isVectorial()) {
+                                            ourJPanel = new LegendRenderPanel();
+                                            ourJPanel.setNodeCosmetic(tree, layer, legendNode
+                                                            .getLegendIndex(), selected, expanded, leaf, row,
+                                                            hasFocus);
+                                            return ourJPanel.getJPanel();
+                                    }
 
-				else if (layer.isWMS()) {
-					WMSLegendRenderPanel ourJPanel = new WMSLegendRenderPanel();
-					ourJPanel.setNodeCosmetic(tree, legendNode.getLayer(),
-							legendNode.getLegendIndex(), selected, expanded,
-							leaf, row, hasFocus);
-					return ourJPanel.getJPanel();
-				} 
-				
-				else {
-					RasterLegendRenderPanel ourJPanel = new RasterLegendRenderPanel();
-					ourJPanel.setNodeCosmetic(tree, legendNode.getLayer(),
-							legendNode.getLegendIndex(), selected, expanded,
-							leaf, row, hasFocus);
-					return ourJPanel.getJPanel();
-				}
-				
-			} catch (DriverException e) {
-				e.printStackTrace();
-			}
+                                    else if (layer.isWMS()) {
+                                            WMSLegendRenderPanel ourJPanel = new WMSLegendRenderPanel();
+                                            ourJPanel.setNodeCosmetic(tree, legendNode.getLayer(),
+                                                            legendNode.getLegendIndex(), selected, expanded,
+                                                            leaf, row, hasFocus);
+                                            return ourJPanel.getJPanel();
+                                    }
+
+                                    else {
+                                            RasterLegendRenderPanel ourJPanel = new RasterLegendRenderPanel();
+                                            ourJPanel.setNodeCosmetic(tree, legendNode.getLayer(),
+                                                            legendNode.getLegendIndex(), selected, expanded,
+                                                            leaf, row, hasFocus);
+                                            return ourJPanel.getJPanel();
+                                    }
+
+                            } catch (DriverException e) {
+                                    e.printStackTrace();
+                            }
+                    }
 
 		}
 		return tree;
@@ -147,7 +153,7 @@ public class TocRenderer extends TocAbstractRenderer implements
 			jpanel.add(iconAndLabel);
 		}
 
-		public void setNodeCosmetic(JTree tree, ILayer node, boolean selected,
+		public void setNodeCosmetic(JTree tree, IDisplayable node, boolean selected,
 				boolean expanded, boolean leaf, int row, boolean hasFocus) {
 			check.setVisible(true);
 			check.setSelected(node.isVisible());
@@ -197,7 +203,7 @@ public class TocRenderer extends TocAbstractRenderer implements
 		}
 
 		@Override
-		public void setNodeCosmetic(JTree tree, ILayer layer, int legendIndex,
+		public void setNodeCosmetic(JTree tree, IDisplayable layer, int legendIndex,
 				boolean selected, boolean expanded, boolean leaf, int row,
 				boolean hasFocus) {
 		}
@@ -229,7 +235,7 @@ public class TocRenderer extends TocAbstractRenderer implements
 			jpanel.add(pane);
 		}
 
-		public void setNodeCosmetic(JTree tree, ILayer node, int legendIndex,
+		public void setNodeCosmetic(JTree tree, IDisplayable node, int legendIndex,
 				boolean selected, boolean expanded, boolean leaf, int row,
 				boolean hasFocus) {
 
@@ -270,7 +276,7 @@ public class TocRenderer extends TocAbstractRenderer implements
 		}
 
 		@Override
-		public void setNodeCosmetic(JTree tree, ILayer value, boolean selected,
+		public void setNodeCosmetic(JTree tree, IDisplayable value, boolean selected,
 				boolean expanded, boolean leaf, int row, boolean hasFocus) {
 
 		}
@@ -290,7 +296,7 @@ public class TocRenderer extends TocAbstractRenderer implements
 			jpanel.add(lblLegend);
 		}
 
-		public void setNodeCosmetic(JTree tree, ILayer node, int legendIndex,
+		public void setNodeCosmetic(JTree tree, IDisplayable node, int legendIndex,
 				boolean selected, boolean expanded, boolean leaf, int row,
 				boolean hasFocus) {
 			try {
@@ -333,7 +339,7 @@ public class TocRenderer extends TocAbstractRenderer implements
 			jpanel.add(lblLegend);
 		}
 
-		public void setNodeCosmetic(JTree tree, ILayer node, int legendIndex,
+		public void setNodeCosmetic(JTree tree, IDisplayable node, int legendIndex,
 				boolean selected, boolean expanded, boolean leaf, int row,
 				boolean hasFocus) {
 			try {

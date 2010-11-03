@@ -1,6 +1,6 @@
 package org.orbisgis.core.ui.editorViews.toc;
 
-import org.orbisgis.core.layerModel.ILayer;
+import org.orbisgis.core.layerModel.IDisplayable;
 import org.orbisgis.core.layerModel.LayerListenerAdapter;
 import org.orbisgis.core.layerModel.SelectionEvent;
 import org.orbisgis.core.ui.editors.table.Selection;
@@ -8,10 +8,10 @@ import org.orbisgis.core.ui.editors.table.SelectionListener;
 
 public class LayerSelection implements Selection {
 
-	private ILayer layer;
+	private IDisplayable layer;
 	private LayerListenerAdapter layerListener = null;
 
-	public LayerSelection(ILayer layer) {
+	public LayerSelection(IDisplayable layer) {
 		this.layer = layer;
 	}
 

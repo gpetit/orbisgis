@@ -1,38 +1,40 @@
 /*
  * OrbisGIS is a GIS application dedicated to scientific spatial simulation.
- * This cross-platform GIS is developed at French IRSTV institute and is able
- * to manipulate and create vector and raster spatial information. OrbisGIS
- * is distributed under GPL 3 license. It is produced  by the geo-informatic team of
- * the IRSTV Institute <http://www.irstv.cnrs.fr/>, CNRS FR 2488:
- *    Erwan BOCHER, scientific researcher,
- *    Thomas LEDUC, scientific researcher,
- *    Fernando GONZALEZ CORTES, computer engineer.
+ * This cross-platform GIS is developed at French IRSTV institute and is able to
+ * manipulate and create vector and raster spatial information. OrbisGIS is
+ * distributed under GPL 3 license. It is produced by the "Atelier SIG" team of
+ * the IRSTV Institute <http://www.irstv.cnrs.fr/> CNRS FR 2488.
+ *
+ *  Team leader Erwan BOCHER, scientific researcher,
+ *
+ *  User support leader : Gwendall Petit, geomatic engineer.
+ *
+ * Previous computer developer : Pierre-Yves FADET, computer engineer,
+ * Thomas LEDUC, scientific researcher, Fernando GONZALEZ
+ * CORTES, computer engineer.
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT
+ *
  * This file is part of OrbisGIS.
  *
- * OrbisGIS is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * OrbisGIS is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  *
- * OrbisGIS is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * OrbisGIS is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with OrbisGIS. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * OrbisGIS. If not, see <http://www.gnu.org/licenses/>.
  *
- * For more information, please consult:
- *    <http://orbisgis.cerma.archi.fr/>
- *    <http://sourcesup.cru.fr/projects/orbisgis/>
+ * For more information, please consult: <http://www.orbisgis.org/>
  *
  * or contact directly:
- *    erwan.bocher _at_ ec-nantes.fr
- *    fergonco _at_ gmail.com
- *    thomas.leduc _at_ cerma.archi.fr
+ * info@orbisgis.org
  */
 package org.orbisgis.core.ui.editorViews.toc;
 
@@ -62,7 +64,10 @@ import org.orbisgis.core.Services;
 import org.orbisgis.core.background.BackgroundJob;
 import org.orbisgis.core.background.BackgroundManager;
 import org.orbisgis.core.edition.EditableElement;
+import org.orbisgis.core.layerModel.DefaultMapContext;
+import org.orbisgis.core.layerModel.IDisplayable;
 import org.orbisgis.core.layerModel.ILayer;
+import org.orbisgis.core.layerModel.LayerCollection;
 import org.orbisgis.core.layerModel.LayerCollectionEvent;
 import org.orbisgis.core.layerModel.LayerException;
 import org.orbisgis.core.layerModel.LayerListener;
@@ -81,6 +86,10 @@ import org.orbisgis.core.ui.plugins.views.editor.EditorManager;
 import org.orbisgis.core.ui.plugins.views.geocatalog.TransferableSource;
 import org.orbisgis.progress.IProgressMonitor;
 
+/**
+ *
+ * @author alexis
+ */
 public class Toc extends ResourceTree implements WorkbenchFrame {
 
 	private MyLayerListener ll;
@@ -95,30 +104,26 @@ public class Toc extends ResourceTree implements WorkbenchFrame {
 
 	private MapContext mapContext = null;
 
-	public MapContext getMapContext() {
-		return mapContext;
-	}
-
 	private EditableElement element = null;
 
 	private MapEditorPlugIn mapEditor;
 
 	private org.orbisgis.core.ui.pluginSystem.menu.MenuTree menuTree;
 
-	public org.orbisgis.core.ui.pluginSystem.menu.MenuTree getMenuTreePopup() {
-		return menuTree;
-	}
-
 	public Toc() {
-
+		mapContext = new DefaultMapContext();
+		try{
+			mapContext.open(null);
+		} catch (LayerException e ){
+			Services.getErrorManager().error("Cannot create mapcontext", e);
+		}
 		menuTree = new org.orbisgis.core.ui.pluginSystem.menu.MenuTree();
 		this.ll = new MyLayerListener();
 
 		tocRenderer = new TocRenderer(this);
 		DataManager dataManager = (DataManager) Services
 				.getService(DataManager.class);
-		treeModel = new TocTreeModel(dataManager.createLayerCollection("root"),
-				getTree());
+		treeModel = new TocTreeModel(mapContext, getTree());
 		this.setModel(treeModel);
 		this.setTreeCellRenderer(tocRenderer);
 		this.setTreeCellEditor(new TocEditor(tree));
@@ -174,7 +179,7 @@ public class Toc extends ResourceTree implements WorkbenchFrame {
 								} else {
 									legend.setVisible(false);
 								}
-								ILayer layer = legendNode.getLayer();
+								IDisplayable layer = legendNode.getLayer();
 								if (layer.isVisible()) {
 									layer.setVisible(true);
 								}
@@ -212,15 +217,13 @@ public class Toc extends ResourceTree implements WorkbenchFrame {
 				});
 	}
 
-	private ArrayList<ILayer> getSelectedLayers(TreePath[] selectedPaths) {
-		ArrayList<ILayer> layers = new ArrayList<ILayer>();
-		for (int i = 0; i < selectedPaths.length; i++) {
-			Object lastPathComponent = selectedPaths[i].getLastPathComponent();
-			if (lastPathComponent instanceof ILayer) {
-				layers.add((ILayer) lastPathComponent);
-			}
-		}
-		return layers;
+
+	public MapContext getMapContext() {
+		return mapContext;
+	}
+
+	public org.orbisgis.core.ui.pluginSystem.menu.MenuTree getMenuTreePopup() {
+		return menuTree;
 	}
 
 	@Override
@@ -234,54 +237,84 @@ public class Toc extends ResourceTree implements WorkbenchFrame {
 	}
 
 	@Override
-	protected boolean isDroppable(TreePath path) {
-		return path.getLastPathComponent() instanceof ILayer;
-	}
-
-	@Override
 	public boolean doDrop(Transferable trans, Object node) {
-
-		ILayer dropNode;
-
+		IDisplayable dropNode;
+		MapContext mc=(MapContext) treeModel.getRoot();
 		if (node instanceof TocTreeModel.LegendNode) {
 			dropNode = ((TocTreeModel.LegendNode) node).getLayer();
 		} else {
 			dropNode = (ILayer) node;
 		}
-		// By default drop on rootNode
-		if (dropNode == null) {
-			ILayer rootNode = (ILayer) treeModel.getRoot();
-			dropNode = rootNode;
-		}
-
 		try {
-
 			if (trans.isDataFlavorSupported(TransferableLayer.getLayerFlavor())) {
-				ILayer[] draggedLayers = (ILayer[]) trans
+				IDisplayable[] draggedLayers = (IDisplayable[]) trans
 						.getTransferData(TransferableLayer.getLayerFlavor());
-				if (dropNode.acceptsChilds()) {
-					for (ILayer layer : draggedLayers) {
-						try {
-							layer.moveTo(dropNode);
-						} catch (LayerException e) {
-							Services.getErrorManager().error(
-									"Cannot move layer", e);
+				//We are targeting an actual node, not the mapContext.
+				if(dropNode!=null){
+					//First case : the targeted node is a collection.
+					//We can insert new nodes in it only if they are not LayerCollections too.
+					if (dropNode.isCollection()) {
+						for (IDisplayable layer : draggedLayers) {
+							try {
+								if(!layer.isCollection()){
+									((ILayer)layer).moveTo((LayerCollection) dropNode);
+								} else {
+					//If layer is a collection, we insert it just before dropNode
+									mc.moveLayerBefore(layer, dropNode);
+								}
+							} catch (LayerException e) {
+								Services.getErrorManager().error("Cannot move layer", e);
+							}
+						}
+					} else {
+						IDisplayable parent = dropNode.getParent();
+						if (parent != null) {
+					//dropNode is an IDisplayable which has a parent, so it is an ILayer
+					//We can only organize sublayers that are in the same LayerCollection.
+					//It means that if we want our drop to have some effect, the dropped node
+					//must come from the same LayerCollection than the targeted one.
+							for (IDisplayable layer : draggedLayers) {
+								if (layer.getParent() == dropNode.getParent()) {
+									int index = ((LayerCollection)parent).getIndex((ILayer)dropNode);
+									try {
+										((ILayer) layer).moveTo((LayerCollection)parent, index);
+									} catch (LayerException e) {
+										Services.getErrorManager().error(
+												"Cannot move layer: "
+														+ layer.getName());
+									}
+								}
+							}
+						} else {
+					//dropNode is not a collection and doesn't have any parent. Conesquently, it is
+					//an orphan ILayer. Artifacts that are dropped on it are placed just before,
+					//if and only if they don't have a paren (Such an artifact is a LayerCollection,
+					//or another orphan ILayer).
+							for(IDisplayable layer : draggedLayers){
+								try{
+									if(layer.getParent() == null){
+										mc.moveLayerBefore(layer, dropNode);
+									}
+								} catch(LayerException e){
+									Services.getErrorManager().error("Cannot move layer", e);
+								}
+							}
 						}
 					}
 				} else {
-					ILayer parent = dropNode.getParent();
-					if (parent != null) {
-						for (ILayer layer : draggedLayers) {
-							if (layer.getParent() == dropNode.getParent()) {
-								int index = parent.getIndex(dropNode);
-								try {
-									layer.moveTo(parent, index);
-								} catch (LayerException e) {
-									Services.getErrorManager().error(
-											"Cannot move layer: "
-													+ layer.getName());
+					for(IDisplayable layer : draggedLayers){
+						try{
+							if(mc.getLayerModel().contains(layer)){
+								mc.remove(layer);
+								mc.add(layer);
+							} else {
+								mc.add(layer);
+								if(layer.getParent() != null && layer instanceof ILayer){
+									((ILayer) layer).setParent(null);
 								}
 							}
+						}catch(LayerException e){
+							Services.getErrorManager().error("Cannot move layer", e);
 						}
 					}
 				}
@@ -297,11 +330,10 @@ public class Toc extends ResourceTree implements WorkbenchFrame {
 				return false;
 			}
 		} catch (UnsupportedFlavorException e1) {
-			throw new RuntimeException("bug", e1);
+			throw new RuntimeException("You shouldn't try to manage such objects here", e1);
 		} catch (IOException e1) {
-			throw new RuntimeException("bug", e1);
+			throw new RuntimeException("The data is no longer available :-(", e1);
 		}
-
 		return true;
 	}
 
@@ -315,153 +347,95 @@ public class Toc extends ResourceTree implements WorkbenchFrame {
 		}
 	}
 
-	private final class MyMapContextListener implements MapContextListener {
-		public void layerSelectionChanged(MapContext mapContext) {
-			setTocSelection(mapContext);
-		}
-
-		public void activeLayerChanged(ILayer previousActiveLayer,
-				MapContext mapContext) {
-			treeModel.refresh();
-		}
-	}
-
-	private class MyLayerListener implements LayerListener, EditionListener,
-			DataSourceListener {
-
-		public void layerAdded(final LayerCollectionEvent e) {
-			for (final ILayer layer : e.getAffected()) {
-				addLayerListenerRecursively(layer, ll);
-			}
-			treeModel.refresh();
-		}
-
-		public void layerMoved(LayerCollectionEvent e) {
-			treeModel.refresh();
-		}
-
-		@Override
-		public boolean layerRemoving(LayerCollectionEvent e) {
-			// Close editors
-			for (final ILayer layer : e.getAffected()) {
-				ILayer[] layers = new ILayer[] { layer };
-				if (layer.acceptsChilds()) {
-					layers = layer.getLayersRecursively();
-				}
-				for (ILayer lyr : layers) {
-					EditorManager em = Services.getService(EditorManager.class);
-					IEditor[] editors = em.getEditor(new EditableLayer(element,
-							lyr));
-					for (IEditor editor : editors) {
-						if (!em.closeEditor(editor)) {
-							return false;
-						}
-					}
-				}
-			}
-			return true;
-		}
-
-		public void layerRemoved(final LayerCollectionEvent e) {
-			for (final ILayer layer : e.getAffected()) {
-				removeLayerListenerRecursively(layer, ll);
-			}
-			treeModel.refresh();
-		}
-
-		public void nameChanged(LayerListenerEvent e) {
-		}
-
-		public void styleChanged(LayerListenerEvent e) {
-			treeModel.refresh();
-		}
-
-		public void visibilityChanged(LayerListenerEvent e) {
-			treeModel.refresh();
-		}
-
-		public void selectionChanged(SelectionEvent e) {
-			treeModel.refresh();
-		}
-
-		public void multipleModification(MultipleEditionEvent e) {
-			treeModel.refresh();
-		}
-
-		public void singleModification(EditionEvent e) {
-			treeModel.refresh();
-		}
-
-		public void cancel(DataSource ds) {
-		}
-
-		public void commit(DataSource ds) {
-			treeModel.refresh();
-		}
-
-		public void open(DataSource ds) {
-			treeModel.refresh();
-		}
-
-	}
-
 	public void delete() {
 		if (mapContext != null) {
 			mapContext.removeMapContextListener(myMapContextListener);
 		}
 	}
 
-	private class MoveProcess implements BackgroundJob {
+	public void setMapContext(EditableElement element) {
 
-		private ILayer dropNode;
-		private String[] draggedResources;
-
-		public MoveProcess(String[] draggedResources, ILayer dropNode) {
-			this.draggedResources = draggedResources;
-			this.dropNode = dropNode;
+		// Remove the listeners
+		if (this.mapContext != null) {
+			for(IDisplayable dis : this.mapContext.getLayerModel()){
+			removeLayerListenerRecursively(dis, ll);
+			}
+			this.mapContext.removeMapContextListener(myMapContextListener);
 		}
 
-		public void run(IProgressMonitor pm) {
-			int index;
-			if (!dropNode.acceptsChilds()) {
-				ILayer parent = dropNode.getParent();
-				if (parent.acceptsChilds()) {
-					index = parent.getIndex(dropNode);
-					dropNode = parent;
-				} else {
-					Services.getErrorManager().error(
-							"Cannot create layer on " + dropNode.getName());
-					return;
-				}
-			} else {
-				index = dropNode.getLayerCount();
+		if (element != null) {
+			this.mapContext = ((MapContext) element.getObject());
+			this.element = element;
+			// Add the listeners to the new MapContext
+			this.mapContext.addMapContextListener(myMapContextListener);
+			for(IDisplayable dis : this.mapContext.getLayerModel()){
+				addLayerListenerRecursively(dis, ll);
 			}
+			treeModel = new TocTreeModel(mapContext, tree);
+			// Set model clears selection
+			ignoreSelection = true;
+			Toc.this.setModel(treeModel);
+			ignoreSelection = false;
+			setTocSelection(Toc.this.mapContext);
+			Toc.this.repaint();
+		} else {
+			// Remove the references to the mapContext
 			DataManager dataManager = (DataManager) Services
 					.getService(DataManager.class);
-			for (int i = 0; i < draggedResources.length; i++) {
-				String sourceName = draggedResources[i];
-				if (pm.isCancelled()) {
-					break;
-				} else {
-					pm.progressTo(100 * i / draggedResources.length);
-					try {
-						dropNode.insertLayer(dataManager
-								.createLayer(sourceName), index);
-					} catch (LayerException e) {
-						throw new RuntimeException("Cannot "
-								+ "add the layer to the destination", e);
-					}
-				}
-			}
-		}
+			treeModel = new TocTreeModel(mapContext, getTree());
+			ignoreSelection = true;
+			this.setModel(treeModel);
+			ignoreSelection = false;
+			this.mapContext = null;
+			this.element = null;
 
-		public String getTaskName() {
-			return "Importing resources";
+			// Patch to remove any reference to the previous model
+			myTreeUI = new MyTreeUI();
+			((MyTreeUI) tree.getUI()).dispose();
+			tree.setUI(myTreeUI);
 		}
 
 	}
 
-	private void addLayerListenerRecursively(ILayer rootLayer,
+	boolean isActive(IDisplayable layer) {
+		if (mapContext != null) {
+			return layer == mapContext.getActiveLayer();
+		} else {
+			return false;
+		}
+	}
+
+	public void setMapContext(EditableElement element, MapEditorPlugIn mapEditor) {
+		this.mapEditor = mapEditor;
+		setMapContext(element);
+	}
+
+	///////////////***Protected methods***///////////////
+
+	@Override
+	protected boolean isDroppable(TreePath path) {
+		return path.getLastPathComponent() instanceof ILayer;
+	}
+
+	///////////////***Private methods***////////////////
+
+	private ArrayList<ILayer> getSelectedLayers(TreePath[] selectedPaths) {
+		ArrayList<ILayer> layers = new ArrayList<ILayer>();
+		for (int i = 0; i < selectedPaths.length; i++) {
+			Object lastPathComponent = selectedPaths[i].getLastPathComponent();
+			if (lastPathComponent instanceof ILayer) {
+				layers.add((ILayer) lastPathComponent);
+			}
+		}
+		return layers;
+	}
+
+	/**
+	 * This method will add a layerlistener to rootlayer and its children.
+	 * @param rootLayer
+	 * @param refreshLayerListener
+	 */
+	private void addLayerListenerRecursively(IDisplayable rootLayer,
 			MyLayerListener refreshLayerListener) {
 		rootLayer.addLayerListener(refreshLayerListener);
 		DataSource dataSource = rootLayer.getDataSource();
@@ -469,13 +443,19 @@ public class Toc extends ResourceTree implements WorkbenchFrame {
 			dataSource.addEditionListener(refreshLayerListener);
 			dataSource.addDataSourceListener(refreshLayerListener);
 		}
-		for (int i = 0; i < rootLayer.getLayerCount(); i++) {
-			addLayerListenerRecursively(rootLayer.getLayer(i),
-					refreshLayerListener);
+		if(rootLayer.isCollection()){
+			for (IDisplayable dis : ((LayerCollection) rootLayer).getLayerCollection()) {
+				addLayerListenerRecursively(dis,refreshLayerListener);
+			}
 		}
 	}
 
-	private void removeLayerListenerRecursively(ILayer rootLayer,
+	/**
+	 * This method will remove a LayerListener from rootLayer and its children
+	 * @param rootLayer
+	 * @param refreshLayerListener
+	 */
+	private void removeLayerListenerRecursively(IDisplayable rootLayer,
 			MyLayerListener refreshLayerListener) {
 		rootLayer.removeLayerListener(refreshLayerListener);
 		DataSource dataSource = rootLayer.getDataSource();
@@ -483,9 +463,10 @@ public class Toc extends ResourceTree implements WorkbenchFrame {
 			dataSource.removeEditionListener(refreshLayerListener);
 			dataSource.removeDataSourceListener(refreshLayerListener);
 		}
-		for (int i = 0; i < rootLayer.getLayerCount(); i++) {
-			removeLayerListenerRecursively(rootLayer.getLayer(i),
-					refreshLayerListener);
+		if(rootLayer.isCollection()){
+			for (IDisplayable dis : ((LayerCollection) rootLayer).getLayerCollection()) {
+				removeLayerListenerRecursively(dis, refreshLayerListener);
+			}
 		}
 	}
 
@@ -501,61 +482,161 @@ public class Toc extends ResourceTree implements WorkbenchFrame {
 		ignoreSelection = false;
 	}
 
-	public void setMapContext(EditableElement element) {
+	////////////////////Private classes////////////////////////
 
-		// Remove the listeners
-		if (this.mapContext != null) {
-			removeLayerListenerRecursively(this.mapContext.getLayerModel(), ll);
-			this.mapContext.removeMapContextListener(myMapContextListener);
+	private class MoveProcess implements BackgroundJob {
+
+		private IDisplayable dropNode;
+		private String[] draggedResources;
+
+		public MoveProcess(String[] draggedResources, IDisplayable dropNode) {
+			this.draggedResources = draggedResources;
+			this.dropNode = dropNode;
 		}
 
-		if (element != null) {
-			this.mapContext = ((MapContext) element.getObject());
-			this.element = element;
-			// Add the listeners to the new MapContext
-			this.mapContext.addMapContextListener(myMapContextListener);
-			final ILayer root = this.mapContext.getLayerModel();
-			addLayerListenerRecursively(root, ll);
-
-			treeModel = new TocTreeModel(root, tree);
-
-			// Set model clears selection
-			ignoreSelection = true;
-			Toc.this.setModel(treeModel);
-			ignoreSelection = false;
-			setTocSelection(Toc.this.mapContext);
-			Toc.this.repaint();
-
-		} else {
-			// Remove the references to the mapContext
+		@Override
+		public void run(IProgressMonitor pm) {
+			int index;
+			if (!dropNode.isCollection()) {
+				IDisplayable parent = dropNode.getParent();
+				if (parent!=null) {
+					index = ((LayerCollection)parent).getIndex((ILayer) dropNode);
+					dropNode = parent;
+				} else {
+					Services.getErrorManager().error(
+							"Cannot create layer on " + dropNode.getName());
+					return;
+				}
+			} else {
+				index = ((LayerCollection) dropNode).getLayerCount();
+			}
 			DataManager dataManager = (DataManager) Services
 					.getService(DataManager.class);
-			treeModel = new TocTreeModel(dataManager
-					.createLayerCollection("root"), getTree());
-			ignoreSelection = true;
-			this.setModel(treeModel);
-			ignoreSelection = false;
-			this.mapContext = null;
-			this.element = null;
+			for (int i = 0; i < draggedResources.length; i++) {
+				String sourceName = draggedResources[i];
+				if (pm.isCancelled()) {
+					break;
+				} else {
+					pm.progressTo(100 * i / draggedResources.length);
+					try {
+						((LayerCollection) dropNode).insertLayer( dataManager
+								.createLayer(sourceName, dropNode.getMapContext()), index);
+					} catch (LayerException e) {
+						throw new RuntimeException("Cannot "
+								+ "add the layer to the destination", e);
+					}
+				}
+			}
+		}
 
-			// Patch to remove any reference to the previous model
-			myTreeUI = new MyTreeUI();
-			((MyTreeUI) tree.getUI()).dispose();
-			tree.setUI(myTreeUI);
+		@Override
+		public String getTaskName() {
+			return "Importing resources";
 		}
 
 	}
 
-	boolean isActive(ILayer layer) {
-		if (mapContext != null) {
-			return layer == mapContext.getActiveLayer();
-		} else {
-			return false;
+	private class MyLayerListener implements LayerListener, EditionListener,
+			DataSourceListener {
+
+		@Override
+		public void layerAdded(final LayerCollectionEvent e) {
+			for (final IDisplayable layer : e.getAffected()) {
+				addLayerListenerRecursively(layer, ll);
+			}
+			treeModel.refresh();
 		}
+
+		@Override
+		public void layerMoved(LayerCollectionEvent e) {
+			treeModel.refresh();
+		}
+
+		@Override
+		public boolean layerRemoving(LayerCollectionEvent e) {
+			// Close editors
+			for (final IDisplayable layer : e.getAffected()) {
+				IDisplayable[] layers = new IDisplayable [] { layer };
+				if (layer.isCollection()) {
+					layers = layer.getLayers();
+				}
+				for (IDisplayable lyr : layers) {
+					EditorManager em = Services.getService(EditorManager.class);
+					IEditor[] editors = em.getEditor(new EditableLayer(element,
+							lyr));
+					for (IEditor editor : editors) {
+						if (!em.closeEditor(editor)) {
+							return false;
+						}
+					}
+				}
+			}
+			return true;
+		}
+
+		@Override
+		public void layerRemoved(final LayerCollectionEvent e) {
+			for (final IDisplayable layer : e.getAffected()) {
+				removeLayerListenerRecursively(layer, ll);
+			}
+			treeModel.refresh();
+		}
+
+		@Override
+		public void nameChanged(LayerListenerEvent e) {
+		}
+
+		@Override
+		public void styleChanged(LayerListenerEvent e) {
+			treeModel.refresh();
+		}
+
+		@Override
+		public void visibilityChanged(LayerListenerEvent e) {
+			treeModel.refresh();
+		}
+
+		@Override
+		public void selectionChanged(SelectionEvent e) {
+			treeModel.refresh();
+		}
+
+		@Override
+		public void multipleModification(MultipleEditionEvent e) {
+			treeModel.refresh();
+		}
+
+		@Override
+		public void singleModification(EditionEvent e) {
+			treeModel.refresh();
+		}
+
+		@Override
+		public void cancel(DataSource ds) {
+		}
+
+		@Override
+		public void commit(DataSource ds) {
+			treeModel.refresh();
+		}
+
+		@Override
+		public void open(DataSource ds) {
+			treeModel.refresh();
+		}
+
 	}
 
-	public void setMapContext(EditableElement element, MapEditorPlugIn mapEditor) {
-		this.mapEditor = mapEditor;
-		setMapContext(element);
+	private final class MyMapContextListener implements MapContextListener {
+		@Override
+		public void layerSelectionChanged(MapContext mapContext) {
+			setTocSelection(mapContext);
+		}
+
+		@Override
+		public void activeLayerChanged(IDisplayable previousActiveLayer,
+				MapContext mapContext) {
+			treeModel.refresh();
+		}
 	}
 }
