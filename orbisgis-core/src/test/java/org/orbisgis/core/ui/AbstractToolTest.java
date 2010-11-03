@@ -77,7 +77,7 @@ public class AbstractToolTest extends TestCase {
 		createSource("mixed", TypeFactory.createType(Type.GEOMETRY));
 
 		mapContext = new DefaultMapContext();
-		mapContext.getLayerModel().addLayer(dataManager.createLayer("mixed"));
+		mapContext.add(dataManager.createLayer("mixed",mapContext));
 		mapTransform = new MapTransform();
 		mapTransform.setImage(new BufferedImage(100, 100,
 				BufferedImage.TYPE_INT_ARGB));

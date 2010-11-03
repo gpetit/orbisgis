@@ -1,38 +1,40 @@
 /*
  * OrbisGIS is a GIS application dedicated to scientific spatial simulation.
- * This cross-platform GIS is developed at French IRSTV institute and is able
- * to manipulate and create vector and raster spatial information. OrbisGIS
- * is distributed under GPL 3 license. It is produced  by the geo-informatic team of
- * the IRSTV Institute <http://www.irstv.cnrs.fr/>, CNRS FR 2488:
- *    Erwan BOCHER, scientific researcher,
- *    Thomas LEDUC, scientific researcher,
- *    Fernando GONZALEZ CORTES, computer engineer.
+ * This cross-platform GIS is developed at French IRSTV institute and is able to
+ * manipulate and create vector and raster spatial information. OrbisGIS is
+ * distributed under GPL 3 license. It is produced by the "Atelier SIG" team of
+ * the IRSTV Institute <http://www.irstv.cnrs.fr/> CNRS FR 2488.
+ *
+ *
+ *  Team leader Erwan BOCHER, scientific researcher,
+ *
+ *  User support leader : Gwendall Petit, geomatic engineer.
+ *
+ * Previous computer developer : Pierre-Yves FADET, computer engineer, Thomas LEDUC, scientific researcher, Fernando GONZALEZ
+ * CORTES, computer engineer.
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT
+ *
  * This file is part of OrbisGIS.
  *
- * OrbisGIS is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * OrbisGIS is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  *
- * OrbisGIS is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * OrbisGIS is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with OrbisGIS. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * OrbisGIS. If not, see <http://www.gnu.org/licenses/>.
  *
- * For more information, please consult:
- *    <http://orbisgis.cerma.archi.fr/>
- *    <http://sourcesup.cru.fr/projects/orbisgis/>
+ * For more information, please consult: <http://www.orbisgis.org/>
  *
  * or contact directly:
- *    erwan.bocher _at_ ec-nantes.fr
- *    fergonco _at_ gmail.com
- *    thomas.leduc _at_ cerma.archi.fr
+ * info@orbisgis.org
  */
 package org.orbisgis.core.ui.editors.map.tools;
 
@@ -52,6 +54,7 @@ import org.orbisgis.core.ui.editors.map.tool.Automaton;
 import org.orbisgis.core.ui.editors.map.tool.TransitionException;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import org.orbisgis.core.layerModel.IDisplayable;
 
 public class ToolUtilities {
 
@@ -119,7 +122,7 @@ public class ToolUtilities {
 	}
 
 	public static boolean isActiveLayerEditable(MapContext vc) {
-		ILayer activeLayer = vc.getActiveLayer();
+		IDisplayable activeLayer = vc.getActiveLayer();
 		if (activeLayer == null) {
 			return false;
 		} else {
@@ -128,7 +131,7 @@ public class ToolUtilities {
 	}
 
 	public static boolean isActiveLayerVisible(MapContext vc) {
-		ILayer activeLayer = vc.getActiveLayer();
+		IDisplayable activeLayer = vc.getActiveLayer();
 		if (activeLayer == null) {
 			return false;
 		} else {
@@ -137,7 +140,7 @@ public class ToolUtilities {
 	}
 
 	public static boolean activeSelectionGreaterThan(MapContext vc, int i) {
-		ILayer activeLayer = vc.getActiveLayer();
+		IDisplayable activeLayer = vc.getActiveLayer();
 		if (activeLayer == null) {
 			return false;
 		} else {
@@ -146,7 +149,7 @@ public class ToolUtilities {
 	}
 
 	public static boolean geometryTypeIs(MapContext vc, int... geometryTypes) {
-		ILayer activeLayer = vc.getActiveLayer();
+		IDisplayable activeLayer = vc.getActiveLayer();
 		if (activeLayer == null) {
 			return false;
 		} else {
@@ -171,7 +174,7 @@ public class ToolUtilities {
 	}
 
 	public static boolean layerCountGreaterThan(MapContext vc, int i) {
-		return vc.getLayerModel().getLayersRecursively().length > i;
+		return vc.getAllLayersCount() > i;
 	}
 
 	public static boolean isResctritedPopup(Automaton currentTool) {

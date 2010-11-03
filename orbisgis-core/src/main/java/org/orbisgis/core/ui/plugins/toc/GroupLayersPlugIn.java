@@ -10,10 +10,12 @@
  *
  *  User support leader : Gwendall Petit, geomatic engineer.
  *
+ * Previous computer developer : Pierre-Yves FADET, computer engineer, Thomas LEDUC, scientific researcher, Fernando GONZALEZ
+ * CORTES, computer engineer.
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
- * Copyright (C) 2010 Erwan BOCHER, Pierre-Yves FADET, Alexis GUEGANNO, Maxence LAURENT
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT
  *
  * This file is part of OrbisGIS.
  *
@@ -32,15 +34,15 @@
  * For more information, please consult: <http://www.orbisgis.org/>
  *
  * or contact directly:
- * erwan.bocher _at_ ec-nantes.fr
- * gwendall.petit _at_ ec-nantes.fr
+ * info@orbisgis.org
  */
 package org.orbisgis.core.ui.plugins.toc;
 
 import org.orbisgis.core.DataManager;
 import org.orbisgis.core.Services;
-import org.orbisgis.core.images.OrbisGISIcon;
+import org.orbisgis.core.layerModel.IDisplayable;
 import org.orbisgis.core.layerModel.ILayer;
+import org.orbisgis.core.layerModel.LayerCollection;
 import org.orbisgis.core.layerModel.LayerException;
 import org.orbisgis.core.layerModel.MapContext;
 import org.orbisgis.core.ui.pluginSystem.AbstractPlugIn;
@@ -50,6 +52,14 @@ import org.orbisgis.core.ui.pluginSystem.PlugInContext.SelectionAvailability;
 import org.orbisgis.core.ui.pluginSystem.workbench.Names;
 import org.orbisgis.core.ui.pluginSystem.workbench.WorkbenchContext;
 import org.orbisgis.core.ui.pluginSystem.workbench.WorkbenchFrame;
+import org.orbisgis.core.ui.preferences.lookandfeel.OrbisGISIcon;
+
+/**
+ * This plug-in is supposed to group all the selected layers in one group. It will
+ * retrieve all the layers found in the selectedLayers attribute from the mapContext,
+ * and group them in a new LayerCollection.
+ * @author alexis
+ */
 
 public class GroupLayersPlugIn extends AbstractPlugIn {
 
@@ -60,16 +70,16 @@ public class GroupLayersPlugIn extends AbstractPlugIn {
 
 		DataManager dataManager = (DataManager) Services
 				.getService(DataManager.class);
-		ILayer col = dataManager.createLayerCollection("group"
-				+ System.currentTimeMillis());
-		ILayer parent = layers[0].getParent();
+		IDisplayable col = dataManager.createLayerCollection("group"
+				+ System.currentTimeMillis(), mapContext);
 		try {
-			parent.addLayer(col);
+                    //col is an instance of LayerCollection.
+			mapContext.add(col);
 			for (ILayer layer : layers) {
-				layer.moveTo(col);
+				layer.moveTo((LayerCollection) col);
 			}
 		} catch (LayerException e) {
-			throw new RuntimeException("bug!");
+			throw new RuntimeException("A bug occured during the execution of GroupLayersPlugIn !");
 		}
 
 		return true;

@@ -35,8 +35,8 @@ public class MapContextDemo {
 		MapContext mc = new DefaultMapContext();
 		mc.open(null);
 		ILayer layer = getDataManager().createLayer(
-				new File("src/test/resources/data/bv_sap.shp"));
-		mc.getLayerModel().addLayer(layer);
+				new File("src/test/resources/data/bv_sap.shp"), mc);
+		mc.add(layer);
 
 		DefaultMetadata metadata = new DefaultMetadata(new Type[] {
 				TypeFactory.createType(Type.STRING),
@@ -45,8 +45,8 @@ public class MapContextDemo {
 
 		GenericObjectDriver driver = new GenericObjectDriver(metadata);
 
-		for (int i = 0; i < mc.getLayerModel().getLayerCount(); i++) {
-			layer = mc.getLayerModel().getLayer(i);
+		for (int i = 0; i < mc.getLayerCount(); i++) {
+			layer = (ILayer) mc.getLayer(i);
 			String layerName = layer.getName();
 
 			Envelope enveloppe = layer.getDataSource().getFullExtent();
@@ -60,9 +60,7 @@ public class MapContextDemo {
 
 	public static void registerDataManager() {
 		// Installation of the service
-		Services
-				.registerService(
-						DataManager.class,
+		Services.registerService(DataManager.class,
 						"Access to the sources, to its properties (indexes, etc.) and its contents, either raster or vectorial",
 						new DefaultDataManager(dsf));
 	}

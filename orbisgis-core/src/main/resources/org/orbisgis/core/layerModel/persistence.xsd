@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<xs:schema xmlns:leg="org.orbisgis.legend" xmlns:sym="org.orbisgis.symbol"
-	xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="org.orbisgis.mapContext"
-	targetNamespace="org.orbisgis.mapContext">
+<xs:schema xmlns:leg="persistence.carto.legend.renderer.core.orbisgis.org" xmlns:sym="persistence.collection.symbol.renderer.core.orbisgis.org"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="persistence.layerModel.core.orbisgis.org"
+	targetNamespace="persistence.layerModel.core.orbisgis.org">
 	
-	<xs:import namespace="org.orbisgis.legend"
+	<xs:import namespace="persistence.carto.legend.renderer.core.orbisgis.org"
 		schemaLocation="../renderer/legend/persistence.xsd"/>
 	
 	<xs:element name="selected-layer">
@@ -37,8 +37,10 @@
 			<xs:sequence>
 			    <xs:element ref="idTime"/>
 				<xs:element ref="boundingBox"/>
-				<xs:element ref="layer-collection"/>
-				<xs:element ref="selected-layer" maxOccurs="unbounded"/>				
+                                <xs:element ref="abstract-layer" maxOccurs="unbounded"/>
+<!--				<xs:element ref="layer-collection" maxOccurs="unbounded"/>-->
+                                <!--xs:element ref="layer" maxOccurs="unbounded"/-->
+				<xs:element ref="selected-layer" maxOccurs="unbounded"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -64,16 +66,18 @@
 	
 	<xs:complexType name="abstract-layer-type" abstract="true">
 		<xs:attribute name="name" type="xs:string" use="required"/>
-		<xs:attribute name="source-name" type="xs:string" use="required"/>
-		<xs:attribute name="visible" type="xs:boolean" use="required"/>
 	</xs:complexType>
-	
+
+        <xs:element name="abstract-layer" type="abstract-layer-type"/>
+
 	<xs:complexType name="layer-type">
-		<xs:complexContent>
+                        <xs:complexContent>
 			<xs:extension base="abstract-layer-type">
 				<xs:sequence>
 					<xs:element ref="legends" minOccurs="0" maxOccurs="unbounded"/>
 				</xs:sequence>
+                                <xs:attribute name="source-name" type="xs:string" use="required"/>
+                                <xs:attribute name="visible" type="xs:boolean" use="required"/>
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
@@ -81,14 +85,14 @@
 	<xs:element name="layer" type="layer-type"/>
 	
 	<xs:complexType name="layer-collection-type">
-		<xs:complexContent>
-			<xs:extension base="layer-type">
-				<xs:sequence>
-					<xs:element name="layer" type="layer-type" minOccurs="0"
-						maxOccurs="unbounded"/>
-				</xs:sequence>
-			</xs:extension>
-		</xs:complexContent>
+                <xs:complexContent>
+                        <xs:extension base="abstract-layer-type">
+                                <xs:sequence>
+                                        <xs:element name="layer" type="layer-type" minOccurs="0"
+                                                maxOccurs="unbounded"/>
+                                </xs:sequence>
+                        </xs:extension>
+                </xs:complexContent>
 	</xs:complexType>
 	
 	<xs:element name="layer-collection" type="layer-collection-type"/>

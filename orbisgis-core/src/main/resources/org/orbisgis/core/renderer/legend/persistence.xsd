@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<xs:schema xmlns:sym="org.orbisgis.symbol"
-	xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="org.orbisgis.legend"
-	targetNamespace="org.orbisgis.legend">
+<xs:schema xmlns:sym="persistence.collection.symbol.renderer.core.orbisgis.org"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="persistence.carto.legend.renderer.core.orbisgis.org"
+	targetNamespace="persistence.carto.legend.renderer.core.orbisgis.org">
 	
-	<xs:import namespace="org.orbisgis.symbol"
+	<xs:import namespace="persistence.collection.symbol.renderer.core.orbisgis.org"
 		schemaLocation="../symbol/persistence.xsd"/>
 	
 	<xs:element name="legend-container">

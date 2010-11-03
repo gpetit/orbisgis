@@ -5,15 +5,17 @@
  * distributed under GPL 3 license. It is produced by the "Atelier SIG" team of
  * the IRSTV Institute <http://www.irstv.cnrs.fr/> CNRS FR 2488.
  *
- * 
+ *
  *  Team leader Erwan BOCHER, scientific researcher,
- * 
+ *
  *  User support leader : Gwendall Petit, geomatic engineer.
  *
+ * Previous computer developer : Pierre-Yves FADET, computer engineer, Thomas LEDUC, scientific researcher, Fernando GONZALEZ
+ * CORTES, computer engineer.
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
- * Copyright (C) 2010 Erwan BOCHER, Pierre-Yves FADET, Alexis GUEGANNO, Maxence LAURENT
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT
  *
  * This file is part of OrbisGIS.
  *
@@ -32,8 +34,7 @@
  * For more information, please consult: <http://www.orbisgis.org/>
  *
  * or contact directly:
- * erwan.bocher _at_ ec-nantes.fr
- * gwendall.petit _at_ ec-nantes.fr
+ * info@orbisgis.org
  */
 
 package org.orbisgis.core.ui.plugins.editors.mapEditor;
@@ -52,7 +53,6 @@ import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 
 import org.orbisgis.core.Services;
-import org.orbisgis.core.images.IconLoader;
 import org.orbisgis.core.layerModel.ILayer;
 import org.orbisgis.core.layerModel.MapContext;
 import org.orbisgis.core.map.export.Scale;
@@ -69,6 +69,7 @@ import org.orbisgis.core.ui.pluginSystem.workbench.WorkbenchContext;
 import org.orbisgis.core.ui.pluginSystem.workbench.WorkbenchFrame;
 import org.orbisgis.core.ui.plugins.views.MapEditorPlugIn;
 import org.orbisgis.core.ui.plugins.views.editor.EditorManager;
+import org.orbisgis.core.ui.preferences.lookandfeel.images.IconLoader;
 import org.orbisgis.progress.NullProgressMonitor;
 
 import com.itextpdf.text.Document;
@@ -78,7 +79,13 @@ import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfTemplate;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.vividsolutions.jts.geom.Envelope;
+import java.util.List;
+import org.orbisgis.core.layerModel.IDisplayable;
 
+
+/**
+ * By using this plugin, the user will be free to export his map in a pdf file.
+ */
 public class ExportMapAsPDFPlugIn extends AbstractPlugIn {
 
 	public boolean execute(PlugInContext context) throws Exception {
@@ -97,7 +104,7 @@ public class ExportMapAsPDFPlugIn extends AbstractPlugIn {
 
 			File outPutFile = outfilePanel.getSelectedFile();
 			Scale scale = scaleEditor.getScale();
-			ILayer root = mapContext.getLayerModel();
+			List<IDisplayable> root = mapContext.getLayerModel();
 			Envelope envelope = mapEditor.getMapTransform().getAdjustedExtent();
 
 			BufferedImage img = mapEditor.getMapTransform().getImage();
@@ -121,7 +128,7 @@ public class ExportMapAsPDFPlugIn extends AbstractPlugIn {
 	}
 
 	public void save(File outputFile, Scale scale, BufferedImage img,
-			Envelope envelope, ILayer layer) {
+			Envelope envelope, List<IDisplayable> layer) {
 		int width = img.getWidth();
 		int height = img.getHeight();
 		Document document = new Document(PageSize.A4.rotate());
@@ -172,8 +179,7 @@ public class ExportMapAsPDFPlugIn extends AbstractPlugIn {
 						new NullProgressMonitor());
 
 				
-				ILayer[] layers = mapContext.getLayerModel()
-						.getLayersRecursively();
+				ILayer[] layers = mapContext.getLayers();
 
 				g2dLegend.setColor(Color.BLACK);
 				g2dLegend.drawRect(0, 0, 150, (int) pageHeight);
@@ -258,7 +264,7 @@ public class ExportMapAsPDFPlugIn extends AbstractPlugIn {
 		MapEditorPlugIn mapEditor = null;
 		if((mapEditor=getPlugInContext().getMapEditor()) != null){
 			MapContext mc = (MapContext) mapEditor.getElement().getObject();
-			return mc.getLayerModel().getLayerCount() >= 1;
+			return mc.getLayerCount() >= 1;
 		}
 		return false;
 	}

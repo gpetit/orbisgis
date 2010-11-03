@@ -146,9 +146,9 @@ public class WandTool extends AbstractPointTool {
 			DataManager dataManager = (DataManager) Services
 					.getService(DataManager.class);
 			final ILayer wandLayer = dataManager
-					.createLayer(buildWandDatasource(polygon));
+					.createLayer(buildWandDatasource(polygon), vc);
 
-			vc.getLayerModel().insertLayer(wandLayer, 0);
+			vc.insertLayer(wandLayer, 0);
 			wandLayer.setLegend(uniqueSymbolLegend);
 		} catch (LayerException e) {
 			Services.getErrorManager().error(

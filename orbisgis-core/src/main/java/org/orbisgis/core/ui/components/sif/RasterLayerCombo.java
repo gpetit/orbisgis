@@ -43,7 +43,7 @@ import org.orbisgis.core.sif.multiInputPanel.ComboBoxChoice;
 
 public class RasterLayerCombo extends ComboBoxChoice {
 	public RasterLayerCombo(MapContext view) throws DriverException {
-		final ILayer[] allLayers = view.getLayerModel().getRasterLayers();
+		final ILayer[] allLayers = view.getRasterLayers();
 		final String[] names = new String[allLayers.length];
 		for (int i = 0; i < names.length; i++) {
 			names[i] = allLayers[i].getName();

@@ -67,6 +67,9 @@ import org.orbisgis.core.renderer.symbol.Symbol;
 import org.orbisgis.core.renderer.symbol.SymbolFactory;
 
 import com.vividsolutions.jts.geom.Envelope;
+import org.orbisgis.core.layerModel.DefaultMapContext;
+import org.orbisgis.core.layerModel.LayerCollection;
+import org.orbisgis.core.layerModel.MapContext;
 
 public class TestClassfication {
 
@@ -90,7 +93,8 @@ public class TestClassfication {
 	}
 
 	public static void testRangeMethod(File src) throws LayerException {
-		ILayer layer = getDataManager().createLayer(src);
+		MapContext mc = new DefaultMapContext();
+		ILayer layer = getDataManager().createLayer(src, mc);
 		layer.open();
 		DataSource ds;
 		try {
@@ -176,7 +180,7 @@ public class TestClassfication {
 	}
 
 	public static void testProportionnalMethod(File src) {
-
+		MapContext mc = new DefaultMapContext();
 		DataSource ds;
 		try {
 			ds = dsf.getDataSource(src);
@@ -193,8 +197,8 @@ public class TestClassfication {
 			UniqueSymbolLegend l2 = LegendFactory.createUniqueSymbolLegend();
 			l2.setSymbol(defaultSymbol);
 
-			ILayer root = getDataManager().createLayerCollection("root");
-			ILayer layer = getDataManager().createLayer(ds);
+			LayerCollection root = getDataManager().createLayerCollection("root", mc);
+			ILayer layer = getDataManager().createLayer(ds, mc);
 
 			root.addLayer(layer);
 			layer.open();

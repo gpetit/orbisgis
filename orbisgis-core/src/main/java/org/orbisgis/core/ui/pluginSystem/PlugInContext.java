@@ -152,7 +152,7 @@ public class PlugInContext {
 								return false;
 							break;
 						case ACCEPT_CHILDS:
-							if (!(layer.acceptsChilds()))
+							if (!(layer.isCollection()))
 								return false;
 							break;
 						case LAYER_NOT_NULL:

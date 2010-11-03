@@ -10,10 +10,12 @@
  *
  *  User support leader : Gwendall Petit, geomatic engineer.
  *
+ * Previous computer developer : Pierre-Yves FADET, computer engineer, Thomas LEDUC, scientific researcher, Fernando GONZALEZ
+ * CORTES, computer engineer.
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
- * Copyright (C) 2010 Erwan BOCHER, Pierre-Yves FADET, Alexis GUEGANNO, Maxence LAURENT
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT
  *
  * This file is part of OrbisGIS.
  *
@@ -32,15 +34,13 @@
  * For more information, please consult: <http://www.orbisgis.org/>
  *
  * or contact directly:
- * erwan.bocher _at_ ec-nantes.fr
- * gwendall.petit _at_ ec-nantes.fr
+ * info@orbisgis.org
  */
 package org.orbisgis.core.ui.plugins.editors.mapEditor;
 
 import javax.swing.JButton;
 
 import org.orbisgis.core.Services;
-import org.orbisgis.core.images.OrbisGISIcon;
 import org.orbisgis.core.layerModel.MapContext;
 import org.orbisgis.core.ui.editor.IEditor;
 import org.orbisgis.core.ui.pluginSystem.AbstractPlugIn;
@@ -49,6 +49,7 @@ import org.orbisgis.core.ui.pluginSystem.workbench.Names;
 import org.orbisgis.core.ui.pluginSystem.workbench.WorkbenchContext;
 import org.orbisgis.core.ui.plugins.views.MapEditorPlugIn;
 import org.orbisgis.core.ui.plugins.views.editor.EditorManager;
+import org.orbisgis.core.ui.preferences.lookandfeel.OrbisGISIcon;
 
 public class FullExtentPlugIn extends AbstractPlugIn {
 
@@ -70,7 +71,7 @@ public class FullExtentPlugIn extends AbstractPlugIn {
 				.getActiveEditor();
 		MapContext mc = (MapContext) editor.getElement().getObject();
 		((MapEditorPlugIn) editor).getMapTransform().setExtent(
-				mc.getLayerModel().getEnvelope());
+				mc.getEnvelope());
 		return true;
 	}
 
@@ -79,7 +80,7 @@ public class FullExtentPlugIn extends AbstractPlugIn {
 		IEditor editor = Services.getService(EditorManager.class).getActiveEditor();
 		if (editor != null && editor instanceof MapEditorPlugIn) {
 			MapContext mc = (MapContext) editor.getElement().getObject();
-			isEnabled = mc.getLayerModel().getLayerCount() > 0;
+			isEnabled = mc.getLayerCount() > 0;
 			btn.setEnabled(isEnabled);
 		}
 		btn.setEnabled(isEnabled);

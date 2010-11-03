@@ -67,6 +67,9 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
 
 public class WatershedTool extends AbstractPointTool {
+
+	AbstractButton button;
+        
 	public boolean isEnabled(MapContext vc, ToolManager tm) {
 		try {
 			if ((vc.getSelectedLayers().length == 1)
@@ -129,8 +132,8 @@ public class WatershedTool extends AbstractPointTool {
 				DataManager dataManager = (DataManager) Services
 						.getService(DataManager.class);
 				final ILayer newLayer = dataManager.createLayer(new File(
-						tempFile));
-				vc.getLayerModel().insertLayer(newLayer, 0);
+						tempFile), vc);
+				vc.insertLayer(newLayer, 0);
 			}
 		} catch (IOException e) {
 			Services.getErrorManager().error("Problem to access the GeoRaster",
@@ -148,8 +151,6 @@ public class WatershedTool extends AbstractPointTool {
 					e);
 		}
 	}
-
-	AbstractButton button;
 
 	@Override
 	public AbstractButton getButton() {

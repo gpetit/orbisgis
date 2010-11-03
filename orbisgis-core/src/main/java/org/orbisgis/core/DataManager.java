@@ -5,15 +5,15 @@
  * distributed under GPL 3 license. It is produced by the "Atelier SIG" team of
  * the IRSTV Institute <http://www.irstv.cnrs.fr/> CNRS FR 2488.
  *
- * 
+ *
  *  Team leader Erwan BOCHER, scientific researcher,
- * 
+ *
  *  User support leader : Gwendall Petit, geomatic engineer.
  *
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
- * Copyright (C) 2010 Erwan BOCHER, Pierre-Yves FADET, Alexis GUEGANNO, Maxence LAURENT
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT
  *
  * This file is part of OrbisGIS.
  *
@@ -32,8 +32,7 @@
  * For more information, please consult: <http://www.orbisgis.org/>
  *
  * or contact directly:
- * erwan.bocher _at_ ec-nantes.fr
- * gwendall.petit _at_ ec-nantes.fr
+ * info@orbisgis.org
  */
 package org.orbisgis.core;
 
@@ -44,7 +43,9 @@ import org.gdms.data.DataSourceFactory;
 import org.gdms.data.indexes.IndexManager;
 import org.gdms.source.SourceManager;
 import org.orbisgis.core.layerModel.ILayer;
+import org.orbisgis.core.layerModel.LayerCollection;
 import org.orbisgis.core.layerModel.LayerException;
+import org.orbisgis.core.layerModel.MapContext;
 
 public interface DataManager {
 
@@ -73,11 +74,12 @@ public interface DataManager {
 	 * Creates a layer on the source which name is equal to the specified name
 	 * 
 	 * @param sourceName
+         * @param mc
 	 * @return
 	 * @throws LayerException
 	 *             if the layer could not be created
 	 */
-	ILayer createLayer(String sourceName) throws LayerException;
+	ILayer createLayer(String sourceName, MapContext mc) throws LayerException;
 
 	/**
 	 * Creates a layer that accesses the specified DataSource. The DataSource
@@ -85,19 +87,21 @@ public interface DataManager {
 	 * interface
 	 * 
 	 * @param dataSource
+         * @param mc
 	 * @return
 	 * @throws LayerException
 	 *             If the layer cannot be created
 	 */
-	ILayer createLayer(DataSource dataSource) throws LayerException;
+	ILayer createLayer(DataSource dataSource, MapContext mc) throws LayerException;
 
 	/**
 	 * Creates a layer collection with the specified name
 	 * 
 	 * @param string
+         * @param mc
 	 * @return
 	 */
-	ILayer createLayerCollection(String layerName);
+	LayerCollection createLayerCollection(String layerName, MapContext mc);
 
 	/**
 	 * Creates a layer on the specified file with the specified name. The file
@@ -105,21 +109,23 @@ public interface DataManager {
 	 * 
 	 * @param name
 	 * @param file
+         * @param mc
 	 * @return
 	 * @throws LayerException
 	 *             If the layer could not be created
 	 */
-	ILayer createLayer(String name, File file) throws LayerException;
+	ILayer createLayer(String name, File file, MapContext mc) throws LayerException;
 
 	/**
 	 * Creates a layer on the specified file with a random name. The file is
 	 * added as a source in the source manager
 	 * 
 	 * @param file
+         * @param mc 
 	 * @return
 	 * @throws LayerException
 	 *             If the layer could not be created
 	 */
-	ILayer createLayer(File file) throws LayerException;
+	ILayer createLayer(File file, MapContext mc) throws LayerException;
 
 }

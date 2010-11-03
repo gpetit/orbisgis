@@ -41,7 +41,6 @@ package org.orbisgis.core.ui.plugins.editors.mapEditor;
 import javax.swing.JButton;
 
 import org.orbisgis.core.edition.EditableElement;
-import org.orbisgis.core.images.OrbisGISIcon;
 import org.orbisgis.core.layerModel.ILayer;
 import org.orbisgis.core.layerModel.MapContext;
 import org.orbisgis.core.ui.editor.IEditor;
@@ -50,6 +49,7 @@ import org.orbisgis.core.ui.pluginSystem.AbstractPlugIn;
 import org.orbisgis.core.ui.pluginSystem.PlugInContext;
 import org.orbisgis.core.ui.pluginSystem.workbench.WorkbenchContext;
 import org.orbisgis.core.ui.plugins.views.MapEditorPlugIn;
+import org.orbisgis.core.ui.preferences.lookandfeel.OrbisGISIcon;
 
 public class ClearMapSelectionPlugIn extends AbstractPlugIn {
 
@@ -62,7 +62,7 @@ public class ClearMapSelectionPlugIn extends AbstractPlugIn {
 	public boolean execute(PlugInContext context) throws Exception {
 		IEditor editor = getPlugInContext().getActiveEditor();
 		MapContext mc = (MapContext) editor.getElement().getObject();
-		ILayer[] layers = mc.getLayerModel().getLayersRecursively();
+		ILayer[] layers = mc.getLayers();
 		EditableElement element = editor.getElement();
 		for (ILayer lyr : layers) {
 			new EditableLayer(element, lyr).getSelection().clearSelection();
@@ -81,7 +81,7 @@ public class ClearMapSelectionPlugIn extends AbstractPlugIn {
 		MapEditorPlugIn mapEditor = null;
 		if((mapEditor=getPlugInContext().getMapEditor()) != null){
 			MapContext mc = (MapContext) mapEditor.getElement().getObject();
-			ILayer[] layers = mc.getLayerModel().getLayersRecursively();
+			ILayer[] layers = mc.getLayers();
 			for (ILayer lyr : layers) {
 				if (!lyr.isWMS()){
 					lyr.getSelection();

@@ -1,5 +1,5 @@
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="org.orbisgis.symbol"
-	targetNamespace="org.orbisgis.symbol">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="persistence.collection.symbol.renderer.core.orbisgis.org"
+	targetNamespace="persistence.collection.symbol.renderer.core.orbisgis.org">
 
 	<xs:element name="symbol-list">
 		<xs:complexType>

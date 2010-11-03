@@ -5,15 +5,17 @@
  * distributed under GPL 3 license. It is produced by the "Atelier SIG" team of
  * the IRSTV Institute <http://www.irstv.cnrs.fr/> CNRS FR 2488.
  *
- * 
+ *
  *  Team leader Erwan BOCHER, scientific researcher,
- * 
+ *
  *  User support leader : Gwendall Petit, geomatic engineer.
  *
+ * Previous computer developer : Pierre-Yves FADET, computer engineer, Thomas LEDUC, scientific researcher, Fernando GONZALEZ
+ * CORTES, computer engineer.
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
- * Copyright (C) 2010 Erwan BOCHER, Pierre-Yves FADET, Alexis GUEGANNO, Maxence LAURENT
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT
  *
  * This file is part of OrbisGIS.
  *
@@ -32,8 +34,7 @@
  * For more information, please consult: <http://www.orbisgis.org/>
  *
  * or contact directly:
- * erwan.bocher _at_ ec-nantes.fr
- * gwendall.petit _at_ ec-nantes.fr
+ * info@orbisgis.org
  */
 package org.orbisgis.core.ui.plugins.editors.mapEditor.raster;
 
@@ -50,7 +51,7 @@ import org.grap.processing.OperationException;
 import org.grap.processing.operation.GeoRasterCalculator;
 import org.orbisgis.core.DataManager;
 import org.orbisgis.core.Services;
-import org.orbisgis.core.images.OrbisGISIcon;
+import org.orbisgis.core.layerModel.IDisplayable;
 import org.orbisgis.core.layerModel.ILayer;
 import org.orbisgis.core.layerModel.LayerException;
 import org.orbisgis.core.layerModel.MapContext;
@@ -65,7 +66,11 @@ import org.orbisgis.core.ui.pluginSystem.workbench.Names;
 import org.orbisgis.core.ui.pluginSystem.workbench.WorkbenchContext;
 import org.orbisgis.core.ui.plugins.views.MapEditorPlugIn;
 import org.orbisgis.core.ui.plugins.views.editor.EditorManager;
+import org.orbisgis.core.ui.preferences.lookandfeel.OrbisGISIcon;
 
+/**
+ * This plugin is intended to be used for operations on raster layers.
+ */
 public class RasterAlgebraPlugIn extends AbstractPlugIn {
 
 	private JButton btn;
@@ -93,28 +98,32 @@ public class RasterAlgebraPlugIn extends AbstractPlugIn {
 					mapContext));
 
 			if (UIFactory.showDialog(mip)) {
-				final ILayer raster1 = mapContext.getLayerModel()
-						.getLayerByName(mip.getInput("source1"));
-				final ILayer raster2 = mapContext.getLayerModel()
-						.getLayerByName(mip.getInput("source2"));
-				final String method = mip.getInput("method");
+				final IDisplayable r1 = mapContext.getLayerByName(mip.getInput("source1"));
+				final IDisplayable r2 = mapContext.getLayerByName(mip.getInput("source2"));
+                                if(r1 instanceof ILayer && r2 instanceof ILayer){
+                                    ILayer raster1 = (ILayer) r1;
+                                    ILayer raster2 = (ILayer) r2;
+                                    final String method = mip.getInput("method");
 
-				final GeoRaster grResult = raster1.getRaster().doOperation(
-						new GeoRasterCalculator(raster2.getRaster(),
-								GeoRasterCalculator.operators.get(method)));
+                                    final GeoRaster grResult = raster1.getRaster().doOperation(
+                                                    new GeoRasterCalculator(raster2.getRaster(),
+                                                                    GeoRasterCalculator.operators.get(method)));
 
-				// save the computed GeoRaster in a tempFile
-				final DataSourceFactory dsf = ((DataManager) Services
-						.getService(DataManager.class)).getDataSourceFactory();
-				final String tempFile = dsf.getTempFile() + ".tif";
-				grResult.save(tempFile);
+                                    // save the computed GeoRaster in a tempFile
+                                    final DataSourceFactory dsf = ((DataManager) Services
+                                                    .getService(DataManager.class)).getDataSourceFactory();
+                                    final String tempFile = dsf.getTempFile() + ".tif";
+                                    grResult.save(tempFile);
 
-				// populate the GeoView TOC with a new RasterLayer
-				DataManager dataManager = (DataManager) Services
-						.getService(DataManager.class);
-				final ILayer newLayer = dataManager.createLayer(new File(
-						tempFile));
-				mapContext.getLayerModel().insertLayer(newLayer, 0);
+                                    // populate the GeoView TOC with a new RasterLayer
+                                    DataManager dataManager = (DataManager) Services
+                                                    .getService(DataManager.class);
+                                    final ILayer newLayer = dataManager.createLayer(new File(
+                                                    tempFile),mapContext);
+                                    mapContext.insertLayer(newLayer, 0);
+                                } else {
+                                    throw new LayerException("One of the layer is not a raster layer.");
+                                }
 			}
 
 		} catch (OperationException e) {

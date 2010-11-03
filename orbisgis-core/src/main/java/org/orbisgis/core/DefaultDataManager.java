@@ -5,15 +5,15 @@
  * distributed under GPL 3 license. It is produced by the "Atelier SIG" team of
  * the IRSTV Institute <http://www.irstv.cnrs.fr/> CNRS FR 2488.
  *
- * 
+ *
  *  Team leader Erwan BOCHER, scientific researcher,
- * 
+ *
  *  User support leader : Gwendall Petit, geomatic engineer.
  *
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
- * Copyright (C) 2010 Erwan BOCHER, Pierre-Yves FADET, Alexis GUEGANNO, Maxence LAURENT
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT
  *
  * This file is part of OrbisGIS.
  *
@@ -32,8 +32,7 @@
  * For more information, please consult: <http://www.orbisgis.org/>
  *
  * or contact directly:
- * erwan.bocher _at_ ec-nantes.fr
- * gwendall.petit _at_ ec-nantes.fr
+ * info@orbisgis.org
  */
 package org.orbisgis.core;
 
@@ -55,6 +54,7 @@ import org.orbisgis.core.layerModel.ILayer;
 import org.orbisgis.core.layerModel.Layer;
 import org.orbisgis.core.layerModel.LayerCollection;
 import org.orbisgis.core.layerModel.LayerException;
+import org.orbisgis.core.layerModel.MapContext;
 import org.orbisgis.core.layerModel.WMSLayer;
 
 public class DefaultDataManager implements DataManager {
@@ -79,7 +79,7 @@ public class DefaultDataManager implements DataManager {
 		return dsf.getSourceManager();
 	}
 
-	public ILayer createLayer(String sourceName) throws LayerException {
+	public ILayer createLayer(String sourceName, MapContext mc) throws LayerException {
 		Source src = ((DataManager) Services.getService(DataManager.class))
 				.getDataSourceFactory().getSourceManager().getSource(sourceName);
 		if (src != null) {
@@ -89,7 +89,7 @@ public class DefaultDataManager implements DataManager {
 					DataSource ds = ((DataManager) Services
 							.getService(DataManager.class)).getDataSourceFactory()
 							.getDataSource(sourceName);
-					return createLayer(ds);
+					return createLayer(ds, mc);
 				} catch (DriverLoadException e) {
 					throw new LayerException("Cannot instantiate layer", e);
 				} catch (NoSuchTableException e) {
@@ -107,10 +107,10 @@ public class DefaultDataManager implements DataManager {
 		}
 	}
 
-	public ILayer createLayer(DataSource ds) throws LayerException {
+	public ILayer createLayer(DataSource ds, MapContext mc) throws LayerException {
 		int type = ds.getSource().getType();
 		if ((type & SourceManager.WMS) == SourceManager.WMS) {
-			return new WMSLayer(ds.getName(), ds);
+			return new WMSLayer(ds.getName(), ds, mc);
 		} else {
 			boolean hasSpatialData = true;
 			if ((type & SourceManager.VECTORIAL) == SourceManager.VECTORIAL) {
@@ -132,24 +132,24 @@ public class DefaultDataManager implements DataManager {
 				}
 			}
 			if (hasSpatialData) {
-				return new Layer(ds.getName(), ds);
+				return new Layer(ds.getName(), ds, mc);
 			} else {
 				throw new LayerException("The source contains no spatial info");
 			}
 		}
 	}
-
-	public ILayer createLayerCollection(String layerName) {
-		return new LayerCollection(layerName);
+        
+	public LayerCollection createLayerCollection(String layerName, MapContext mc) {
+		return new LayerCollection(layerName, mc);
 	}
 
-	public ILayer createLayer(String name, File file) throws LayerException {
+	public ILayer createLayer(String name, File file, MapContext mc) throws LayerException {
 		DataSourceFactory dsf = ((DataManager) Services
 				.getService(DataManager.class)).getDataSourceFactory();
 		dsf.getSourceManager().register(name, file);
 		try {
 			DataSource dataSource = dsf.getDataSource(name);
-			return createLayer(dataSource);
+			return createLayer(dataSource, mc);
 		} catch (DriverLoadException e) {
 			throw new LayerException("Cannot find a suitable driver for "
 					+ file.getAbsolutePath(), e);
@@ -160,13 +160,13 @@ public class DefaultDataManager implements DataManager {
 		}
 	}
 
-	public ILayer createLayer(File file) throws LayerException {
+	public ILayer createLayer(File file, MapContext mc) throws LayerException {
 		DataSourceFactory dsf = ((DataManager) Services
 				.getService(DataManager.class)).getDataSourceFactory();
 		String name = dsf.getSourceManager().nameAndRegister(file);
 		try {
 			DataSource dataSource = dsf.getDataSource(name);
-			return createLayer(dataSource);
+			return createLayer(dataSource, mc);
 		} catch (DriverLoadException e) {
 			throw new LayerException("Cannot find a suitable driver for "
 					+ file.getAbsolutePath(), e);

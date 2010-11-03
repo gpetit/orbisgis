@@ -1,38 +1,40 @@
 /*
  * OrbisGIS is a GIS application dedicated to scientific spatial simulation.
- * This cross-platform GIS is developed at French IRSTV institute and is able
- * to manipulate and create vector and raster spatial information. OrbisGIS
- * is distributed under GPL 3 license. It is produced  by the geo-informatic team of
- * the IRSTV Institute <http://www.irstv.cnrs.fr/>, CNRS FR 2488:
- *    Erwan BOCHER, scientific researcher,
- *    Thomas LEDUC, scientific researcher,
- *    Fernando GONZALEZ CORTES, computer engineer.
+ * This cross-platform GIS is developed at French IRSTV institute and is able to
+ * manipulate and create vector and raster spatial information. OrbisGIS is
+ * distributed under GPL 3 license. It is produced by the "Atelier SIG" team of
+ * the IRSTV Institute <http://www.irstv.cnrs.fr/> CNRS FR 2488.
+ *
+ *
+ *  Team leader Erwan BOCHER, scientific researcher,
+ *
+ *  User support leader : Gwendall Petit, geomatic engineer.
+ *
+ * Previous computer developer : Pierre-Yves FADET, computer engineer, Thomas LEDUC, scientific researcher, Fernando GONZALEZ
+ * CORTES, computer engineer.
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT
+ *
  * This file is part of OrbisGIS.
  *
- * OrbisGIS is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * OrbisGIS is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  *
- * OrbisGIS is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * OrbisGIS is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with OrbisGIS. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * OrbisGIS. If not, see <http://www.gnu.org/licenses/>.
  *
- * For more information, please consult:
- *    <http://orbisgis.cerma.archi.fr/>
- *    <http://sourcesup.cru.fr/projects/orbisgis/>
+ * For more information, please consult: <http://www.orbisgis.org/>
  *
  * or contact directly:
- *    erwan.bocher _at_ ec-nantes.fr
- *    fergonco _at_ gmail.com
- *    thomas.leduc _at_ cerma.archi.fr
+ * info@orbisgis.org
  */
 package org.orbisgis.core.renderer.legend;
 
@@ -74,8 +76,9 @@ public class LegendTest extends AbstractTest {
 	private LegendManager lm;
 
 	public void testRendererWithNullSymbols() throws Exception {
+		MapContext mc = new DefaultMapContext();
 		ILayer layer = getDataManager().createLayer(
-				new File("src/test/resources/data/bv_sap.shp"));
+				new File("src/test/resources/data/bv_sap.shp"), mc);
 		layer.open();
 		UniqueValueLegend legend = LegendFactory.createUniqueValueLegend();
 		legend.setClassificationField(layer.getDataSource().getFieldName(1),
@@ -94,15 +97,15 @@ public class LegendTest extends AbstractTest {
 		MapContext mc = new DefaultMapContext();
 		mc.open(null);
 		ILayer layer1 = getDataManager().createLayer("myVectorLegend",
-				new File("src/test/resources/data/bv_sap.shp"));
-		mc.getLayerModel().addLayer(layer1);
+				new File("src/test/resources/data/bv_sap.shp"),mc);
+		mc.getLayerModel().add(layer1);
 		ILayer layer2 = getDataManager().createLayer("myRasterLegend",
-				new File("src/test/resources/data/ace.tiff"));
-		mc.getLayerModel().addLayer(layer2);
+				new File("src/test/resources/data/ace.tiff"),mc);
+		mc.getLayerModel().add(layer2);
 		Renderer r = new Renderer();
 		BufferedImage img = new BufferedImage(100, 100,
 				BufferedImage.TYPE_INT_ARGB);
-		r.draw(img, mc.getLayerModel().getEnvelope(), mc.getLayerModel());
+		r.draw(img, mc.getEnvelope(), mc.getLayerModel());
 
 		try {
 			layer1.getRasterLegend();

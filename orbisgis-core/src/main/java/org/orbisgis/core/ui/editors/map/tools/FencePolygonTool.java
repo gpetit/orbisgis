@@ -5,15 +5,17 @@
  * distributed under GPL 3 license. It is produced by the "Atelier SIG" team of
  * the IRSTV Institute <http://www.irstv.cnrs.fr/> CNRS FR 2488.
  *
- * 
+ *
  *  Team leader Erwan BOCHER, scientific researcher,
- * 
+ *
  *  User support leader : Gwendall Petit, geomatic engineer.
  *
+ * Previous computer developer : Pierre-Yves FADET, computer engineer, Thomas LEDUC, scientific researcher, Fernando GONZALEZ
+ * CORTES, computer engineer.
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
- * Copyright (C) 2010 Erwan BOCHER, Pierre-Yves FADET, Alexis GUEGANNO, Maxence LAURENT
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT
  *
  * This file is part of OrbisGIS.
  *
@@ -32,8 +34,7 @@
  * For more information, please consult: <http://www.orbisgis.org/>
  *
  * or contact directly:
- * erwan.bocher _at_ ec-nantes.fr
- * gwendall.petit _at_ ec-nantes.fr
+ * info@orbisgis.org
  */
 package org.orbisgis.core.ui.editors.map.tools;
 
@@ -100,9 +101,9 @@ public class FencePolygonTool extends AbstractPolygonTool {
 			buildFenceDatasource(g);
 			DataManager dataManager = (DataManager) Services
 					.getService(DataManager.class);
-			layer = dataManager.createLayer(dsResult);
+			layer = dataManager.createLayer(dsResult,vc);
 
-			vc.getLayerModel().insertLayer(layer, 0);
+			vc.insertLayer(layer, 0);
 
 			final UniqueSymbolLegend l = LegendFactory
 					.createUniqueSymbolLegend();
@@ -120,7 +121,7 @@ public class FencePolygonTool extends AbstractPolygonTool {
 	}
 
 	public boolean isEnabled(MapContext vc, ToolManager tm) {
-		return vc.getLayerModel().getLayerCount() > 0;
+		return vc.getLayerCount() > 0;
 	}
 
 	public boolean isVisible(MapContext vc, ToolManager tm) {

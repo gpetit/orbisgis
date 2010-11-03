@@ -7,6 +7,7 @@ import org.orbisgis.core.geocognition.GeocognitionElementContentListener;
 import org.orbisgis.core.geocognition.GeocognitionElementFactory;
 import org.orbisgis.core.geocognition.GeocognitionExtensionElement;
 import org.orbisgis.core.layerModel.DefaultMapContext;
+import org.orbisgis.core.layerModel.IDisplayable;
 import org.orbisgis.core.layerModel.ILayer;
 import org.orbisgis.core.layerModel.LayerCollectionEvent;
 import org.orbisgis.core.layerModel.LayerException;
@@ -60,8 +61,7 @@ public class GeocognitionMapContext extends AbstractExtensionElement implements
 	public void close(IProgressMonitor progressMonitor)
 			throws UnsupportedOperationException {
 		mapContext.removeMapContextListener(changeListener);
-		mapContext.getLayerModel().removeLayerListenerRecursively(
-				changeListener);
+		mapContext.removeLayerListenerRecursively(changeListener);
 		mapContext.close(progressMonitor);		
 		mapContext.setJAXBObject(revertStatus);
 	}
@@ -77,8 +77,7 @@ public class GeocognitionMapContext extends AbstractExtensionElement implements
 			mapContext.open(progressMonitor);
 			changeListener = new ChangeListener();
 			mapContext.addMapContextListener(changeListener);
-			mapContext.getLayerModel().addLayerListenerRecursively(
-					changeListener);
+			mapContext.addLayerListenerRecursively(changeListener);
 		} catch (LayerException e) {
 			throw new EditableElementException("Cannot open map", e);
 		}
@@ -90,7 +89,7 @@ public class GeocognitionMapContext extends AbstractExtensionElement implements
 	}
 
 	public boolean isModified() {
-		ILayer[] layers = mapContext.getLayerModel().getLayersRecursively();
+		ILayer[] layers = mapContext.getLayers();
 		for (ILayer layer : layers) {
 			if ((layer.getDataSource() != null)
 					&& layer.getDataSource().isModified()) {
@@ -108,14 +107,14 @@ public class GeocognitionMapContext extends AbstractExtensionElement implements
 		}
 
 		@Override
-		public void activeLayerChanged(ILayer previousActiveLayer,
+		public void activeLayerChanged(IDisplayable previousActiveLayer,
 				MapContext mapContext) {
 			fireContentChanged();
 		}
 
 		@Override
 		public void layerAdded(final LayerCollectionEvent e) {
-			for (final ILayer layer : e.getAffected()) {
+			for (final IDisplayable layer : e.getAffected()) {
 				layer.addLayerListenerRecursively(changeListener);
 			}
 			fireContentChanged();
@@ -128,7 +127,7 @@ public class GeocognitionMapContext extends AbstractExtensionElement implements
 
 		@Override
 		public void layerRemoved(LayerCollectionEvent e) {
-			for (final ILayer layer : e.getAffected()) {
+			for (final IDisplayable layer : e.getAffected()) {
 				layer.removeLayerListenerRecursively(changeListener);
 			}
 			fireContentChanged();

@@ -5,15 +5,17 @@
  * distributed under GPL 3 license. It is produced by the "Atelier SIG" team of
  * the IRSTV Institute <http://www.irstv.cnrs.fr/> CNRS FR 2488.
  *
- * 
  *  Team leader Erwan BOCHER, scientific researcher,
- * 
+ *
  *  User support leader : Gwendall Petit, geomatic engineer.
  *
+ * Previous computer developer : Pierre-Yves FADET, computer engineer,
+Thomas LEDUC, scientific researcher, Fernando GONZALEZ
+ * CORTES, computer engineer.
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
- * Copyright (C) 2010 Erwan BOCHER, Pierre-Yves FADET, Alexis GUEGANNO, Maxence LAURENT
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT
  *
  * This file is part of OrbisGIS.
  *
@@ -32,8 +34,7 @@
  * For more information, please consult: <http://www.orbisgis.org/>
  *
  * or contact directly:
- * erwan.bocher _at_ ec-nantes.fr
- * gwendall.petit _at_ ec-nantes.fr
+ * info@orbisgis.org
  */
 package org.orbisgis.core.ui.editors.map;
 
@@ -82,6 +83,8 @@ import org.orbisgis.core.ui.pluginSystem.workbench.WorkbenchContext;
 import org.orbisgis.progress.IProgressMonitor;
 
 import com.vividsolutions.jts.geom.Envelope;
+import java.util.List;
+import org.orbisgis.core.layerModel.IDisplayable;
 
 /**
  * MapControl.
@@ -196,47 +199,42 @@ public class MapControl extends JComponent implements ComponentListener,
 			mapTransform.addTransformListener((LeafElement) element);
 
 		// Set extent with BoundingBox value
-		ILayer rootLayer = mapContext.getLayerModel();
 		Envelope boundingBox = mapContext.getBoundingBox();
 		if (boundingBox != null) {
 			mapTransform.setExtent(boundingBox);
 		} else {
-			mapTransform.setExtent(rootLayer.getEnvelope());
+			mapTransform.setExtent(mapContext.getEnvelope());
 		}
 
 		// Add refresh listener
-		addLayerListenerRecursively(rootLayer, new RefreshLayerListener());
+		addLayerListenerRecursively(mapContext, new RefreshLayerListener());
 
 		setLayout(new BorderLayout());
 	}
 
-	private void addLayerListenerRecursively(ILayer rootLayer,
+	private void addLayerListenerRecursively(IDisplayable disp,
 			RefreshLayerListener refreshLayerListener) {
-		rootLayer.addLayerListener(refreshLayerListener);
-		DataSource dataSource = rootLayer.getDataSource();
-		if (dataSource != null) {
-			dataSource.addEditionListener(refreshLayerListener);
-			dataSource.addDataSourceListener(refreshLayerListener);
-		}
-		for (int i = 0; i < rootLayer.getLayerCount(); i++) {
-			addLayerListenerRecursively(rootLayer.getLayer(i),
-					refreshLayerListener);
-		}
+            disp.addLayerListenerRecursively(refreshLayerListener);
 	}
 
-	private void removeLayerListenerRecursively(ILayer rootLayer,
+	private void removeLayerListenerRecursively(IDisplayable disp,
 			RefreshLayerListener refreshLayerListener) {
-		rootLayer.removeLayerListener(refreshLayerListener);
-		DataSource dataSource = rootLayer.getDataSource();
-		if (dataSource != null) {
-			dataSource.removeEditionListener(refreshLayerListener);
-			dataSource.removeDataSourceListener(refreshLayerListener);
-		}
-		for (int i = 0; i < rootLayer.getLayerCount(); i++) {
-			removeLayerListenerRecursively(rootLayer.getLayer(i),
-					refreshLayerListener);
-		}
+            disp.removeLayerListenerRecursively(refreshLayerListener);
 	}
+
+        private void addLayerListenerRecursively(MapContext mc,
+                RefreshLayerListener refreshLayerListener) {
+            for(IDisplayable dis : mc.getLayerModel()){
+                addLayerListenerRecursively(dis, refreshLayerListener);
+            }
+        }
+
+        private void removeLayerListenerRecursively(MapContext mc,
+                RefreshLayerListener refreshLayerListener) {
+            for(IDisplayable dis : mc.getLayerModel()){
+                removeLayerListenerRecursively(dis, refreshLayerListener);
+            }
+        }
 
 	/**
 	 * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
@@ -460,7 +458,7 @@ public class MapControl extends JComponent implements ComponentListener,
 	private class RefreshLayerListener implements LayerListener,
 			EditionListener, DataSourceListener {
 		public void layerAdded(LayerCollectionEvent listener) {
-			for (ILayer layer : listener.getAffected()) {
+			for (IDisplayable layer : listener.getAffected()) {
 				addLayerListenerRecursively(layer, this);
 				if (mapTransform.getAdjustedExtent() == null) {
 					final Envelope e = layer.getEnvelope();
@@ -483,7 +481,7 @@ public class MapControl extends JComponent implements ComponentListener,
 		}
 
 		public void layerRemoved(LayerCollectionEvent listener) {
-			for (ILayer layer : listener.getAffected()) {
+			for (IDisplayable layer : listener.getAffected()) {
 				removeLayerListenerRecursively(layer, this);
 				invalidateImage();
 			}

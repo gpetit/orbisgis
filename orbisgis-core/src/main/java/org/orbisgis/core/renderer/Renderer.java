@@ -88,12 +88,29 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.index.quadtree.Quadtree;
+import org.orbisgis.core.layerModel.IDisplayable;
 
 public class Renderer {
 
 	private static Logger logger = Logger.getLogger(Renderer.class.getName());
 
 	public GeometryFactory gf = new GeometryFactory();
+
+        /**
+         * Draw the content of the layer list in the specified graphics.
+         * @param g2
+         * @param width
+         * @param height
+         * @param extent
+         * @param layerList
+         * @param pm
+         */
+        public void draw(Graphics2D g2, int width, int height, Envelope extent,
+			List<IDisplayable> layerList, IProgressMonitor pm){
+            for (IDisplayable dis : layerList){
+                draw(g2, width, height, extent, dis, pm);
+            }
+        }
 
 	/**
 	 * Draws the content of the layer in the specified graphics
@@ -112,16 +129,18 @@ public class Renderer {
 	 *            Progress monitor to report the status of the drawing
 	 */
 	public void draw(Graphics2D g2, int width, int height, Envelope extent,
-			ILayer layer, IProgressMonitor pm) {
+			IDisplayable lay, IProgressMonitor pm) {
 		setHints(g2);
 		MapTransform mt = new MapTransform();
 		mt.resizeImage(width, height);
 		mt.setExtent(extent);
 		ILayer[] layers;
-		if (layer.acceptsChilds()) {
-			layers = layer.getLayersRecursively();
+                ILayer layer=null;
+		if (lay.isCollection()) {
+			layers = lay.getLayers();
 		} else {
-			layers = new ILayer[] { layer };
+			layers = new ILayer[] { (ILayer) lay };
+                        layer = (ILayer) lay;
 		}
 
 		long total1 = System.currentTimeMillis();
@@ -199,6 +218,50 @@ public class Renderer {
 		logger.info("Total rendering time:" + (total2 - total1));
 	}
 
+	/**
+	 * Draws the content of the layer in the specified image.
+	 *
+	 * @param img
+	 *            Image to draw the data
+	 * @param extent
+	 *            Extent of the data to draw in the image
+	 * @param layer
+	 *            Layer to get the information
+	 * @param pm
+	 *            Progress monitor to report the status of the drawing
+	 */
+	public void draw(BufferedImage img, Envelope extent, IDisplayable layer,
+			IProgressMonitor pm) {
+		draw(img.createGraphics(), img.getWidth(), img.getHeight(), extent,
+				layer, pm);
+	}
+
+	/**
+	 * Draws the content of the layer in the specified image.
+	 *
+	 * @param img
+	 *            Image to draw the data
+	 * @param extent
+	 *            Extent of the data to draw in the image
+	 * @param layer
+	 *            Layer to get the information
+	 * @param pm
+	 *            Progress monitor to report the status of the drawing
+	 */
+	public void draw(BufferedImage img, Envelope extent, List<IDisplayable> layer,
+			IProgressMonitor pm) {
+		draw(img.createGraphics(), img.getWidth(), img.getHeight(), extent,
+				layer, pm);
+	}
+
+	public void draw(BufferedImage img, Envelope extent, IDisplayable layer) {
+		draw(img, extent, layer, new NullProgressMonitor());
+	}
+
+	public void draw(BufferedImage img, Envelope extent, List<IDisplayable> layer) {
+		draw(img, extent, layer, new NullProgressMonitor());
+	}
+
 	private boolean sameServer(ILayer layer, ILayer layer2) {
 		return layer.getWMSConnection().getClient().getHost().equals(
 				layer2.getWMSConnection().getClient().getHost());
@@ -225,24 +288,6 @@ public class Renderer {
 			Services.getService(ErrorManager.class).error(
 					"Cannot get WMS image", e);
 		}
-	}
-
-	/**
-	 * Draws the content of the layer in the specified image.
-	 * 
-	 * @param img
-	 *            Image to draw the data
-	 * @param extent
-	 *            Extent of the data to draw in the image
-	 * @param layer
-	 *            Layer to get the information
-	 * @param pm
-	 *            Progress monitor to report the status of the drawing
-	 */
-	public void draw(BufferedImage img, Envelope extent, ILayer layer,
-			IProgressMonitor pm) {
-		draw(img.createGraphics(), img.getWidth(), img.getHeight(), extent,
-				layer, pm);
 	}
 
 	private void drawRasterLayer(MapTransform mt, ILayer layer, Graphics2D g2,
@@ -433,11 +478,7 @@ public class Renderer {
 		}
 	}
 
-	public void draw(BufferedImage img, Envelope extent, ILayer layer) {
-		draw(img, extent, layer, new NullProgressMonitor());
-	}
-
-	private class DefaultRendererPermission implements RenderPermission {
+	private class DefaultRendererPermission implements RenderContext {
 
 		private Quadtree quadtree;
 		private Envelope drawExtent;

@@ -31,8 +31,8 @@ public class MyTOCMenu extends AbstractPlugIn {
 	public boolean isEnabled() {
 		MapContext mc = getPlugInContext().getMapContext();
 		if(mc!=null){
-			if (mc.getLayerModel().getLayerCount() > 2) {
-				if (mc.getLayerModel().getLayerByName("toto") != null) {
+			if (mc.getLayerCount() > 2) {
+				if (mc.getLayerByName("toto") != null) {
 					return true;
 				}
 			}

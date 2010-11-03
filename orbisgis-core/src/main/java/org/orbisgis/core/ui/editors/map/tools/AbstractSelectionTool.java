@@ -1,38 +1,40 @@
 /*
  * OrbisGIS is a GIS application dedicated to scientific spatial simulation.
- * This cross-platform GIS is developed at French IRSTV institute and is able
- * to manipulate and create vector and raster spatial information. OrbisGIS
- * is distributed under GPL 3 license. It is produced  by the geo-informatic team of
- * the IRSTV Institute <http://www.irstv.cnrs.fr/>, CNRS FR 2488:
- *    Erwan BOCHER, scientific researcher,
- *    Thomas LEDUC, scientific researcher,
- *    Fernando GONZALEZ CORTES, computer engineer.
+ * This cross-platform GIS is developed at French IRSTV institute and is able to
+ * manipulate and create vector and raster spatial information. OrbisGIS is
+ * distributed under GPL 3 license. It is produced by the "Atelier SIG" team of
+ * the IRSTV Institute <http://www.irstv.cnrs.fr/> CNRS FR 2488.
+ *
+ *
+ *  Team leader Erwan BOCHER, scientific researcher,
+ *
+ *  User support leader : Gwendall Petit, geomatic engineer.
+ *
+ * Previous computer developer : Pierre-Yves FADET, computer engineer, Thomas LEDUC, scientific researcher, Fernando GONZALEZ
+ * CORTES, computer engineer.
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT
+ *
  * This file is part of OrbisGIS.
  *
- * OrbisGIS is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * OrbisGIS is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  *
- * OrbisGIS is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * OrbisGIS is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with OrbisGIS. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * OrbisGIS. If not, see <http://www.gnu.org/licenses/>.
  *
- * For more information, please consult:
- *    <http://orbisgis.cerma.archi.fr/>
- *    <http://sourcesup.cru.fr/projects/orbisgis/>
+ * For more information, please consult: <http://www.orbisgis.org/>
  *
  * or contact directly:
- *    erwan.bocher _at_ ec-nantes.fr
- *    fergonco _at_ gmail.com
- *    thomas.leduc _at_ cerma.archi.fr
+ * info@orbisgis.org
  */
 /* OrbisCAD. The Community cartography editor
  *
@@ -87,6 +89,7 @@ import org.orbisgis.utils.I18N;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
+import org.orbisgis.core.layerModel.IDisplayable;
 
 /**
  * Tool to select geometries
@@ -147,7 +150,7 @@ public abstract class AbstractSelectionTool extends Selection {
 
 		Geometry selectionRect = p.getEnvelope();
 
-		ILayer activeLayer = getLayer(mc);
+		IDisplayable activeLayer = getLayer(mc);
 		SpatialDataSourceDecorator ds = activeLayer.getDataSource();
 		try {
 			Iterator<Integer> l = queryLayer(activeLayer.getDataSource(), p);
@@ -184,7 +187,7 @@ public abstract class AbstractSelectionTool extends Selection {
 		}
 	}
 
-	protected abstract ILayer getLayer(MapContext mc);
+	protected abstract IDisplayable getLayer(MapContext mc);
 
 	private Iterator<Integer> queryLayer(SpatialDataSourceDecorator ds,
 			Rectangle2DDouble rect) throws DriverException {
@@ -212,7 +215,7 @@ public abstract class AbstractSelectionTool extends Selection {
 	@Override
 	public void transitionTo_TwoPoints(MapContext mc, ToolManager tm)
 			throws TransitionException, FinishedAutomatonException {
-		ILayer activeLayer = getLayer(mc);
+		IDisplayable activeLayer = getLayer(mc);
 		boolean intersects = true;
 		if (rect.getMinX() < tm.getValues()[0]) {
 			intersects = false;

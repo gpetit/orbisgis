@@ -10,10 +10,12 @@
  *
  *  User support leader : Gwendall Petit, geomatic engineer.
  *
+ * Previous computer developer : Pierre-Yves FADET, computer engineer, Thomas LEDUC, scientific researcher, Fernando GONZALEZ
+ * CORTES, computer engineer.
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
- * Copyright (C) 2010 Erwan BOCHER, Pierre-Yves FADET, Alexis GUEGANNO, Maxence LAURENT
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT
  *
  * This file is part of OrbisGIS.
  *
@@ -32,15 +34,14 @@
  * For more information, please consult: <http://www.orbisgis.org/>
  *
  * or contact directly:
- * erwan.bocher _at_ ec-nantes.fr
- * gwendall.petit _at_ ec-nantes.fr
+ * info@orbisgis.org
  */
 package org.orbisgis.core.ui.plugins.toc;
 
 import org.orbisgis.core.DataManager;
 import org.orbisgis.core.Services;
-import org.orbisgis.core.images.OrbisGISIcon;
 import org.orbisgis.core.layerModel.ILayer;
+import org.orbisgis.core.layerModel.LayerCollection;
 import org.orbisgis.core.layerModel.LayerException;
 import org.orbisgis.core.layerModel.MapContext;
 import org.orbisgis.core.ui.editors.map.MapContextManager;
@@ -51,6 +52,12 @@ import org.orbisgis.core.ui.pluginSystem.PlugInContext.SelectionAvailability;
 import org.orbisgis.core.ui.pluginSystem.workbench.Names;
 import org.orbisgis.core.ui.pluginSystem.workbench.WorkbenchContext;
 import org.orbisgis.core.ui.pluginSystem.workbench.WorkbenchFrame;
+import org.orbisgis.core.ui.preferences.lookandfeel.OrbisGISIcon;
+
+/**
+ * This plug in will create a new group of layers in the TOC.
+ * @author alexis
+ */
 
 public class CreateGroupPlugIn extends AbstractPlugIn {
 
@@ -83,16 +90,12 @@ public class CreateGroupPlugIn extends AbstractPlugIn {
 		DataManager dataManager = (DataManager) Services
 				.getService(DataManager.class);
 		if (vcm.getActiveMapContext() != null) {
-			ILayer newLayerCollection = dataManager
-					.createLayerCollection("group" + System.currentTimeMillis());
-
-			if ((resource == null) || (!resource.acceptsChilds())) {
-				resource = vcm.getActiveMapContext().getLayerModel();
-			}
+			LayerCollection newLayerCollection = dataManager
+					.createLayerCollection("group" + System.currentTimeMillis(),vcm.getActiveMapContext());
 			try {
-				resource.addLayer(newLayerCollection);
+				vcm.getActiveMapContext().add(newLayerCollection);
 			} catch (LayerException e) {
-				throw new RuntimeException("bug!");
+				throw new RuntimeException("A bug has occured during the execution of the CreateGroupPlugIn");
 			}
 		}
 	}

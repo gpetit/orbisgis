@@ -76,16 +76,17 @@ public class LayerModelTest extends AbstractTest {
 	}
 
 	public void testTreeExploring() throws Exception {
-		ILayer vl = getDataManager().createLayer((DataSource) dummy);
+		MapContext mc=new DefaultMapContext();
+		mc.open(null);
+		ILayer vl = getDataManager().createLayer((DataSource) dummy,mc);
 		ILayer rl = getDataManager().createLayer("my tiff",
-				new File("src/test/resources/data/ace.tiff"));
-		ILayer lc = getDataManager().createLayerCollection("my data");
+				new File("src/test/resources/data/ace.tiff"),mc);
+		LayerCollection lc = getDataManager().createLayerCollection("my data",mc);
 		lc.addLayer(vl);
 		lc.addLayer(rl);
 
-		ILayer layer = lc;
+		IDisplayable layer = lc;
 		if (layer instanceof LayerCollection) {
-			lc = (ILayer) layer;
 			lc.getChildren();
 		} else {
 			if (layer.getDataSource().isDefaultRaster()) {
@@ -99,12 +100,14 @@ public class LayerModelTest extends AbstractTest {
 	}
 
 	public void testLayerEvents() throws Exception {
+		MapContext mc=new DefaultMapContext();
+		mc.open(null);
 		TestLayerListener listener = new TestLayerListener();
-		ILayer vl = getDataManager().createLayer((DataSource) dummy);
-		ILayer lc = getDataManager().createLayerCollection("root");
+		ILayer vl = getDataManager().createLayer((DataSource) dummy,mc);
+		LayerCollection lc = getDataManager().createLayerCollection("root",mc);
 		vl.addLayerListener(listener);
 		lc.addLayerListener(listener);
-		ILayer vl1 = getDataManager().createLayer((DataSource) dummy);
+		ILayer vl1 = getDataManager().createLayer((DataSource) dummy,mc);
 		lc.addLayer(vl1);
 		assertTrue(listener.la == 1);
 		lc.setName("new name");
@@ -123,14 +126,16 @@ public class LayerModelTest extends AbstractTest {
 	}
 
 	public void testLayerRemovalCancellation() throws Exception {
+		MapContext mc=new DefaultMapContext();
+		mc.open(null);
 		TestLayerListener listener = new TestLayerListener() {
 			@Override
 			public boolean layerRemoving(LayerCollectionEvent arg0) {
 				return false;
 			}
 		};
-		ILayer vl = getDataManager().createLayer((DataSource) dummy);
-		ILayer lc = getDataManager().createLayerCollection("root");
+		ILayer vl = getDataManager().createLayer((DataSource) dummy, mc);
+		LayerCollection lc = getDataManager().createLayerCollection("root", mc);
 		lc.addLayer(vl);
 		lc.addLayerListener(listener);
 		assertTrue(lc.remove(vl) == null);
@@ -140,23 +145,25 @@ public class LayerModelTest extends AbstractTest {
 	}
 
 	public void testRepeatedName() throws Exception {
+		MapContext mc=new DefaultMapContext();
+		mc.open(null);
 		DataSourceFactory dsf = ((DataManager) Services
 				.getService(DataManager.class)).getDataSourceFactory();
 		SourceManager sourceManager = dsf.getSourceManager();
 		sourceManager.register("vector1", new File("/tmp/1.shp"));
 		sourceManager.register("vector2", new File("/tmp/2.shp"));
 		sourceManager.register("vector3", new File("/tmp/3.shp"));
-		ILayer lc1 = getDataManager().createLayerCollection("firstLevel");
-		ILayer lc2 = getDataManager().createLayerCollection("secondLevel");
-		ILayer lc3 = getDataManager().createLayerCollection("thirdLevel");
-		ILayer vl1 = getDataManager().createLayer(dummy);
-		ILayer vl2 = getDataManager().createLayer(dummy2);
-		ILayer vl3 = getDataManager().createLayer(dummy3);
+		LayerCollection lc1 = getDataManager().createLayerCollection("firstLevel", mc);
+		LayerCollection lc2 = getDataManager().createLayerCollection("secondLevel", mc);
+		LayerCollection lc3 = getDataManager().createLayerCollection("thirdLevel", mc);
+		ILayer vl1 = getDataManager().createLayer(dummy, mc);
+		ILayer vl2 = getDataManager().createLayer(dummy2, mc);
+		ILayer vl3 = getDataManager().createLayer(dummy3, mc);
 		lc1.addLayer(vl1);
 		lc2.addLayer(vl2);
-		lc1.addLayer(lc2);
+//		lc1.addLayer(lc2);
 		lc3.addLayer(vl3);
-		lc2.addLayer(lc3);
+//		lc2.addLayer(lc3);
 		try {
 			vl3.setName(dummy2.getName());
 			assertTrue(false);
@@ -170,66 +177,71 @@ public class LayerModelTest extends AbstractTest {
 	}
 
 	public void testAddWithSameName() throws Exception {
+		MapContext mc=new DefaultMapContext();
+		mc.open(null);
 		DataSourceFactory dsf = ((DataManager) Services
 				.getService(DataManager.class)).getDataSourceFactory();
 		SourceManager sourceManager = dsf.getSourceManager();
 		sourceManager.register("mySource", new File(
 				"src/test/resources/data/bv_sap.shp"));
-		ILayer lc = getDataManager().createLayerCollection("firstLevel");
-		ILayer vl1 = getDataManager().createLayer("mySource");
-		ILayer vl2 = getDataManager().createLayer("mySource");
+		LayerCollection lc = getDataManager().createLayerCollection("firstLevel", mc);
+		ILayer vl1 = getDataManager().createLayer("mySource", mc);
+		ILayer vl2 = getDataManager().createLayer("mySource", mc);
 		lc.addLayer(vl1);
 		lc.addLayer(vl2);
 		assertTrue(!vl1.getName().equals(vl2.getName()));
 
 	}
 
-	public void testAddToChild() throws Exception {
-		ILayer lc1 = getDataManager().createLayerCollection("firstLevel");
-		ILayer lc2 = getDataManager().createLayerCollection("secondLevel");
-		ILayer lc3 = getDataManager().createLayerCollection("thirdLevel");
-		ILayer lc4 = getDataManager().createLayerCollection("fourthLevel");
-		lc1.addLayer(lc2);
-		lc2.addLayer(lc3);
-		lc3.addLayer(lc4);
-		try {
-			lc2.moveTo(lc4);
-			assertTrue(false);
-		} catch (LayerException e) {
-		}
-
-		TestLayerListener listener = new TestLayerListener();
-		lc1.addLayerListenerRecursively(listener);
-		lc3.moveTo(lc1);
-		assertTrue(lc3.getParent() == lc1);
-		assertTrue(lc2.getChildren().length == 0);
-		assertTrue(listener.la == 0);
-		assertTrue(listener.lr == 0);
-		assertTrue(listener.lring == 0);
-		assertTrue(listener.lm == 1);
-	}
+	//This test is not useful anymore, as we are not managing an actual tree anymore...
+//	public void testAddToChild() throws Exception {
+//		LayerCollection lc1 = getDataManager().createLayerCollection("firstLevel", mc);
+//		LayerCollection lc2 = getDataManager().createLayerCollection("secondLevel", mc);
+//		LayerCollection lc3 = getDataManager().createLayerCollection("thirdLevel", mc);
+//		LayerCollection lc4 = getDataManager().createLayerCollection("fourthLevel", mc);
+//		lc1.addLayer(lc2);
+//		lc2.addLayer(lc3);
+//		lc3.addLayer(lc4);
+//		try {
+//			lc2.moveTo(lc4);
+//			assertTrue(false);
+//		} catch (LayerException e) {
+//		}
+//
+//		TestLayerListener listener = new TestLayerListener();
+//		lc1.addLayerListenerRecursively(listener);
+//		lc3.moveTo(lc1);
+//		assertTrue(lc3.getParent() == lc1);
+//		assertTrue(lc2.getChildren().length == 0);
+//		assertTrue(listener.la == 0);
+//		assertTrue(listener.lr == 0);
+//		assertTrue(listener.lring == 0);
+//		assertTrue(listener.lm == 1);
+//	}
 
 	public void testContainsLayer() throws Exception {
-		ILayer lc = getDataManager().createLayerCollection("root");
-		ILayer l2 = getDataManager().createLayerCollection("secondlevel");
-		ILayer vl1 = getDataManager().createLayer(dummy);
-		lc.addLayer(l2);
+		MapContext mc=new DefaultMapContext();
+		mc.open(null);
+		LayerCollection l2 = getDataManager().createLayerCollection("secondlevel", mc);
+		ILayer vl1 = getDataManager().createLayer(dummy, mc);
 		l2.addLayer(vl1);
-		assertTrue(lc.getAllLayersNames().contains(vl1.getName()));
+		mc.add(l2);
+		assertTrue(mc.getAllLayersNames().contains(vl1.getName()));
 	}
 
 	public void testGetLayerByName() throws Exception {
-		ILayer lc = getDataManager().createLayerCollection("root");
-		ILayer l2 = getDataManager().createLayerCollection("secondlevel");
-		ILayer l3 = getDataManager().createLayerCollection("secondlevelbis");
-		ILayer vl1 = getDataManager().createLayer(dummy);
+		MapContext mc=new DefaultMapContext();
+		mc.open(null);
+		LayerCollection l2 = getDataManager().createLayerCollection("secondlevel",mc);
+		LayerCollection l3 = getDataManager().createLayerCollection("secondlevelbis",mc);
+		ILayer vl1 = getDataManager().createLayer(dummy,mc);
 		l2.addLayer(vl1);
-		lc.addLayer(l2);
-		lc.addLayer(l3);
+		mc.add(l2);
+		mc.add(l3);
 
-		assertTrue(lc.getLayerByName("secondlevel") == l2);
-		assertTrue(lc.getLayerByName("secondlevelbis") == l3);
-		assertTrue(lc.getLayerByName(dummy.getName()) == vl1);
+		assertTrue(mc.getLayerByName("secondlevel") == l2);
+		assertTrue(mc.getLayerByName("secondlevelbis") == l3);
+		assertTrue(mc.getLayerByName(dummy.getName()) == vl1);
 	}
 
 	private class TestLayerListener implements LayerListener {

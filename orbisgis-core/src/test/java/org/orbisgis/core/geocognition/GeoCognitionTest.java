@@ -116,14 +116,14 @@ public class GeoCognitionTest extends AbstractGeocognitionTest {
 		mc.open(null);
 		DataManager dm = (DataManager) Services.getService(DataManager.class);
 		ILayer lyr = dm.createLayer(new File(
-				"src/test/resources/data/bv_sap.shp"));
-		mc.getLayerModel().addLayer(lyr);
+				"src/test/resources/data/bv_sap.shp"), mc);
+		mc.getLayerModel().add(lyr);
 		mc.close(null);
 		gc.addElement("org.mymap", mc);
 		saveAndLoad();
 		mc = gc.getElement("org.mymap", MapContext.class);
 		mc.open(null);
-		assertTrue(mc.getLayerModel().getLayerCount() == 1);
+		assertTrue(mc.getLayerCount() == 1);
 		mc.close(null);
 	}
 
@@ -132,9 +132,9 @@ public class GeoCognitionTest extends AbstractGeocognitionTest {
 		mc.open(null);
 		DataManager dm = (DataManager) Services.getService(DataManager.class);
 		ILayer lyr = dm.createLayer(new File(
-				"src/test/resources/data/bv_sap.shp"));
-		mc.getLayerModel().addLayer(lyr);
-		mc.getLayerModel().addLayer(dm.createLayerCollection("group"));
+				"src/test/resources/data/bv_sap.shp"), mc);
+		mc.getLayerModel().add(lyr);
+		mc.getLayerModel().add(dm.createLayerCollection("group", mc));
 		mc.close(null);
 		gc.addElement("org.mymap", mc);
 		GeocognitionElement elem = gc.getGeocognitionElement("org.mymap");
@@ -300,8 +300,8 @@ public class GeoCognitionTest extends AbstractGeocognitionTest {
 		MapContext mc = new DefaultMapContext();
 		mc.open(null);
 		ILayer layer = getDataManager().createLayer("linestring",
-				new File("src/test/resources/data/linestring.shp"));
-		mc.getLayerModel().addLayer(layer);
+				new File("src/test/resources/data/linestring.shp"), mc);
+		mc.add(layer);
 		mc.close(null);
 
 		gc.addElement("org.map", mc);
@@ -315,8 +315,7 @@ public class GeoCognitionTest extends AbstractGeocognitionTest {
 		Services.setService(ErrorManager.class, em);
 		mapElement.open(null);
 		Services.setService(ErrorManager.class, previous);
-		assertTrue(((MapContext) mapElement.getObject()).getLayerModel()
-				.getLayerCount() == 0);
+		assertTrue(((MapContext) mapElement.getObject()).getLayerCount() == 0);
 		assertTrue(mapElement.isModified());
 		mapElement.close(null);
 	}
@@ -381,8 +380,8 @@ public class GeoCognitionTest extends AbstractGeocognitionTest {
 		mc.open(null);
 		DataManager dm = (DataManager) Services.getService(DataManager.class);
 		ILayer lyr = dm.createLayer(new File(
-				"src/test/resources/data/bv_sap.shp"));
-		mc.getLayerModel().addLayer(lyr);
+				"src/test/resources/data/bv_sap.shp"), mc);
+		mc.add(lyr);
 		mc.close(null);
 		gc.addElement("mymap", mc);
 
@@ -394,7 +393,7 @@ public class GeoCognitionTest extends AbstractGeocognitionTest {
 		element2.setXMLContent(xml);
 
 		mc2.open(null);
-		assertTrue(mc2.getLayerModel().getLayerCount() == 1);
+		assertTrue(mc2.getLayerCount() == 1);
 	}
 
 	public void testChangeMapIdConflict() throws Exception {
@@ -426,8 +425,8 @@ public class GeoCognitionTest extends AbstractGeocognitionTest {
 		mc.open(null);
 		DataManager dm = (DataManager) Services.getService(DataManager.class);
 		ILayer lyr = dm.createLayer(new File(
-				"src/test/resources/data/bv_sap.shp"));
-		mc.getLayerModel().addLayer(lyr);
+				"src/test/resources/data/bv_sap.shp"), mc);
+		mc.add(lyr);
 		mc.close(null);
 		gc.addElement("org.mymap", mc);
 		File temp = new File("target/temp.xml");
@@ -456,7 +455,7 @@ public class GeoCognitionTest extends AbstractGeocognitionTest {
 				.getTypeId()));
 		MapContext map = gc.getElement("org.mymap", MapContext.class);
 		map.open(null);
-		assertTrue(map.getLayerModel().getLayerCount() > 0);
+		assertTrue(map.getLayerCount() > 0);
 		map.close(null);
 	}
 

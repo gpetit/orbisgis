@@ -40,6 +40,8 @@ package org.orbisgis.core;
 import java.io.File;
 
 import org.gdms.source.SourceManager;
+import org.orbisgis.core.layerModel.DefaultMapContext;
+import org.orbisgis.core.layerModel.MapContext;
 
 public class FormatTest extends AbstractTest {
 
@@ -56,21 +58,24 @@ public class FormatTest extends AbstractTest {
 	}
 
 	public void testTiff() throws Exception {
+		MapContext mc = new DefaultMapContext();
 		File file = new File("src/test/resources/data/ace.tiff");
 		sourceManager.register("tiff", file);
-		getDataManager().createLayer("tiff");
+		getDataManager().createLayer("tiff", mc);
 	}
 
 	public void testAsc() throws Exception {
+		MapContext mc = new DefaultMapContext();
 		File file = new File("src/test/resources/data/3x3.asc");
 		sourceManager.register("asc", file);
-		getDataManager().createLayer("asc");
+		getDataManager().createLayer("asc", mc);
 	}
 
 	public void testShapefile() throws Exception {
+		MapContext mc = new DefaultMapContext();
 		File file = new File("src/test/resources/data/bv_sap.shp");
 		sourceManager.register("shp", file);
-		getDataManager().createLayer("shp");
+		getDataManager().createLayer("shp", mc);
 	}
 
 }

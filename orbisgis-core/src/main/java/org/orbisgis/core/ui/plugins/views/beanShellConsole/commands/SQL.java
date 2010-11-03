@@ -152,10 +152,9 @@ public class SQL {
 
 								try {
 									final ILayer layer = dataManager
-											.createLayer(ds);
+											.createLayer(ds,vc);
 									if (vc != null) {
-										vc.getLayerModel()
-												.insertLayer(layer, 0);
+										vc.insertLayer(layer, 0);
 									}
 								} catch (LayerException e) {
 									Services.getErrorManager().error(

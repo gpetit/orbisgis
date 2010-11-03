@@ -43,8 +43,7 @@ import org.orbisgis.core.sif.multiInputPanel.ComboBoxChoice;
 public class LayerCombo extends ComboBoxChoice {
 
 	public LayerCombo(MapContext view) {
-		final ILayer root = view.getLayerModel();
-		final ILayer[] allLayers = root.getLayersRecursively();
+		final ILayer[] allLayers = view.getLayers();
 		final String[] names = new String[allLayers.length];
 		for (int i = 0; i < names.length; i++) {
 			names[i] = allLayers[i].getName();
