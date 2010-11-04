@@ -37,6 +37,8 @@
 package org.orbisgis.core.layerModel;
 
 import java.util.ArrayList;
+import java.util.Set;
+import org.apache.log4j.Logger;
 
 /**
  * This abstract class contains methods that can be used by both <code>ILayer</code>s
@@ -44,16 +46,58 @@ import java.util.ArrayList;
  * @author alexis
  */
 public abstract class AbstractDisplayable implements IDisplayable {
-
+	private static Logger logger = Logger.getLogger(AbstractDisplayable.class.getName());
 	protected ArrayList<LayerListener> listeners;
 	protected MapContext context;
+	protected String name;
 
-	public AbstractDisplayable(MapContext mc) {
+	public AbstractDisplayable(String name, MapContext mc) {
+		this.name=name;
 		context = mc;
 		listeners = new ArrayList<LayerListener>();
+		if(mc !=null){
+			try {
+				addToContext();
+			} catch( LayerException e) {
+				logger.warn("can't add the layer to the MapContext",e);
+			}
+		}
+	}
+
+	public final void addToContext() throws LayerException{
+		context.add(this);
 	}
 
 ////////////////protected methods.//////////////////////
+
+	/**
+	 * Set the name of this layer. If the name is already used in the
+	 * parent MapContext, a new one will be computed.
+	 * @throws LayerException
+	 * @see org.orbisgis.core.layerModel.ILayer#setName(java.lang.String)
+	 */
+	@Override
+	public void setName(final String name) throws LayerException {
+		Set<String> allLayersNames = context.getAllLayersNames();
+		allLayersNames.remove(getName());
+		this.name = provideNewLayerName(name, allLayersNames);
+		fireNameChanged();
+	}
+
+	private String provideNewLayerName(final String name,
+		final Set<String> allLayersNames) {
+		String tmpName = name;
+		if (allLayersNames.contains(tmpName)) {
+			int i = 1;
+			while (allLayersNames.contains(tmpName + "_" + i)) {
+				i++;
+			}
+			tmpName += "_" + i;
+		}
+		allLayersNames.add(tmpName);
+		return tmpName;
+	}
+
 	protected void fireNameChanged() {
 		if (null != listeners) {
 			for (LayerListener listener : listeners) {

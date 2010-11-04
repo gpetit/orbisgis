@@ -77,13 +77,22 @@ public interface MapContext {
 	public IDisplayable getLayer(int i);
 
 	/**
-	 * Gets all the layers in the map context
+	 * Gets all the layers instance of IDisplayable in the map context
 	 * 
 	 * @return
 	 * @throws IllegalStateException
 	 *             If the map is closed
 	 */
 	public ILayer[] getLayers() throws IllegalStateException;
+
+	/**
+	 * Gets all the layers instance of ILayer in the map context
+	 *
+	 * @return
+	 * @throws IllegalStateException
+	 *             If the map is closed
+	 */
+	public IDisplayable[] getAllLayers() throws IllegalStateException;
 
         /**
          * Get all the raster layers of this map context as an array of ILayer. 

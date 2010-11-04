@@ -77,6 +77,7 @@ public class LegendTest extends AbstractTest {
 
 	public void testRendererWithNullSymbols() throws Exception {
 		MapContext mc = new DefaultMapContext();
+		mc.open(null);
 		ILayer layer = getDataManager().createLayer(
 				new File("src/test/resources/data/bv_sap.shp"), mc);
 		layer.open();

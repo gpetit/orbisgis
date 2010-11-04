@@ -46,11 +46,10 @@ import org.gdms.driver.DriverException;
 
 public abstract class AbstractLayer extends AbstractDisplayable implements ILayer {
 
-	private String name;
 	private LayerCollection parent;
 
 	public AbstractLayer(final String name, MapContext mc) {
-		super(mc);
+		super(name, mc);
 		this.name = name;
 		listeners = new ArrayList<LayerListener>();
 		context = mc;
@@ -82,34 +81,6 @@ public abstract class AbstractLayer extends AbstractDisplayable implements ILaye
 	@Override
 	public String getName() {
 		return name;
-	}
-
-	/**
-	 * Set the name of this layer. If the name is already used in the
-	 * parent MapContext, a new one will be computed.
-	 * @throws LayerException
-	 * @see org.orbisgis.core.layerModel.ILayer#setName(java.lang.String)
-	 */
-	@Override
-	public void setName(final String name) throws LayerException {
-		Set<String> allLayersNames = context.getAllLayersNames();
-		allLayersNames.remove(getName());
-		this.name = provideNewLayerName(name, allLayersNames);
-		fireNameChanged();
-	}
-
-	private String provideNewLayerName(final String name,
-		final Set<String> allLayersNames) {
-		String tmpName = name;
-		if (allLayersNames.contains(tmpName)) {
-			int i = 1;
-			while (allLayersNames.contains(tmpName + "_" + i)) {
-				i++;
-			}
-			tmpName += "_" + i;
-		}
-		allLayersNames.add(tmpName);
-		return tmpName;
 	}
 
 	@Override

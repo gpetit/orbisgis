@@ -59,7 +59,7 @@ public class LayerCollection extends AbstractDisplayable implements IDisplayable
 	 * @param name
 	 */
 	public LayerCollection(String name, MapContext con) {
-		super(con);
+		super(name, con);
 		this.name = name;
 		layerCollection = new ArrayList<ILayer>();
 	}
@@ -89,15 +89,6 @@ public class LayerCollection extends AbstractDisplayable implements IDisplayable
 	@Override
 	public String getName() {
 		return this.name;
-	}
-
-	/**
-	 * Set the name of the layer collection
-	 * @param name
-	 */
-	@Override
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	/**

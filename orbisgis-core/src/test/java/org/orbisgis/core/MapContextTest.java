@@ -75,11 +75,10 @@ public class MapContextTest extends AbstractTest {
 		mc.open(null);
 		ILayer layer = getDataManager().createLayer(
 				new File("src/test/resources/data/bv_sap.shp"), mc);
-		mc.add(layer);
 		mc.setSelectedLayers(new ILayer[] { layer });
 		assertTrue(mc.getSelectedLayers().length == 1);
 		assertTrue(mc.getSelectedLayers()[0] == layer);
-		mc.getLayerModel().remove(layer);
+		mc.remove(layer);
 		assertTrue(mc.getSelectedLayers().length == 0);
 		mc.close(null);
 	}
@@ -91,7 +90,6 @@ public class MapContextTest extends AbstractTest {
 				new File("src/test/resources/data/bv_sap.shp"),mc);
 		ILayer layer2 = getDataManager().createLayer(
 				new File("src/test/resources/data/linestring.shp"),mc);
-		mc.add(layer);
 		mc.setSelectedLayers(new ILayer[] { layer2 });
 		assertTrue(mc.getSelectedLayers().length == 0);
 		mc.setSelectedLayers(new ILayer[] { layer });
@@ -104,7 +102,6 @@ public class MapContextTest extends AbstractTest {
 		mc.open(null);
 		ILayer layer = getDataManager().createLayer(
 				new File("src/test/resources/data/bv_sap.shp"),mc);
-		mc.add(layer);
 		mc.setActiveLayer(layer);
 		mc.getLayerModel().remove(layer);
 		assertTrue(mc.getActiveLayer() == null);
@@ -118,8 +115,6 @@ public class MapContextTest extends AbstractTest {
 				new File("src/test/resources/data/linestring.shp"),mc);
 		ILayer layer2 = getDataManager().createLayer(
 				new File("src/test/resources/data/bv_sap.shp"),mc);
-		mc.add(layer1);
-		mc.add(layer2);
 		Symbol sym1 = layer1.getVectorLegend()[0].getSymbol(layer1
 				.getDataSource(), 0);
 		Symbol sym2 = layer2.getVectorLegend()[0].getSymbol(layer2
@@ -148,8 +143,6 @@ public class MapContextTest extends AbstractTest {
 		LayerCollection layer2 = getDataManager().createLayerCollection("a",mc);
 		ILayer layer3 = getDataManager().createLayer("linestring",
 				new File("src/test/resources/data/linestring.shp"),mc);
-		mc.add(layer1);
-		mc.add(layer2);
 		layer2.addLayer(layer3);
 		Object persistence = mc.getJAXBObject();
 		mc.close(null);
@@ -248,7 +241,6 @@ public class MapContextTest extends AbstractTest {
 		mc.open(null);
 		ILayer layer = getDataManager().createLayer("linestring",
 				new File("src/test/resources/data/linestring.shp"),mc);
-		mc.add(layer);
 		getDataManager().getSourceManager().remove("linestring");
 		assertTrue(mc.getLayerCount() == 0);
 		mc.close(null);
@@ -276,7 +268,6 @@ public class MapContextTest extends AbstractTest {
 		MapContext mc = new DefaultMapContext();
 		mc.open(null);
 		LayerCollection layer = getDataManager().createLayerCollection("a", mc);
-		mc.add(layer);
 		mc.close(null);
 		return mc;
 	}
@@ -304,7 +295,6 @@ public class MapContextTest extends AbstractTest {
 		mc.open(null);
 		ILayer layer = getDataManager().createLayer("bv_sap",
 				new File("src/test/resources/data/bv_sap.shp"), mc);
-		mc.add(layer);
 		UniqueSymbolLegend legend = LegendFactory.createUniqueSymbolLegend();
 		Symbol symbol = SymbolFactory.createPolygonSymbol(Color.pink);
 		legend.setSymbol(symbol);
@@ -355,7 +345,6 @@ public class MapContextTest extends AbstractTest {
 		mc.open(null);
 		ILayer layer = getDataManager().createLayer(
 				new File("src/test/resources/data/bv_sap.shp"), mc);
-		mc.add(layer);
 		mc.setActiveLayer(layer);
 		mc.close(null);
 		mc.open(null);
@@ -368,7 +357,6 @@ public class MapContextTest extends AbstractTest {
 		mc.getJAXBObject();
 		ILayer layer = getDataManager().createLayer(
 				new File("src/test/resources/data/bv_sap.shp"), mc);
-		mc.add(layer);
 		org.orbisgis.core.layerModel.persistence.MapContext xmlMC = (org.orbisgis.core.layerModel.persistence.MapContext) mc
 				.getJAXBObject();
 		assertTrue(xmlMC.getAbstractLayer().size() == 1);
@@ -410,7 +398,6 @@ public class MapContextTest extends AbstractTest {
 		MapContext mc = new DefaultMapContext();
 		mc.open(null);
 		ILayer layer = getDataManager().createLayer(shp, mc);
-		mc.add(layer);
 		LabelLegend labelLegend = LegendFactory.createLabelLegend();
 		int legendFieldIndex = 1;
 		labelLegend.setClassificationField(layer.getDataSource().getFieldName(
@@ -439,10 +426,8 @@ public class MapContextTest extends AbstractTest {
 		mc.open(null);
 		ILayer layer = getDataManager().createLayer("bv",
 				new File("src/test/resources/data/bv_sap.shp"), mc);
-		mc.add(layer);
 		ILayer layer2 = getDataManager().createLayer("linestring",
 				new File("src/test/resources/data/linestring.shp"), mc);
-		mc.add(layer2);
 
 		MapExportManager mem = Services.getService(MapExportManager.class);
 		Envelope envelope = mc.getEnvelope();
@@ -466,7 +451,6 @@ public class MapContextTest extends AbstractTest {
 		SourceManager sm = getDataManager().getSourceManager();
 		sm.register("bv", new File("src/test/resources/data/bv_sap.shp"));
 		ILayer layer = getDataManager().createLayer("bv", mc);
-		mc.add(layer);
 		sm.rename("bv", "bva");
 		assertTrue(sm.getAllNames("bva").length == 1);
 		assertTrue(sm.getAllNames("bva")[0].equals("bv"));
@@ -479,7 +463,6 @@ public class MapContextTest extends AbstractTest {
 		SourceManager sm = getDataManager().getSourceManager();
 		sm.register("bv", new File("src/test/resources/data/bv_sap.shp"));
 		ILayer layer = getDataManager().createLayer("bv", mc);
-		mc.add(layer);
 		layer.setName("bva");
 		assertTrue(sm.getAllNames("bv").length == 1);
 		assertTrue(sm.getAllNames("bv")[0].equals("bva"));

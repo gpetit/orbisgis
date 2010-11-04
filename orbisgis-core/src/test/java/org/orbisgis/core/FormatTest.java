@@ -59,6 +59,7 @@ public class FormatTest extends AbstractTest {
 
 	public void testTiff() throws Exception {
 		MapContext mc = new DefaultMapContext();
+		mc.open(null);
 		File file = new File("src/test/resources/data/ace.tiff");
 		sourceManager.register("tiff", file);
 		getDataManager().createLayer("tiff", mc);
@@ -66,6 +67,7 @@ public class FormatTest extends AbstractTest {
 
 	public void testAsc() throws Exception {
 		MapContext mc = new DefaultMapContext();
+		mc.open(null);
 		File file = new File("src/test/resources/data/3x3.asc");
 		sourceManager.register("asc", file);
 		getDataManager().createLayer("asc", mc);
@@ -73,6 +75,7 @@ public class FormatTest extends AbstractTest {
 
 	public void testShapefile() throws Exception {
 		MapContext mc = new DefaultMapContext();
+		mc.open(null);
 		File file = new File("src/test/resources/data/bv_sap.shp");
 		sourceManager.register("shp", file);
 		getDataManager().createLayer("shp", mc);

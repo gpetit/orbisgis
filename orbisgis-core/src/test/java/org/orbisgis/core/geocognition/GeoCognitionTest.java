@@ -301,7 +301,6 @@ public class GeoCognitionTest extends AbstractGeocognitionTest {
 		mc.open(null);
 		ILayer layer = getDataManager().createLayer("linestring",
 				new File("src/test/resources/data/linestring.shp"), mc);
-		mc.add(layer);
 		mc.close(null);
 
 		gc.addElement("org.map", mc);
@@ -381,13 +380,13 @@ public class GeoCognitionTest extends AbstractGeocognitionTest {
 		DataManager dm = (DataManager) Services.getService(DataManager.class);
 		ILayer lyr = dm.createLayer(new File(
 				"src/test/resources/data/bv_sap.shp"), mc);
-		mc.add(lyr);
 		mc.close(null);
 		gc.addElement("mymap", mc);
 
 		GeocognitionElement element = gc.getGeocognitionElement("mymap");
 		String xml = element.getXMLContent();
 		MapContext mc2 = new DefaultMapContext();
+		mc2.open(null);
 		gc.addElement("mymap2", mc2);
 		GeocognitionElement element2 = gc.getGeocognitionElement("mymap2");
 		element2.setXMLContent(xml);
@@ -426,7 +425,6 @@ public class GeoCognitionTest extends AbstractGeocognitionTest {
 		DataManager dm = (DataManager) Services.getService(DataManager.class);
 		ILayer lyr = dm.createLayer(new File(
 				"src/test/resources/data/bv_sap.shp"), mc);
-		mc.add(lyr);
 		mc.close(null);
 		gc.addElement("org.mymap", mc);
 		File temp = new File("target/temp.xml");

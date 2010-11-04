@@ -225,7 +225,6 @@ public class LayerModelTest extends AbstractTest {
 		LayerCollection l2 = getDataManager().createLayerCollection("secondlevel", mc);
 		ILayer vl1 = getDataManager().createLayer(dummy, mc);
 		l2.addLayer(vl1);
-		mc.add(l2);
 		assertTrue(mc.getAllLayersNames().contains(vl1.getName()));
 	}
 
@@ -236,8 +235,6 @@ public class LayerModelTest extends AbstractTest {
 		LayerCollection l3 = getDataManager().createLayerCollection("secondlevelbis",mc);
 		ILayer vl1 = getDataManager().createLayer(dummy,mc);
 		l2.addLayer(vl1);
-		mc.add(l2);
-		mc.add(l3);
 
 		assertTrue(mc.getLayerByName("secondlevel") == l2);
 		assertTrue(mc.getLayerByName("secondlevelbis") == l3);

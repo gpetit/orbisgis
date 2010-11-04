@@ -67,6 +67,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
+import java.util.AbstractList;
 import java.util.Collections;
 import java.util.Set;
 import org.orbisgis.core.layerModel.persistence.AbstractLayerType;
@@ -103,7 +104,6 @@ public class DefaultMapContext implements MapContext {
 	public DefaultMapContext() {
 		openerListener = new OpenerListener();
 		sourceListener = new LayerRemovalSourceListener();
-		DataManager dataManager = (DataManager) Services.getService(DataManager.class);
 		displayableArtifacts = new ArrayList<IDisplayable>();
 		this.jaxbMapContext = null;
 		idTime = System.currentTimeMillis();
@@ -145,7 +145,7 @@ public class DefaultMapContext implements MapContext {
 	@Override
 	public void add(IDisplayable layer) throws LayerException {
 		if (layer != null && !displayableArtifacts.contains(layer)) {
-			displayableArtifacts.add(layer);
+			this.add(layer, false);
 		} else {
 			if (layer == null) {
 				throw new LayerException("How did you manage to add a null layer ?");
@@ -157,19 +157,86 @@ public class DefaultMapContext implements MapContext {
 	}
 
 	/**
+	 * Add a new Layer or LayerCollection in this context. The boolean here is used to determine if this layer
+	 * is new ly created, or if it is a layer moved from an inner collection.
+	 * @param layer
+	 * @param isMoving
+	 */
+	public void add(IDisplayable layer, boolean isMoving) throws LayerException{
+		if (layer != null && !displayableArtifacts.contains(layer)) {
+			if(isMoving && layer.getParent()!=null){
+				displayableArtifacts.add(layer);
+				layer.getParent().remove((ILayer) layer);
+				((ILayer) layer).setParent(null);
+			} else if (!isMoving){
+				layer.setName(layer.getName());
+				displayableArtifacts.add(layer);
+				fireLayerAddedEvent(new IDisplayable[] { layer });
+			}
+		} else {
+			if (layer == null) {
+				throw new LayerException("How did you manage to add a null layer ?");
+			}
+			if (displayableArtifacts.contains(layer)) {
+				throw new LayerException("This Layer is already contained in this Map");
+			}
+		}
+	}
+
+
+	/**
 	 * Remove a Layer or LayerCollection from this context
 	 * @param layer
 	 * @throws LayerException
 	 */
 	@Override
 	public void remove(IDisplayable layer) throws LayerException {
-		if (layer != null && displayableArtifacts.contains(layer)) {
-			displayableArtifacts.remove(layer);
+		if (layer != null  ) {
+			if(displayableArtifacts.contains(layer)){
+				displayableArtifacts.remove(layer);
+				IDisplayable[] toRemove = new IDisplayable[]{layer};
+				if (fireLayerRemovingEvent(toRemove)) {
+					if (displayableArtifacts.remove(layer)) {
+						fireLayerRemovedEvent(toRemove);
+					}
+				}
+			} else if(layer instanceof ILayer) {
+				for(IDisplayable dis : displayableArtifacts){
+					if(dis.isCollection() && dis.getLayerList().contains((ILayer)layer)){
+						((LayerCollection) dis).remove((ILayer) layer);
+					}
+				}
+			}
 		} else {
 			throw new LayerException("You can't remove a Layer that is not in the Map");
 		}
 	}
+	@SuppressWarnings("unchecked")
+	protected void fireLayerAddedEvent(IDisplayable[] added) {
+		ArrayList<LayerListener> l = (ArrayList<LayerListener>) listeners.clone();
+		for (LayerListener listener : l) {
+			listener.layerAdded(new LayerCollectionEvent(null, added));
+		}
+	}
 
+	@SuppressWarnings("unchecked")
+	protected void fireLayerRemovedEvent(IDisplayable[] removed) {
+		ArrayList<LayerListener> l = (ArrayList<LayerListener>) listeners.clone();
+		for (LayerListener listener : l) {
+			listener.layerRemoved(new LayerCollectionEvent(null, removed));
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	protected boolean fireLayerRemovingEvent(IDisplayable[] toRemove) {
+		ArrayList<LayerListener> l = (ArrayList<LayerListener>) listeners.clone();
+		for (LayerListener listener : l) {
+			if (!listener.layerRemoving(new LayerCollectionEvent(null, toRemove))) {
+				return false;
+			}
+		}
+		return true;
+	}
 	@Override
 	public void insertLayer(IDisplayable dis, int i) throws IndexOutOfBoundsException {
 		displayableArtifacts.add(i, dis);
@@ -241,6 +308,21 @@ public class DefaultMapContext implements MapContext {
 		return layers.toArray(new ILayer[layers.size()]);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public IDisplayable[] getAllLayers() {
+		checkIsOpen();
+		ArrayList<IDisplayable> layers = new ArrayList<IDisplayable>();
+		for (IDisplayable dis : this.displayableArtifacts) {
+			if(dis instanceof LayerCollection){
+				layers.add(dis);
+			}
+			layers.addAll(dis.getLayerList());
+		}
+		return layers.toArray(new IDisplayable[layers.size()]);
+	}
 	/**
 	 * {@inheritDoc}
 	 */
@@ -402,6 +484,7 @@ public class DefaultMapContext implements MapContext {
 		HashMap<ILayer, LayerType> layerPersistenceMap) {
 		DataManager dataManager = (DataManager) Services.getService(DataManager.class);
 		IDisplayable ret;
+		this.displayableArtifacts=new ArrayList<IDisplayable>();
 		for (AbstractLayerType layer : layerList) {
 			ret = null;
 			if (layer instanceof LayerCollectionType) {
@@ -438,9 +521,6 @@ public class DefaultMapContext implements MapContext {
 						"Cannot recover layer: " + layer.getName(), e);
 				}
 			}
-			if (ret != null) {
-				displayableArtifacts.add(ret);
-			}
 		}
 	}
 
@@ -464,6 +544,11 @@ public class DefaultMapContext implements MapContext {
 		final Set<String> allLayersNames = new HashSet<String>();
 		for (ILayer layer : layers) {
 			allLayersNames.add(layer.getName());
+				}
+		for(IDisplayable dis : displayableArtifacts){
+			if(dis.isCollection()){
+				allLayersNames.add(dis.getName());
+			}
 		}
 		return allLayersNames;
 	}
@@ -672,52 +757,58 @@ public class DefaultMapContext implements MapContext {
 		if (pm == null) {
 			pm = new NullProgressMonitor();
 		}
-		ILayer[] layers = this.getLayers();
-		int i = 0;
-		try {
-			ArrayList<ILayer> toRemove = new ArrayList<ILayer>();
-			for (i = 0; i < layers.length; i++) {
-				pm.progressTo(i * 100 / layers.length);
-				if (!(layers[i] instanceof LayerCollection)) {
-					try {
-						layers[i].open();
-					} catch (LayerException e) {
-						Services.getService(ErrorManager.class).warning(
-							"Cannot open '" + layers[i].getName()
-							+ "'. Layer is removed", e);
-						toRemove.add(layers[i]);
-					}
-				}
-				if (layerPersistenceMap != null) {
-					if (!toRemove.contains(layers[i])) {
+		if(displayableArtifacts!=null && !displayableArtifacts.isEmpty()){
+			IDisplayable[] layers = this.getAllLayersOffline();
+			int i = 0;
+			try {
+				ArrayList<IDisplayable> toRemove = new ArrayList<IDisplayable>();
+				for (i = 0; i < layers.length; i++) {
+					pm.progressTo(i * 100 / layers.length);
+					if (!(layers[i] instanceof LayerCollection)) {
 						try {
-							layers[i].restoreLayer(layerPersistenceMap.get(layers[i]));
+							layers[i].open();
 						} catch (LayerException e) {
 							Services.getService(ErrorManager.class).warning(
-								"Cannot restore '" + layers[i].getName()
+								"Cannot open '" + layers[i].getName()
 								+ "'. Layer is removed", e);
 							toRemove.add(layers[i]);
 						}
 					}
-				}
-			}
-
-			for (ILayer layer : toRemove) {
-				layer.getParent().remove(layer);
-			}
-		} catch (LayerException e) {
-			for (int j = 0; j < i; j++) {
-				pm.progressTo(j * 100 / i);
-				if (layers[j] instanceof ILayer) {
-					try {
-						layers[j].close();
-					} catch (LayerException e1) {
-						// ignore
+					if (layerPersistenceMap != null) {
+						if (!toRemove.contains(layers[i])) {
+							try {
+								if(layers[i] instanceof ILayer){
+									((ILayer) layers[i]).restoreLayer(layerPersistenceMap.get((ILayer) layers[i]));
+								}
+							} catch (LayerException e) {
+								Services.getService(ErrorManager.class).warning(
+									"Cannot restore '" + layers[i].getName()
+									+ "'. Layer is removed", e);
+								toRemove.add(layers[i]);
+							}
+						}
 					}
 				}
-			}
 
-			throw e;
+				for (IDisplayable layer : toRemove) {
+					if(layer instanceof ILayer){
+						((ILayer) layer).getParent().remove((ILayer) layer);
+					}
+				}
+			} catch (LayerException e) {
+				for (int j = 0; j < i; j++) {
+					pm.progressTo(j * 100 / i);
+					if (layers[j] instanceof ILayer) {
+						try {
+							layers[j].close();
+						} catch (LayerException e1) {
+							// ignore
+						}
+					}
+				}
+
+				throw e;
+			}
 		}
 		this.open = true;
 
@@ -784,6 +875,16 @@ public class DefaultMapContext implements MapContext {
 		}
 	}
 
+	private IDisplayable[] getAllLayersOffline(){
+		ArrayList<IDisplayable> layers = new ArrayList<IDisplayable>();
+		for (IDisplayable dis : this.displayableArtifacts) {
+			if(dis instanceof LayerCollection){
+				layers.add(dis);
+			}
+			layers.addAll(dis.getLayerList());
+		}
+		return layers.toArray(new IDisplayable[layers.size()]);
+	}
 	/**********************************************************************/
 	/***********************Private Classes********************************/
 	/**********************************************************************/

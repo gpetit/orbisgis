@@ -281,9 +281,9 @@ public class SQLConsoleViewPlugIn extends ViewPlugIn {
 
 								try {
 									final ILayer layer = dataManager
-											.createLayer(ds);
+											.createLayer(ds, vc);
 
-									vc.getLayerModel().insertLayer(layer, 0);
+									vc.insertLayer(layer, 0);
 
 								} catch (LayerException e) {
 									Services.getErrorManager().error(

@@ -87,9 +87,11 @@ public abstract class GdmsLayer extends AbstractLayer {
 	public void setName(String name) throws LayerException {
 		SourceManager sourceManager = ((DataManager) Services
 				.getService(DataManager.class)).getDataSourceFactory().getSourceManager();
-
+		if(mainName==null){
+			mainName=this.getName();
+		}
 		// Remove previous alias
-		if (!mainName.equals(getName())) {
+		if ( !mainName.equals(getName())) {
 			sourceManager.removeName(getName());
 		}
 		if (!name.equals(mainName)) {
@@ -97,7 +99,7 @@ public abstract class GdmsLayer extends AbstractLayer {
 			try {
 				sourceManager.addName(mainName, name);
 			} catch (TableNotFoundException e) {
-				throw new RuntimeException("bug!", e);
+				throw new RuntimeException("Can't find a table with such a name!", e);
 			} catch (SourceAlreadyExistsException e) {
 				throw new LayerException("Source already exists", e);
 			}
