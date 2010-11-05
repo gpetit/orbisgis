@@ -37,6 +37,7 @@
 package org.orbisgis.core.layerModel;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import org.apache.log4j.Logger;
 
@@ -55,20 +56,11 @@ public abstract class AbstractDisplayable implements IDisplayable {
 		this.name=name;
 		context = mc;
 		listeners = new ArrayList<LayerListener>();
-		if(mc !=null){
-			try {
-				addToContext();
-			} catch( LayerException e) {
-				logger.warn("can't add the layer to the MapContext",e);
-			}
-		}
 	}
 
 	public final void addToContext() throws LayerException{
 		context.add(this);
 	}
-
-////////////////protected methods.//////////////////////
 
 	/**
 	 * Set the name of this layer. If the name is already used in the
@@ -84,19 +76,12 @@ public abstract class AbstractDisplayable implements IDisplayable {
 		fireNameChanged();
 	}
 
-	private String provideNewLayerName(final String name,
-		final Set<String> allLayersNames) {
-		String tmpName = name;
-		if (allLayersNames.contains(tmpName)) {
-			int i = 1;
-			while (allLayersNames.contains(tmpName + "_" + i)) {
-				i++;
-			}
-			tmpName += "_" + i;
-		}
-		allLayersNames.add(tmpName);
-		return tmpName;
+	@Override
+	public List<LayerListener> getListeners(){
+		return listeners;
 	}
+////////////////protected methods.//////////////////////
+
 
 	protected void fireNameChanged() {
 		if (null != listeners) {
@@ -130,4 +115,21 @@ public abstract class AbstractDisplayable implements IDisplayable {
 			listener.styleChanged(new LayerListenerEvent(this));
 		}
 	}
+
+	/********Private methods *************/
+	
+	private String provideNewLayerName(final String name,
+		final Set<String> allLayersNames) {
+		String tmpName = name;
+		if (allLayersNames.contains(tmpName)) {
+			int i = 1;
+			while (allLayersNames.contains(tmpName + "_" + i)) {
+				i++;
+			}
+			tmpName += "_" + i;
+		}
+		allLayersNames.add(tmpName);
+		return tmpName;
+	}
+
 }

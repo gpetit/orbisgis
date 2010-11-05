@@ -103,7 +103,7 @@ public class MapContextTest extends AbstractTest {
 		ILayer layer = getDataManager().createLayer(
 				new File("src/test/resources/data/bv_sap.shp"),mc);
 		mc.setActiveLayer(layer);
-		mc.getLayerModel().remove(layer);
+		mc.remove(layer);
 		assertTrue(mc.getActiveLayer() == null);
 		mc.close(null);
 	}
@@ -281,7 +281,6 @@ public class MapContextTest extends AbstractTest {
 		mc2.open(null);
 		assertTrue(mc2.getLayerCount() == 1);
 		LayerCollection layer = getDataManager().createLayerCollection("b",mc2);
-		mc2.add(layer);
 		assertTrue(mc2.getLayerCount() == 2);
 		mc2.close(null);
 
@@ -373,8 +372,8 @@ public class MapContextTest extends AbstractTest {
 		FileUtils.copy(new File("src/test/resources/data/bv_sap.shx"), shx);
 		MapContext mc = new DefaultMapContext();
 		mc.open(null);
-		mc.add(getDataManager().createLayer(shp,mc));
-		mc.add(getDataManager().createLayer(originalShp,mc));
+		getDataManager().createLayer(shp,mc);
+		getDataManager().createLayer(originalShp,mc);
 		mc.close(null);
 		shp.delete();
 		dbf.delete();

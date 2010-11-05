@@ -85,7 +85,7 @@ public class DefaultMapContext implements MapContext {
 	private ArrayList<MapContextListener> listeners = new ArrayList<MapContextListener>();
 	//A Listener dedicated to listen to new sources.
 	private OpenerListener openerListener;
-	//A Listener dedicated to listen to new sources removal.
+	//A Listener dedicated to listen to sources removal.
 	private LayerRemovalSourceListener sourceListener;
 	//The currently active layer.
 	private IDisplayable activeLayer;
@@ -145,6 +145,7 @@ public class DefaultMapContext implements MapContext {
 	@Override
 	public void add(IDisplayable layer) throws LayerException {
 		if (layer != null && !displayableArtifacts.contains(layer)) {
+			layer.addLayerListener(openerListener);
 			this.add(layer, false);
 		} else {
 			if (layer == null) {
@@ -193,11 +194,11 @@ public class DefaultMapContext implements MapContext {
 	public void remove(IDisplayable layer) throws LayerException {
 		if (layer != null  ) {
 			if(displayableArtifacts.contains(layer)){
-				displayableArtifacts.remove(layer);
 				IDisplayable[] toRemove = new IDisplayable[]{layer};
 				if (fireLayerRemovingEvent(toRemove)) {
-					if (displayableArtifacts.remove(layer)) {
+					if (displayableArtifacts.contains(layer)) {
 						fireLayerRemovedEvent(toRemove);
+						displayableArtifacts.remove(layer);
 					}
 				}
 			} else if(layer instanceof ILayer) {
@@ -213,17 +214,17 @@ public class DefaultMapContext implements MapContext {
 	}
 	@SuppressWarnings("unchecked")
 	protected void fireLayerAddedEvent(IDisplayable[] added) {
-		ArrayList<LayerListener> l = (ArrayList<LayerListener>) listeners.clone();
-		for (LayerListener listener : l) {
-			listener.layerAdded(new LayerCollectionEvent(null, added));
-		}
+			openerListener.layerAdded(new LayerCollectionEvent(null, added));
 	}
 
 	@SuppressWarnings("unchecked")
 	protected void fireLayerRemovedEvent(IDisplayable[] removed) {
-		ArrayList<LayerListener> l = (ArrayList<LayerListener>) listeners.clone();
-		for (LayerListener listener : l) {
-			listener.layerRemoved(new LayerCollectionEvent(null, removed));
+		for(IDisplayable dis : removed){
+			if(displayableArtifacts.contains(dis)){
+				openerListener.layerRemoved(new LayerCollectionEvent(null, removed));
+			} else if(dis.getParent()!=null && dis.getParent().getMapContext()==this){
+				dis.getParent().fireLayerRemovedEvent(new ILayer[] {(ILayer)dis});
+			}
 		}
 	}
 
@@ -304,6 +305,9 @@ public class DefaultMapContext implements MapContext {
 		ArrayList<IDisplayable> layers = new ArrayList<IDisplayable>();
 		for (IDisplayable dis : this.displayableArtifacts) {
 			layers.addAll(dis.getLayerList());
+			if(dis instanceof ILayer){
+				layers.add(dis);
+			}
 		}
 		return layers.toArray(new ILayer[layers.size()]);
 	}
@@ -540,16 +544,11 @@ public class DefaultMapContext implements MapContext {
 	 */
 	@Override
 	public Set<String> getAllLayersNames() {
-		ILayer[] layers = getLayers();
+		IDisplayable[] layers = getAllLayersOffline();
 		final Set<String> allLayersNames = new HashSet<String>();
-		for (ILayer layer : layers) {
+		for (IDisplayable layer : layers) {
 			allLayersNames.add(layer.getName());
 				}
-		for(IDisplayable dis : displayableArtifacts){
-			if(dis.isCollection()){
-				allLayersNames.add(dis.getName());
-			}
-		}
 		return allLayersNames;
 	}
 
@@ -690,7 +689,7 @@ public class DefaultMapContext implements MapContext {
 	@Override
 	public void removeLayerListenerRecursively(LayerListener ll) {
 		for (IDisplayable dis : displayableArtifacts) {
-			dis.removeLayerListenerRecursively(openerListener);
+			dis.removeLayerListenerRecursively(ll);
 		}
 	}
 
@@ -700,7 +699,7 @@ public class DefaultMapContext implements MapContext {
 	@Override
 	public void addLayerListenerRecursively(LayerListener ll) {
 		for (IDisplayable dis : displayableArtifacts) {
-			dis.addLayerListenerRecursively(openerListener);
+			dis.addLayerListenerRecursively(ll);
 		}
 	}
 
@@ -878,13 +877,26 @@ public class DefaultMapContext implements MapContext {
 	private IDisplayable[] getAllLayersOffline(){
 		ArrayList<IDisplayable> layers = new ArrayList<IDisplayable>();
 		for (IDisplayable dis : this.displayableArtifacts) {
+			layers.add(dis);
 			if(dis instanceof LayerCollection){
-				layers.add(dis);
+				layers.addAll(dis.getLayerList());
 			}
-			layers.addAll(dis.getLayerList());
 		}
 		return layers.toArray(new IDisplayable[layers.size()]);
 	}
+
+	/*
+	 * This method will retrieve all the LayerListener linked to the IDisplayable
+	 * in layer[]
+	 */
+	private List<LayerListener> getListeners(IDisplayable layer[]){
+		List<LayerListener> listen = new ArrayList<LayerListener>();
+		for(IDisplayable dis : layer){
+			listen.addAll(dis.getListeners());
+		}
+		return listen;
+	}
+
 	/**********************************************************************/
 	/***********************Private Classes********************************/
 	/**********************************************************************/

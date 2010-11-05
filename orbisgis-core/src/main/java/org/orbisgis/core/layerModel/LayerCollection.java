@@ -46,11 +46,13 @@ import org.orbisgis.core.layerModel.persistence.LayerCollectionType;
 import org.orbisgis.core.layerModel.persistence.LayerType;
 
 import com.vividsolutions.jts.geom.Envelope;
+import org.apache.log4j.Logger;
 import org.orbisgis.core.layerModel.persistence.AbstractLayerType;
 import org.orbisgis.core.renderer.legend.Legend;
 
 public class LayerCollection extends AbstractDisplayable implements IDisplayable {
 
+	private static Logger logger = Logger.getLogger(AbstractDisplayable.class.getName());
 	private String name;
 	private List<ILayer> layerCollection;
 
@@ -62,6 +64,13 @@ public class LayerCollection extends AbstractDisplayable implements IDisplayable
 		super(name, con);
 		this.name = name;
 		layerCollection = new ArrayList<ILayer>();
+		if(con !=null){
+			try {
+				addToContext();
+			} catch( LayerException e) {
+				logger.warn("can't add the layer to the MapContext",e);
+			}
+		}
 	}
 
 	/**
@@ -97,7 +106,11 @@ public class LayerCollection extends AbstractDisplayable implements IDisplayable
 	 * @throws LayerException
 	 */
 	public void addLayer(final ILayer layer) throws LayerException {
-		addLayer(layer, false);
+		if(context.getLayerModel().contains(layer) || layer.getParent()!=null){
+			addLayer(layer, true);
+		}else {
+			addLayer(layer, false);
+		}
 	}
 
 	/**
@@ -431,7 +444,9 @@ public class LayerCollection extends AbstractDisplayable implements IDisplayable
 	 */
 	@Override
 	public void addLayerListener(LayerListener listener) {
-		this.listeners.add(listener);
+		if(!listeners.contains(listener)){
+			this.listeners.add(listener);
+		}
 	}
 
 	@Override

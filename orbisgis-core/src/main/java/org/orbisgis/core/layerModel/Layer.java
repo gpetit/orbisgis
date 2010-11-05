@@ -73,8 +73,10 @@ import org.orbisgis.core.renderer.symbol.Symbol;
 import org.orbisgis.core.renderer.symbol.SymbolFactory;
 
 import com.vividsolutions.jts.geom.Envelope;
+import org.apache.log4j.Logger;
 
 public class Layer extends GdmsLayer {
+	private static Logger logger = Logger.getLogger(AbstractDisplayable.class.getName());
 
 	private SpatialDataSourceDecorator dataSource;
 	private HashMap<String, LegendDecorator[]> fieldLegend = new HashMap<String, LegendDecorator[]>();
@@ -85,6 +87,13 @@ public class Layer extends GdmsLayer {
 		super(name, mc);
 		this.dataSource = new SpatialDataSourceDecorator(ds);
 		editionListener = new RefreshSelectionEditionListener();
+		if(mc !=null){
+			try {
+				addToContext();
+			} catch( LayerException e) {
+				logger.warn("can't add the layer to the MapContext",e);
+			}
+		}
 	}
 
 	private UniqueSymbolLegend getDefaultVectorialLegend(Type fieldType) {

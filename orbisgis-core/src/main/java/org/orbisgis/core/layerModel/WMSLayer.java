@@ -56,9 +56,11 @@ import org.orbisgis.core.renderer.legend.RasterLegend;
 import org.orbisgis.core.renderer.legend.WMSLegend;
 
 import com.vividsolutions.jts.geom.Envelope;
+import org.apache.log4j.Logger;
 
 public class WMSLayer extends GdmsLayer {
 
+	private static Logger logger = Logger.getLogger(AbstractDisplayable.class.getName());
 	private static final String NOT_SUPPORTED = "Method not supported in WMS layers";
 	private DataSource ds;
 	private Envelope envelope;
@@ -68,6 +70,13 @@ public class WMSLayer extends GdmsLayer {
 	public WMSLayer(String name, DataSource ds, MapContext mc) {
 		super(name, mc);
 		this.ds = ds;
+		if(mc !=null){
+			try {
+				addToContext();
+			} catch( LayerException e) {
+				logger.warn("can't add the layer to the MapContext",e);
+			}
+		}
 	}
 
 	@Override

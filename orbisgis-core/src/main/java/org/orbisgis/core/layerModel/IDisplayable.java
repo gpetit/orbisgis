@@ -226,4 +226,10 @@ public interface IDisplayable {
 	 * @throws DriverException
 	 */
 	public Legend[] getRenderingLegend() throws DriverException;
+
+	/**
+	 * Retrieve the listeners associated to this layer.
+	 * @return
+	 */
+	public List<LayerListener> getListeners();
 }

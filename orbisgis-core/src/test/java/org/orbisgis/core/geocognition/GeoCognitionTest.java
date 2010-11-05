@@ -391,7 +391,7 @@ public class GeoCognitionTest extends AbstractGeocognitionTest {
 		GeocognitionElement element2 = gc.getGeocognitionElement("mymap2");
 		element2.setXMLContent(xml);
 
-		mc2.open(null);
+//		mc2.open(null);
 		assertTrue(mc2.getLayerCount() == 1);
 	}
 

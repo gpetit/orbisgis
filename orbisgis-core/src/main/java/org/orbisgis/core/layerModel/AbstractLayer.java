@@ -182,7 +182,9 @@ public abstract class AbstractLayer extends AbstractDisplayable implements ILaye
 
 	@Override
 	public void addLayerListener(LayerListener listener) {
-		listeners.add(listener);
+		if(!listeners.contains(listener)){
+			listeners.add(listener);
+		}
 	}
 
 	@Override
