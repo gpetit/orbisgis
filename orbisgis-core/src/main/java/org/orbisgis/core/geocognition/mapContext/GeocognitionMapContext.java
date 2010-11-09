@@ -59,9 +59,11 @@ import org.orbisgis.progress.NullProgressMonitor;
 
 public class GeocognitionMapContext extends AbstractExtensionElement implements
 		GeocognitionExtensionElement{
-
+	//The associated MapContext.
 	private MapContext mapContext;
+	//
 	private Object revertStatus;
+	//A listener suppposed to commit changes that occur in associated layers and map context.
 	private ChangeListener changeListener;
 	private GeocognitionElementContentListener elementListener;		
 	

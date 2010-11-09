@@ -368,9 +368,7 @@ public class Toc extends ResourceTree implements WorkbenchFrame {
 			this.element = element;
 			// Add the listeners to the new MapContext
 			this.mapContext.addMapContextListener(myMapContextListener);
-			for(IDisplayable dis : this.mapContext.getLayerModel()){
-				addLayerListenerRecursively(dis, ll);
-			}
+			this.mapContext.addLayerListenerRecursively(ll);
 			treeModel = new TocTreeModel(mapContext, tree);
 			// Set model clears selection
 			ignoreSelection = true;
@@ -496,20 +494,50 @@ public class Toc extends ResourceTree implements WorkbenchFrame {
 
 		@Override
 		public void run(IProgressMonitor pm) {
+			//If the map context is null, we don't have any reason to continue.
+			if(mapContext == null){
+				Services.getErrorManager().error(
+						"Cannot add the given layer in this TOC, "
+						+ "The associated MapContext is null");
+				return;
+			}
 			int index;
-			if (!dropNode.isCollection()) {
-				IDisplayable parent = dropNode.getParent();
-				if (parent!=null) {
-					index = ((LayerCollection)parent).getIndex((ILayer) dropNode);
-					dropNode = parent;
+			LayerCollection parent = null;
+			//We determine if dropNode is a collection, or inside a collection.
+			if(dropNode != null){
+				if(dropNode.isCollection()){
+					parent = (LayerCollection) dropNode;
+				} else{
+					parent=dropNode.getParent();
+				}
+			}
+			if(parent != null){
+			//Parent is not null. We are trying to add a new Layer directly
+			//in a targeted folder in the TOC.
+				if(dropNode != parent){
+					index = parent.getIndex((ILayer) dropNode);
 				} else {
-					Services.getErrorManager().error(
-							"Cannot create layer on " + dropNode.getName());
-					return;
+					index = parent.getLayerCount();
 				}
 			} else {
-				index = ((LayerCollection) dropNode).getLayerCount();
+			//Parent is null. We must check whether dropNode is null in order
+			//to insert the layer at the good position.
+				if(dropNode == null){
+					index = mapContext.getLayerModel().size();
+				} else {
+					if(mapContext.getLayerModel().contains(dropNode)){
+						index = mapContext.getLayerModel().indexOf(dropNode);
+					} else {
+					//dropNode is nor a Collection, neither contained in a Collection.
+					//As it's not contained directly in the mapContext, we have a problem...
+						Services.getErrorManager().error(
+								"Cannot add the given layer in this TOC, "
+								+ "The associated MapContext is null");
+						return;
+					}
+				}
 			}
+			//We know the parent where we'll put the node, and the index of the node.
 			DataManager dataManager = (DataManager) Services
 					.getService(DataManager.class);
 			for (int i = 0; i < draggedResources.length; i++) {
@@ -519,8 +547,15 @@ public class Toc extends ResourceTree implements WorkbenchFrame {
 				} else {
 					pm.progressTo(100 * i / draggedResources.length);
 					try {
-						((LayerCollection) dropNode).insertLayer( dataManager
+						if(parent == null){
+						//We insert the nodes directly in the MapContext
+							IDisplayable dis = dataManager.createLayer(sourceName, mapContext);
+							mapContext.insertLayer(dis, index);
+						} else {
+						//We insert the node in the parent 
+							parent.insertLayer(dataManager
 								.createLayer(sourceName, dropNode.getMapContext()), index);
+						}
 					} catch (LayerException e) {
 						throw new RuntimeException("Cannot "
 								+ "add the layer to the destination", e);

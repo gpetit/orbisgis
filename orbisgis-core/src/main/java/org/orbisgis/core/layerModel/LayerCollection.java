@@ -92,15 +92,6 @@ public class LayerCollection extends AbstractDisplayable implements IDisplayable
 	}
 
 	/**
-	 * Get the name of the layer collection
-	 * @return
-	 */
-	@Override
-	public String getName() {
-		return this.name;
-	}
-
-	/**
 	 * Add a ILayer to this collection.
 	 * @param layer
 	 * @throws LayerException
@@ -125,6 +116,32 @@ public class LayerCollection extends AbstractDisplayable implements IDisplayable
 	}
 
 	/**
+	 * Try to insert the ILayer layer at the index index.
+	 * @param layer
+	 * @param index
+	 * @param isMoving
+	 * @throws LayerException
+	 */
+	public void insertLayer(ILayer layer, int index, boolean isMoving)
+		throws LayerException {
+		if (null != layer) {
+			if (isMoving) {
+				layerCollection.add(index, layer);
+				layer.setParent(this);
+			} else {
+				if(context.getLayerModel().contains(layer)){
+					context.getLayerModel().remove(layer);
+				}
+				setNamesRecursively(layer, context.getAllLayersNames());
+				layerCollection.add(index, layer);
+				layer.setParent(this);
+				fireLayerAddedEvent(new ILayer[]{layer});
+			}
+		}
+
+	}
+
+	/**
 	 * Removes the layer from the collection
 	 * 
 	 * @param layerName
@@ -133,7 +150,7 @@ public class LayerCollection extends AbstractDisplayable implements IDisplayable
 	 * 
 	 */
 	public ILayer remove(final String layerName) throws LayerException {
-		for (int i = 0; i < size(); i++) {
+		for (int i = 0; i < layerCollection.size(); i++) {
 			if (layerName.equals(layerCollection.get(i).getName())) {
 				return remove(layerCollection.get(i));
 			}
@@ -147,23 +164,11 @@ public class LayerCollection extends AbstractDisplayable implements IDisplayable
 	 */
 	public ILayer[] getChildren() {
 		if (null != layerCollection) {
-			ILayer[] result = new ILayer[size()];
+			ILayer[] result = new ILayer[layerCollection.size()];
 			return layerCollection.toArray(result);
 		} else {
 			return null;
 		}
-	}
-
-	/**
-	 * Return the number of children in this collection.
-	 * @return
-	 */
-	private int size() {
-		return layerCollection.size();
-	}
-
-	public ILayer remove(ILayer layer) throws LayerException {
-		return remove(layer, false);
 	}
 
 	/**
@@ -185,6 +190,10 @@ public class LayerCollection extends AbstractDisplayable implements IDisplayable
 				fireLayerAddedEvent(new ILayer[]{layer});
 			}
 		}
+	}
+
+	public ILayer remove(ILayer layer) throws LayerException {
+		return remove(layer, false);
 	}
 
 	/**
@@ -221,32 +230,18 @@ public class LayerCollection extends AbstractDisplayable implements IDisplayable
 	}
 
 	/**
-	 * Try to insert the ILayer layer at the index index.
-	 * @param layer
-	 * @param index
-	 * @param isMoving
-	 * @throws LayerException
+	 * Return the number of layers contained in this collection.
+	 * @return
 	 */
-	public void insertLayer(ILayer layer, int index, boolean isMoving)
-		throws LayerException {
-		if (null != layer) {
-			if (isMoving) {
-				layerCollection.add(index, layer);
-				layer.setParent(this);
-			} else {
-				setNamesRecursively(layer, context.getAllLayersNames());
-				layerCollection.add(index, layer);
-				layer.setParent(this);
-				fireLayerAddedEvent(new ILayer[]{layer});
-			}
-		}
-
-	}
-
 	public int getLayerCount() {
 		return layerCollection.size();
 	}
 
+	/**
+	 * return a view of this collection as an object that wil be useable for
+	 * XMML serialization.
+	 * @return
+	 */
 	public AbstractLayerType saveLayer() {
 		LayerCollectionType xmlLayer = new LayerCollectionType();
 		xmlLayer.setName(getName());
@@ -261,6 +256,11 @@ public class LayerCollection extends AbstractDisplayable implements IDisplayable
 	public void restoreLayer(LayerType layer) throws LayerException {
 	}
 
+	/**
+	 * Try to retrieve a layer by its name in this.
+	 * @param layerName
+	 * @return
+	 */
 	public ILayer getLayerByName(String layerName) {
 		for (ILayer layer : layerCollection) {
 			if (layer.getName().equals(layerName)) {
@@ -268,71 +268,6 @@ public class LayerCollection extends AbstractDisplayable implements IDisplayable
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Retrieve the children of this collection that are raster layers
-	 * @return
-	 * @throws DriverException
-	 */
-	@Override
-	public ILayer[] getRasterLayers() throws DriverException {
-		ArrayList<ILayer> filterLayer = new ArrayList<ILayer>();
-
-		for (ILayer l : this.layerCollection) {
-			if (l.isRaster()) {
-				filterLayer.add(l);
-			}
-		}
-		return filterLayer.toArray(new ILayer[filterLayer.size()]);
-	}
-
-	/**
-	 * Retrieve the children of this collection that are vector layers
-	 * @return
-	 * @throws DriverException
-	 */
-	@Override
-	public ILayer[] getVectorLayers() throws DriverException {
-		ArrayList<ILayer> filterLayer = new ArrayList<ILayer>();
-		for (ILayer l : this.layerCollection) {
-			if (l.isVectorial()) {
-				filterLayer.add(l);
-			}
-		}
-		return filterLayer.toArray(new ILayer[filterLayer.size()]);
-	}
-
-	/**
-	 * Retrieve the children of this collection that are vector layers
-	 * @return
-	 * @throws DriverException
-	 */
-	@Override
-	public ILayer[] getWMSLayers() throws DriverException {
-		ArrayList<ILayer> filterLayer = new ArrayList<ILayer>();
-		for (ILayer l : this.layerCollection) {
-			if (l.isWMS()) {
-				filterLayer.add(l);
-			}
-		}
-		return filterLayer.toArray(new ILayer[filterLayer.size()]);
-	}
-
-	/**
-	 * Used to determine if this layer is a raster layer. It is not, it is a layer collection.
-	 * @return false
-	 */
-	public boolean isRaster() {
-		return false;
-	}
-
-	/**
-	 * Used to determine if this layer is a vector layer. It is not, it is a layer collection.
-	 * @return false
-	 */
-	public boolean isVectorial() {
-		return false;
 	}
 
 	///////******************************************///////
@@ -347,6 +282,16 @@ public class LayerCollection extends AbstractDisplayable implements IDisplayable
 	public LayerCollection getParent(){
 		return null;
 	}
+
+	/**
+	 * Get the name of the layer collection
+	 * @return
+	 */
+	@Override
+	public String getName() {
+		return this.name;
+	}
+	
 	/**
 	 * Close this layer and all its children.
 	 * @throws LayerException
@@ -532,11 +477,61 @@ public class LayerCollection extends AbstractDisplayable implements IDisplayable
 	}
 
 	/**
+	 * Retrieve the children of this collection that are raster layers
+	 * @return
+	 * @throws DriverException
+	 */
+	@Override
+	public ILayer[] getRasterLayers() throws DriverException {
+		ArrayList<ILayer> filterLayer = new ArrayList<ILayer>();
+
+		for (ILayer l : this.layerCollection) {
+			if (l.isRaster()) {
+				filterLayer.add(l);
+			}
+		}
+		return filterLayer.toArray(new ILayer[filterLayer.size()]);
+	}
+
+	/**
+	 * Retrieve the children of this collection that are vector layers
+	 * @return
+	 * @throws DriverException
+	 */
+	@Override
+	public ILayer[] getVectorLayers() throws DriverException {
+		ArrayList<ILayer> filterLayer = new ArrayList<ILayer>();
+		for (ILayer l : this.layerCollection) {
+			if (l.isVectorial()) {
+				filterLayer.add(l);
+			}
+		}
+		return filterLayer.toArray(new ILayer[filterLayer.size()]);
+	}
+
+	/**
+	 * Retrieve the children of this collection that are vector layers
+	 * @return
+	 * @throws DriverException
+	 */
+	@Override
+	public ILayer[] getWMSLayers() throws DriverException {
+		ArrayList<ILayer> filterLayer = new ArrayList<ILayer>();
+		for (ILayer l : this.layerCollection) {
+			if (l.isWMS()) {
+				filterLayer.add(l);
+			}
+		}
+		return filterLayer.toArray(new ILayer[filterLayer.size()]);
+	}
+
+	/**
 	 * Supposed to return a legend... but we are working on a LayerCollection, so it doesn't
 	 * have one.
 	 * @return
 	 * @throws DriverException
 	 */
+	@Override
 	public Legend[] getRenderingLegend() throws DriverException {
 		throw new UnsupportedOperationException("Cannot draw a layer collection");
 	}

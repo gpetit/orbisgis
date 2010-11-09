@@ -83,8 +83,10 @@ public class DefaultMapContext implements MapContext {
 	private ILayer[] selectedLayers = new ILayer[0];
 	//The listeners associated to this MapContext.
 	private ArrayList<MapContextListener> listeners = new ArrayList<MapContextListener>();
-	//A Listener dedicated to listen to new sources.
-	private OpenerListener openerListener;
+	//This list of layer listeners is not intended to keep an eye on this MapContext,
+	//but rather on all the IDisplayable objects that will be added to it.
+	//It's just a way to add the good listeners to the newly created layers.
+	private ArrayList<LayerListener> layerListeners = new ArrayList<LayerListener>();
 	//A Listener dedicated to listen to sources removal.
 	private LayerRemovalSourceListener sourceListener;
 	//The currently active layer.
@@ -102,7 +104,7 @@ public class DefaultMapContext implements MapContext {
 	 * Create a new DefaultMapContext
 	 */
 	public DefaultMapContext() {
-		openerListener = new OpenerListener();
+		layerListeners.add(new OpenerListener());
 		sourceListener = new LayerRemovalSourceListener();
 		displayableArtifacts = new ArrayList<IDisplayable>();
 		this.jaxbMapContext = null;
@@ -145,7 +147,7 @@ public class DefaultMapContext implements MapContext {
 	@Override
 	public void add(IDisplayable layer) throws LayerException {
 		if (layer != null && !displayableArtifacts.contains(layer)) {
-			layer.addLayerListener(openerListener);
+			addListenersToLayer(layer);
 			this.add(layer, false);
 		} else {
 			if (layer == null) {
@@ -460,6 +462,24 @@ public class DefaultMapContext implements MapContext {
 	 * @param layer
 	 * @return
 	 */
+
+	/**
+	 * This method will add all the layer listeners associated to this map context
+	 * to the IDisplayable artifact given in argument.
+	 * @param layer
+	 */
+	public void addListenersToLayer(IDisplayable layer){
+		for(LayerListener ll : layerListeners){
+			layer.addLayerListenerRecursively(ll);
+		}
+	}
+
+	public void removeLayerListenersFromLayer(IDisplayable layer){
+		for(LayerListener ll : layerListeners){
+			layer.removeLayerListenerRecursively(ll);
+		}
+	}
+
 	public void recoverContext(List<AbstractLayerType> layerList,
 		HashMap<ILayer, LayerType> layerPersistenceMap) {
 		DataManager dataManager = (DataManager) Services.getService(DataManager.class);
@@ -651,7 +671,9 @@ public class DefaultMapContext implements MapContext {
 					"Could not close layer: " + layers[i].getName());
 			}
 		}
-		removeLayerListenerRecursively(openerListener);
+		for(IDisplayable dis : displayableArtifacts){
+			removeLayerListenersFromLayer(dis);
+		}
 		// Listen source removal events
 		DataManager dm = Services.getService(DataManager.class);
 		dm.getSourceManager().removeSourceListener(sourceListener);
@@ -675,6 +697,9 @@ public class DefaultMapContext implements MapContext {
 	 */
 	@Override
 	public void addLayerListenerRecursively(LayerListener ll) {
+		if(!layerListeners.contains(ll)){
+			layerListeners.add(ll);
+		}
 		for (IDisplayable dis : displayableArtifacts) {
 			dis.addLayerListenerRecursively(ll);
 		}
@@ -861,14 +886,18 @@ public class DefaultMapContext implements MapContext {
 
 	@SuppressWarnings("unchecked")
 	protected void fireLayerAddedEvent(IDisplayable[] added) {
-			openerListener.layerAdded(new LayerCollectionEvent(null, added));
+		for(LayerListener ll : layerListeners){
+			ll.layerAdded(new LayerCollectionEvent(null, added));
+		}
 	}
 
 	@SuppressWarnings("unchecked")
 	protected void fireLayerRemovedEvent(IDisplayable[] removed) {
 		for(IDisplayable dis : removed){
 			if(displayableArtifacts.contains(dis)){
-				openerListener.layerRemoved(new LayerCollectionEvent(null, removed));
+				for(LayerListener ll : layerListeners){
+					ll.layerRemoved(new LayerCollectionEvent(null, removed));
+				}
 			} else if(dis.getParent()!=null && dis.getParent().getMapContext()==this){
 				dis.getParent().fireLayerRemovedEvent(new ILayer[] {(ILayer)dis});
 			}
@@ -1046,7 +1075,9 @@ public class DefaultMapContext implements MapContext {
 				for (final IDisplayable layer : e.getAffected()) {
 					try {
 						layer.open();
-						layer.addLayerListenerRecursively(openerListener);
+						for(LayerListener ll : layerListeners){
+							layer.addLayerListenerRecursively(ll);
+						}
 						// checkLayerCRS(layer);
 					} catch (LayerException ex) {
 						Services.getErrorManager().error(
@@ -1078,7 +1109,9 @@ public class DefaultMapContext implements MapContext {
 
 				// Check selection
 				newSelection.remove(layer);
-				layer.removeLayerListenerRecursively(openerListener);
+						for(LayerListener ll : layerListeners){
+					layer.removeLayerListenerRecursively(ll);
+				}
 				if (isOpen()) {
 					try {
 						layer.close();

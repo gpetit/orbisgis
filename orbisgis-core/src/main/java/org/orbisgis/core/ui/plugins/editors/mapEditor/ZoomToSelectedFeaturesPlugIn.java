@@ -65,7 +65,8 @@ public class ZoomToSelectedFeaturesPlugIn extends AbstractPlugIn {
 	}
 
 	public boolean execute(PlugInContext context) throws Exception {
-		MapEditorPlugIn mapEditor = (MapEditorPlugIn) getPlugInContext().getActiveEditor();
+		MapEditorPlugIn mapEditor = (MapEditorPlugIn) getPlugInContext()
+				.getActiveEditor();
 		MapContext mc = (MapContext) mapEditor.getElement().getObject();
 		ILayer[] layers = mc.getLayers();
 		Envelope rect = null;

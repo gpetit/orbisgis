@@ -96,15 +96,18 @@ import org.orbisgis.core.ui.components.sif.AskValue;
 import org.orbisgis.core.ui.components.text.JTextFilter;
 import org.orbisgis.core.ui.geocatalog.newSourceWizards.SourceRenderer;
 import org.orbisgis.core.ui.pluginSystem.workbench.WorkbenchFrame;
-import org.orbisgis.core.ui.plugins.views.geocatalog.filters.AllFilterPlugIn;
-import org.orbisgis.core.ui.plugins.views.geocatalog.filters.AlphanumericPlugIn;
-import org.orbisgis.core.ui.plugins.views.geocatalog.filters.DBs;
-import org.orbisgis.core.ui.plugins.views.geocatalog.filters.Files;
+import org.orbisgis.core.ui.plugins.views.geocatalog.filters.AllExcludeSytemTableFilter;
+import org.orbisgis.core.ui.plugins.views.geocatalog.filters.AllFilter;
+import org.orbisgis.core.ui.plugins.views.geocatalog.filters.AlphanumericFilter;
+import org.orbisgis.core.ui.plugins.views.geocatalog.filters.DBsFilter;
+import org.orbisgis.core.ui.plugins.views.geocatalog.filters.FilesFilter;
+import org.orbisgis.core.ui.plugins.views.geocatalog.filters.GeoFilter;
 import org.orbisgis.core.ui.plugins.views.geocatalog.filters.GeocatalogFilterDecorator;
 import org.orbisgis.core.ui.plugins.views.geocatalog.filters.IFilter;
-import org.orbisgis.core.ui.plugins.views.geocatalog.filters.Raster;
-import org.orbisgis.core.ui.plugins.views.geocatalog.filters.Vectorial;
-import org.orbisgis.core.ui.plugins.views.geocatalog.filters.WMS;
+import org.orbisgis.core.ui.plugins.views.geocatalog.filters.RasterFilter;
+import org.orbisgis.core.ui.plugins.views.geocatalog.filters.TableSystemFilter;
+import org.orbisgis.core.ui.plugins.views.geocatalog.filters.VectorialFilter;
+import org.orbisgis.core.ui.plugins.views.geocatalog.filters.WMSFilter;
 import org.orbisgis.core.ui.preferences.lookandfeel.OrbisGISIcon;
 import org.orbisgis.utils.CollectionUtils;
 
@@ -292,36 +295,53 @@ public class Catalog extends JPanel implements DragGestureListener,
 		ret.setLayout(new BorderLayout());
 
 		GeocatalogFilterDecorator filter = new GeocatalogFilterDecorator(
-				"geocatalog.filters.All", "All", new AllFilterPlugIn());
-		listModel.getFilters().add(filter);
-
-		filter = new GeocatalogFilterDecorator("geocatalog.filters.Files",
-				"Files", new Files());
-		listModel.getFilters().add(filter);
-
-		filter = new GeocatalogFilterDecorator("geocatalog.filters.DBs",
-				"Databases", new DBs());
+				"geocatalog.filters.AllFilter", "All*", new AllFilter());
 		listModel.getFilters().add(filter);
 
 		filter = new GeocatalogFilterDecorator(
-				"geocatalog.filters.Alphanumeric", "Alphanumeric",
-				new AlphanumericPlugIn());
+				"geocatalog.filters.AllExcludeSystemTable", "All",
+				new AllExcludeSytemTableFilter());
 		listModel.getFilters().add(filter);
 
-		filter = new GeocatalogFilterDecorator("geocatalog.filters.WMS", "WMS",
-				new WMS());
+		filter = new GeocatalogFilterDecorator("geocatalog.filters.GeoFilter",
+				"Geo", new GeoFilter());
 		listModel.getFilters().add(filter);
 
-		filter = new GeocatalogFilterDecorator("geocatalog.filters.Raster",
-				"Raster", new Raster());
+		filter = new GeocatalogFilterDecorator(
+				"geocatalog.filters.FilesFilter", "Files", new FilesFilter());
 		listModel.getFilters().add(filter);
 
-		filter = new GeocatalogFilterDecorator("geocatalog.filters.Vectorial",
-				"Vectorial", new Vectorial());
+		filter = new GeocatalogFilterDecorator("geocatalog.filters.DBsFilter",
+				"Databases", new DBsFilter());
 		listModel.getFilters().add(filter);
 
+		filter = new GeocatalogFilterDecorator(
+				"geocatalog.filters.AlphanumericFilter", "Alphanumeric",
+				new AlphanumericFilter());
+		listModel.getFilters().add(filter);
+
+		filter = new GeocatalogFilterDecorator("geocatalog.filters.WMSFilter",
+				"WMS", new WMSFilter());
+		listModel.getFilters().add(filter);
+
+		filter = new GeocatalogFilterDecorator(
+				"geocatalog.filters.RasterFilter", "Raster", new RasterFilter());
+		listModel.getFilters().add(filter);
+
+		filter = new GeocatalogFilterDecorator(
+				"geocatalog.filters.VectorialFilter", "Vectorial",
+				new VectorialFilter());
+		listModel.getFilters().add(filter);
+
+		filter = new GeocatalogFilterDecorator(
+				"geocatalog.filters.SystemTableFilter", "System table",
+				new TableSystemFilter());
+		listModel.getFilters().add(filter);
+
+		// TODO maybe improve the default filter set.
+		// new GeocatalogFilterDecorator[1]
 		lstFilters = new JList(listModel.getFilters().toArray(
-				new GeocatalogFilterDecorator[0])/* getAvailableFilters() */);
+				new GeocatalogFilterDecorator[1])/* getAvailableFilters() */);
 		lstFilters.setCellRenderer(new DefaultListCellRenderer() {
 			@Override
 			public Component getListCellRendererComponent(JList list,
@@ -544,6 +564,7 @@ public class Catalog extends JPanel implements DragGestureListener,
 		public TagFilter(String tag) {
 			this.tag = tag;
 		}
+
 		@Override
 		public boolean accepts(SourceManager sm, String sourceName) {
 			HashSet<String> sources = tagSources.get(tag);
@@ -561,6 +582,7 @@ public class Catalog extends JPanel implements DragGestureListener,
 		public AddTagActionListener(String tag) {
 			this.tag = tag;
 		}
+
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			Object[] sources = lstSources.getSelectedValues();
@@ -579,7 +601,8 @@ public class Catalog extends JPanel implements DragGestureListener,
 		public RemoveTagActionListener(String tag) {
 			this.tag = tag;
 		}
-        @Override
+
+		@Override
 		public void actionPerformed(ActionEvent e) {
 			Object[] sources = lstSources.getSelectedValues();
 			for (Object source : sources) {
