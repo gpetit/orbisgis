@@ -5,15 +5,15 @@
  * distributed under GPL 3 license. It is produced by the "Atelier SIG" team of
  * the IRSTV Institute <http://www.irstv.cnrs.fr/> CNRS FR 2488.
  *
- * 
+ *
  *  Team leader Erwan BOCHER, scientific researcher,
- * 
+ *
  *  User support leader : Gwendall Petit, geomatic engineer.
  *
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
- * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT, Antoine GOURLAY
  *
  * This file is part of OrbisGIS.
  *
@@ -170,7 +170,8 @@ public class DefaultMapContext implements MapContext {
 				layer.getParent().remove((ILayer) layer);
 				((ILayer) layer).setParent(null);
 			} else if (!isMoving){
-				layer.setName(layer.getName());
+				String tmpName = provideNewLayerName(layer.getName(), getAllLayersNames());
+				layer.setName(tmpName);
 				displayableArtifacts.add(layer);
 				fireLayerAddedEvent(new IDisplayable[] { layer });
 			}
@@ -212,32 +213,7 @@ public class DefaultMapContext implements MapContext {
 			throw new LayerException("You can't remove a Layer that is not in the Map");
 		}
 	}
-	@SuppressWarnings("unchecked")
-	protected void fireLayerAddedEvent(IDisplayable[] added) {
-			openerListener.layerAdded(new LayerCollectionEvent(null, added));
-	}
-
-	@SuppressWarnings("unchecked")
-	protected void fireLayerRemovedEvent(IDisplayable[] removed) {
-		for(IDisplayable dis : removed){
-			if(displayableArtifacts.contains(dis)){
-				openerListener.layerRemoved(new LayerCollectionEvent(null, removed));
-			} else if(dis.getParent()!=null && dis.getParent().getMapContext()==this){
-				dis.getParent().fireLayerRemovedEvent(new ILayer[] {(ILayer)dis});
-			}
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	protected boolean fireLayerRemovingEvent(IDisplayable[] toRemove) {
-		ArrayList<LayerListener> l = (ArrayList<LayerListener>) listeners.clone();
-		for (LayerListener listener : l) {
-			if (!listener.layerRemoving(new LayerCollectionEvent(null, toRemove))) {
-				return false;
-			}
-		}
-		return true;
-	}
+	
 	@Override
 	public void insertLayer(IDisplayable dis, int i) throws IndexOutOfBoundsException {
 		displayableArtifacts.add(i, dis);
@@ -496,12 +472,13 @@ public class DefaultMapContext implements MapContext {
 				LayerCollectionType xmlLayerCollection = (LayerCollectionType) layer;
 				ret = dataManager.createLayerCollection(layer.getName(), this);
 				//We try to recover the children of this collection. They are supposed to
-				//be Layer instances.
+				//be LayerType instances.
 				List<LayerType> xmlChildren = xmlLayerCollection.getLayer();
 				for (LayerType layerType : xmlChildren) {
 					ILayer lyr = null;
 					try {
 						lyr = dataManager.createLayer(layerType.getSourceName(), this);
+						layerPersistenceMap.put(lyr,layerType);
 					} catch (LayerException e) {
 						Services.getErrorManager().error(
 							"Cannot recover layer: " + layer.getName(), e);
@@ -864,9 +841,94 @@ public class DefaultMapContext implements MapContext {
 		}
 	}
 
+	/**
+	 * This method will try to remove a layer in this context
+	 * It must be used with caution, as we don't check if the context is open !
+	 * @param dis
+	 * @return
+	 */
+	@Override
+	public void removeOffline(IDisplayable dis){
+		Logger.getLogger("You are going to remove a layer in offline mode."+
+			"If you're not opening a serialized mapcontext, this could lead to dysfunctions");
+		if(displayableArtifacts!=null){
+			displayableArtifacts.remove(dis);
+		}
+	}
+	/**********************************************************************/
+	/***********************Protected Methods******************************/
+	/**********************************************************************/
+
+	@SuppressWarnings("unchecked")
+	protected void fireLayerAddedEvent(IDisplayable[] added) {
+			openerListener.layerAdded(new LayerCollectionEvent(null, added));
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void fireLayerRemovedEvent(IDisplayable[] removed) {
+		for(IDisplayable dis : removed){
+			if(displayableArtifacts.contains(dis)){
+				openerListener.layerRemoved(new LayerCollectionEvent(null, removed));
+			} else if(dis.getParent()!=null && dis.getParent().getMapContext()==this){
+				dis.getParent().fireLayerRemovedEvent(new ILayer[] {(ILayer)dis});
+			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	protected boolean fireLayerRemovingEvent(IDisplayable[] toRemove) {
+		ArrayList<LayerListener> l = (ArrayList<LayerListener>) listeners.clone();
+		for (LayerListener listener : l) {
+			if (!listener.layerRemoving(new LayerCollectionEvent(null, toRemove))) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * This method will check whether this context contains a layer or not
+	 * It must be used with caution, as we don't check if the context is open !
+	 * @param dis
+	 * @return
+	 */
+	protected boolean containsOffline(IDisplayable dis){
+		if(displayableArtifacts!=null){
+			return displayableArtifacts.contains(dis);
+		} else {
+			return false;
+		}
+	}
+
+
 	/**********************************************************************/
 	/***********************Private Methods********************************/
 	/**********************************************************************/
+
+	/*
+	 * Check that name is not already contained in allLayersNames.
+	 * If it is in, a new String is created and returned, with the form name_i
+	 * where i is as small as possible.
+	 */
+	private String provideNewLayerName(final String name,
+		final Set<String> allLayersNames) {
+		String tmpName = name;
+		if (allLayersNames.contains(tmpName)) {
+			int i = 1;
+			while (allLayersNames.contains(tmpName + "_" + i)) {
+				i++;
+			}
+			tmpName += "_" + i;
+		}
+		allLayersNames.add(tmpName);
+		return tmpName;
+	}
+
+	/**
+	 * Check that this map context is open. If it is not, an ILlegalStateException
+	 * is thrown.
+	 * @throws IllegalStateException
+	 */
 	private void checkIsOpen() throws IllegalStateException {
 		if (!isOpen()) {
 			throw new IllegalStateException(
@@ -874,6 +936,12 @@ public class DefaultMapContext implements MapContext {
 		}
 	}
 
+	/**
+	 * get all the layers associated with this context while in offline mode.
+	 * This operation is hazardous, as we can't guarantee that the sources associated
+	 * to the layers of this MapContext are open. Use with care.
+	 * @return
+	 */
 	private IDisplayable[] getAllLayersOffline(){
 		ArrayList<IDisplayable> layers = new ArrayList<IDisplayable>();
 		for (IDisplayable dis : this.displayableArtifacts) {
@@ -907,7 +975,9 @@ public class DefaultMapContext implements MapContext {
 
 		@Override
 		public void sourceRemoved(final SourceRemovalEvent e) {
-			processLayersLeaves(displayableArtifacts,
+			List<IDisplayable> tmpList = new ArrayList<IDisplayable>();
+			tmpList.addAll(displayableArtifacts);
+			processLayersLeaves(tmpList,
 				new DeleteLayerFromResourceAction(e));
 		}
 
@@ -939,13 +1009,21 @@ public class DefaultMapContext implements MapContext {
 			String layerName = layer.getName();
 			if (resourceNames.contains(layerName)) {
 				try {
-					if (layer instanceof LayerCollection) {
+					if (layer instanceof ILayer) {
 						LayerCollection lc = ((ILayer) layer).getParent();
 						if (lc != null) {
+							//If the layer has a parent, we remove it from this parent
 							lc.remove((ILayer) layer);
 						} else {
-							layer.getMapContext().remove(layer);
+							//If it doesn't, we remove it from this mapcontext
+							remove((IDisplayable) layer);
 						}
+					} else {
+						LayerCollection lc = (LayerCollection) layer;
+						for(ILayer lay : lc.getChildren()){
+							lc.remove(lay);
+						}
+						remove(layer);
 					}
 				} catch (LayerException e) {
 					Services.getErrorManager().error(

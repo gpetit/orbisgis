@@ -5,15 +5,15 @@
  * distributed under GPL 3 license. It is produced by the "Atelier SIG" team of
  * the IRSTV Institute <http://www.irstv.cnrs.fr/> CNRS FR 2488.
  *
- * 
+ *
  *  Team leader Erwan BOCHER, scientific researcher,
- * 
+ *
  *  User support leader : Gwendall Petit, geomatic engineer.
  *
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
- * Copyright (C) 2010 Erwan BOCHER, Pierre-Yves FADET, Alexis GUEGANNO, Maxence LAURENT
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT, Antoine GOURLAY
  *
  * This file is part of OrbisGIS.
  *
@@ -32,8 +32,7 @@
  * For more information, please consult: <http://www.orbisgis.org/>
  *
  * or contact directly:
- * erwan.bocher _at_ ec-nantes.fr
- * gwendall.petit _at_ ec-nantes.fr
+ * info@orbisgis.org
  */
 package org.orbisgis.core.layerModel;
 
@@ -101,15 +100,19 @@ public class LayerModelTest extends AbstractTest {
 
 	public void testLayerEvents() throws Exception {
 		MapContext mc=new DefaultMapContext();
+		MapContext mc2 = new DefaultMapContext();
 		mc.open(null);
+		mc2.open(null);
 		TestLayerListener listener = new TestLayerListener();
-		ILayer vl = getDataManager().createLayer((DataSource) dummy,mc);
+		ILayer vl = getDataManager().createLayer((DataSource) dummy,mc2);
 		LayerCollection lc = getDataManager().createLayerCollection("root",mc);
 		vl.addLayerListener(listener);
 		lc.addLayerListener(listener);
-		ILayer vl1 = getDataManager().createLayer((DataSource) dummy,mc);
+		DataManager dm = getDataManager();
+		ILayer vl1 = dm.createLayer((DataSource) dummy,mc);
 		lc.addLayer(vl1);
-		assertTrue(listener.la == 1);
+		assertTrue(listener.la == 0);
+		assertTrue(listener.lm == 1);
 		lc.setName("new name");
 		assertTrue(listener.nc == 1);
 		lc.setVisible(false);

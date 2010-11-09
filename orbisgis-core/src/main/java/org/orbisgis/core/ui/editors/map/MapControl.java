@@ -5,17 +5,15 @@
  * distributed under GPL 3 license. It is produced by the "Atelier SIG" team of
  * the IRSTV Institute <http://www.irstv.cnrs.fr/> CNRS FR 2488.
  *
+ *
  *  Team leader Erwan BOCHER, scientific researcher,
  *
  *  User support leader : Gwendall Petit, geomatic engineer.
  *
- * Previous computer developer : Pierre-Yves FADET, computer engineer,
-Thomas LEDUC, scientific researcher, Fernando GONZALEZ
- * CORTES, computer engineer.
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
- * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT, Antoine GOURLAY
  *
  * This file is part of OrbisGIS.
  *
@@ -340,6 +338,10 @@ public class MapControl extends JComponent implements ComponentListener,
 		toolManager.setTool(tool);
 	}
 
+	/**
+	 * This method is used when a signicactive change is reported by a RefreshLayerListener.
+	 * It provokes the repainting of the image.
+	 */
 	private void invalidateImage() {
 		status = DIRTY;
 		repaint();

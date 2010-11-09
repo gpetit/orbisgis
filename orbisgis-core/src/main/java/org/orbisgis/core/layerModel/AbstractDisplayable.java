@@ -13,7 +13,7 @@
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
- * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT, Antoine GOURLAY
  *
  * This file is part of OrbisGIS.
  *
@@ -39,7 +39,6 @@ package org.orbisgis.core.layerModel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import org.apache.log4j.Logger;
 
 /**
  * This abstract class contains methods that can be used by both <code>ILayer</code>s
@@ -47,7 +46,6 @@ import org.apache.log4j.Logger;
  * @author alexis
  */
 public abstract class AbstractDisplayable implements IDisplayable {
-	private static Logger logger = Logger.getLogger(AbstractDisplayable.class.getName());
 	protected ArrayList<LayerListener> listeners;
 	protected MapContext context;
 	protected String name;

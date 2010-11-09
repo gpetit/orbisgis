@@ -13,7 +13,7 @@
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
- * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT, Antoine GOURLAY
  *
  * This file is part of OrbisGIS.
  *
@@ -106,7 +106,7 @@ public class LayerCollection extends AbstractDisplayable implements IDisplayable
 	 * @throws LayerException
 	 */
 	public void addLayer(final ILayer layer) throws LayerException {
-		if(context.getLayerModel().contains(layer) || layer.getParent()!=null){
+		if(layer.getMapContext()!=null || layer.getParent()!=null){
 			addLayer(layer, true);
 		}else {
 			addLayer(layer, false);
@@ -177,6 +177,7 @@ public class LayerCollection extends AbstractDisplayable implements IDisplayable
 			if (isMoving) {
 				layerCollection.add(layer);
 				layer.setParent(this);
+				fireLayerMovedEvent(this, layer);
 			} else {
 				setNamesRecursively(layer, context.getAllLayersNames());
 				layerCollection.add(layer);

@@ -1,4 +1,4 @@
-/**
+/*
  * OrbisGIS is a GIS application dedicated to scientific spatial simulation.
  * This cross-platform GIS is developed at French IRSTV institute and is able to
  * manipulate and create vector and raster spatial information. OrbisGIS is
@@ -10,12 +10,10 @@
  *
  *  User support leader : Gwendall Petit, geomatic engineer.
  *
- * Previous computer developer : Pierre-Yves FADET, computer engineer, Thomas LEDUC, scientific researcher, Fernando GONZALEZ
- * CORTES, computer engineer.
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
- * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT, Antoine GOURLAY
  *
  * This file is part of OrbisGIS.
  *
@@ -35,7 +33,7 @@
  *
  * or contact directly:
  * info@orbisgis.org
- **/
+ */
 package org.orbisgis.core.layerModel;
 
 import java.util.ArrayList;
@@ -70,8 +68,13 @@ public abstract class AbstractLayer extends AbstractDisplayable implements ILaye
 	 * @see org.orbisgis.core.layerModel.ILayer#setParent()
 	 */
 	@Override
-	public void setParent(final LayerCollection parent) {
-		this.parent = parent;
+	public void setParent(final LayerCollection par) {
+		if(this.getMapContext()!=null && !this.getMapContext().isOpen() && par != null){
+			this.getMapContext().removeOffline(this);
+		}else if(parent==null && this.getMapContext()!=null){
+			context.getLayerModel().remove(this);
+		}
+		this.parent = par;
 	}
 
 	/**

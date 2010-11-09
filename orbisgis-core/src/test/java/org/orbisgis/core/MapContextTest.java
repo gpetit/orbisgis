@@ -5,15 +5,15 @@
  * distributed under GPL 3 license. It is produced by the "Atelier SIG" team of
  * the IRSTV Institute <http://www.irstv.cnrs.fr/> CNRS FR 2488.
  *
- * 
+ *
  *  Team leader Erwan BOCHER, scientific researcher,
- * 
+ *
  *  User support leader : Gwendall Petit, geomatic engineer.
  *
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
- * Copyright (C) 2010 Erwan BOCHER, Pierre-Yves FADET, Alexis GUEGANNO, Maxence LAURENT
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT, Antoine GOURLAY
  *
  * This file is part of OrbisGIS.
  *
@@ -32,8 +32,7 @@
  * For more information, please consult: <http://www.orbisgis.org/>
  *
  * or contact directly:
- * erwan.bocher _at_ ec-nantes.fr
- * gwendall.petit _at_ ec-nantes.fr
+ * info@orbisgis.org
  */
 package org.orbisgis.core;
 
@@ -86,10 +85,12 @@ public class MapContextTest extends AbstractTest {
 	public void testSetBadLayerSelection() throws Exception {
 		MapContext mc = new DefaultMapContext();
 		mc.open(null);
+		MapContext mc2 = new DefaultMapContext();
+		mc2.open(null);
 		ILayer layer = getDataManager().createLayer(
 				new File("src/test/resources/data/bv_sap.shp"),mc);
 		ILayer layer2 = getDataManager().createLayer(
-				new File("src/test/resources/data/linestring.shp"),mc);
+				new File("src/test/resources/data/linestring.shp"),mc2);
 		mc.setSelectedLayers(new ILayer[] { layer2 });
 		assertTrue(mc.getSelectedLayers().length == 0);
 		mc.setSelectedLayers(new ILayer[] { layer });
@@ -153,9 +154,9 @@ public class MapContextTest extends AbstractTest {
 		IDisplayable layer2_ = mc.getLayer(1);
 		assertTrue(layer1_ instanceof LayerCollection);
 		assertTrue(layer2_ instanceof LayerCollection);
-		assertTrue(((LayerCollection)layer1_).getLayerCount() == 1);
-		assertTrue(((LayerCollection)layer2_).getLayerCount() == 0);
-		assertTrue(((LayerCollection)layer1_).getLayer(0).getName().equals(
+		assertTrue(((LayerCollection)layer1_).getLayerCount() == 0);
+		assertTrue(((LayerCollection)layer2_).getLayerCount() == 1);
+		assertTrue(((LayerCollection)layer2_).getLayer(0).getName().equals(
 				"linestring"));
 		mc.close(null);
 	}
@@ -326,7 +327,6 @@ public class MapContextTest extends AbstractTest {
 		mc2.open(null);
 		assertTrue(mc2.getLayerCount() == 1);
 		LayerCollection layer = getDataManager().createLayerCollection("b", mc2);
-		mc2.add(layer);
 		assertTrue(mc2.getLayerCount() == 2);
 		// close
 		mc2.close(null);
