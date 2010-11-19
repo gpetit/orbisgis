@@ -89,7 +89,8 @@ public class Layer extends GdmsLayer {
 		if(mc !=null){
 			try {
 				addToContext();
-			} catch( LayerException e) {
+			} catch( Exception e) {
+				e.printStackTrace();
 				logger.warn("can't add the layer to the MapContext",e);
 			}
 		}

@@ -340,8 +340,8 @@ public class LayerCollection extends AbstractDisplayable implements IDisplayable
 	}
 
 	@Override
-	public IDisplayable[] getLayerPath(){
-		return null;
+	public Object[] getLayerPath(){
+		return new Object[] {context, this};
 	}
 	/**
 	 * Check if this layer is visible or not. It is visible if at least one of its children is visible,

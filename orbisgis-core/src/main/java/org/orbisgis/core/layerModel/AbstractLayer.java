@@ -158,22 +158,12 @@ public abstract class AbstractLayer extends AbstractDisplayable implements ILaye
 	}
 
 	@Override
-	public IDisplayable[] getLayerPath() {
-		ArrayList<IDisplayable> path = new ArrayList<IDisplayable>();
-		IDisplayable current = this;
-		while (current != null) {
-			path.add(current);
-			current = current.getParent();
+	public Object[] getLayerPath() {
+		if(this.getParent()==null){
+			return new Object[]{context, this};
+		} else {
+			return new Object[]{context, this.getParent(),this};
 		}
-
-		// Now we must reverse the order
-		ArrayList<IDisplayable> path2 = new ArrayList<IDisplayable>();
-		int l = path.size();
-		for (int i = 0; i < l; i++) {
-			path2.add(i, path.get(l - i - 1));
-		}
-
-		return path2.toArray(new ILayer[path2.size()]);
 	}
 
 	@Override

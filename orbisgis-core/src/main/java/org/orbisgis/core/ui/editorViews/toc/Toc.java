@@ -15,7 +15,7 @@
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
- * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT, Antoine GOURLAY
  *
  * This file is part of OrbisGIS.
  *
@@ -52,6 +52,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
+import org.apache.log4j.Logger;
 
 import org.gdms.data.DataSource;
 import org.gdms.data.DataSourceListener;
@@ -92,6 +93,8 @@ import org.orbisgis.progress.IProgressMonitor;
  */
 public class Toc extends ResourceTree implements WorkbenchFrame {
 
+	private Logger logger = Logger.getLogger(Toc.class);
+
 	private MyLayerListener ll;
 
 	private TocRenderer tocRenderer;
@@ -123,7 +126,7 @@ public class Toc extends ResourceTree implements WorkbenchFrame {
 		tocRenderer = new TocRenderer(this);
 		DataManager dataManager = (DataManager) Services
 				.getService(DataManager.class);
-		treeModel = new TocTreeModel(mapContext, getTree());
+		treeModel = new TocTreeModel(new DefaultMapContext(), getTree());
 		this.setModel(treeModel);
 		this.setTreeCellRenderer(tocRenderer);
 		this.setTreeCellEditor(new TocEditor(tree));
@@ -202,6 +205,7 @@ public class Toc extends ResourceTree implements WorkbenchFrame {
 		this.getTree().getSelectionModel().addTreeSelectionListener(
 				new TreeSelectionListener() {
 
+					@Override
 					public void valueChanged(TreeSelectionEvent e) {
 						if (!ignoreSelection) {
 							TreePath[] selectedPaths = Toc.this.getSelection();
@@ -222,6 +226,7 @@ public class Toc extends ResourceTree implements WorkbenchFrame {
 		return mapContext;
 	}
 
+	@Override
 	public org.orbisgis.core.ui.pluginSystem.menu.MenuTree getMenuTreePopup() {
 		return menuTree;
 	}
@@ -236,6 +241,13 @@ public class Toc extends ResourceTree implements WorkbenchFrame {
 		return newPopup;
 	}
 
+	/**
+	 * Try to drop something encapsulated in the Transferable object trans,
+	 * on the node node of this toc's tree.
+	 * @param trans
+	 * @param node
+	 * @return
+	 */
 	@Override
 	public boolean doDrop(Transferable trans, Object node) {
 		IDisplayable dropNode;
@@ -243,7 +255,7 @@ public class Toc extends ResourceTree implements WorkbenchFrame {
 		if (node instanceof TocTreeModel.LegendNode) {
 			dropNode = ((TocTreeModel.LegendNode) node).getLayer();
 		} else {
-			dropNode = (ILayer) node;
+			dropNode = (IDisplayable) node;
 		}
 		try {
 			if (trans.isDataFlavorSupported(TransferableLayer.getLayerFlavor())) {
@@ -370,9 +382,11 @@ public class Toc extends ResourceTree implements WorkbenchFrame {
 			this.mapContext.addMapContextListener(myMapContextListener);
 			this.mapContext.addLayerListenerRecursively(ll);
 			treeModel = new TocTreeModel(mapContext, tree);
+			TocTreeModel tm = new TocTreeModel(new DefaultMapContext(), tree);
 			// Set model clears selection
 			ignoreSelection = true;
-			Toc.this.setModel(treeModel);
+			this.setModel(null);
+			this.setModel(treeModel);
 			ignoreSelection = false;
 			setTocSelection(Toc.this.mapContext);
 			Toc.this.repaint();
@@ -380,7 +394,7 @@ public class Toc extends ResourceTree implements WorkbenchFrame {
 			// Remove the references to the mapContext
 			DataManager dataManager = (DataManager) Services
 					.getService(DataManager.class);
-			treeModel = new TocTreeModel(mapContext, getTree());
+			treeModel = new TocTreeModel(new DefaultMapContext(), getTree());
 			ignoreSelection = true;
 			this.setModel(treeModel);
 			ignoreSelection = false;

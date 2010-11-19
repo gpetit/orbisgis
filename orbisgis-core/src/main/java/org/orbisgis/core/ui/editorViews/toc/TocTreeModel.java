@@ -98,12 +98,15 @@ public class TocTreeModel extends AbstractTreeModel {
 
 	@Override
 	public int getIndexOfChild(Object parent, Object child) {
-		if (parent instanceof ILayer) {
-			if (child instanceof LegendNode) {
+		if (parent instanceof IDisplayable) {
+			if (parent instanceof ILayer && child instanceof LegendNode) {
 				return ((LegendNode) child).getLegendIndex();
-			} else {
+			} else if(parent instanceof LayerCollection ){
 				return ((IDisplayable) parent).getIndex((ILayer) child);
 			}
+			return 0;
+		} else if(parent instanceof MapContext && child instanceof IDisplayable) {
+			return ((MapContext) parent).getLayerModel().indexOf(child);
 		} else {
 			return 0;
 		}
@@ -119,6 +122,8 @@ public class TocTreeModel extends AbstractTreeModel {
 		if (node instanceof IDisplayable) {
 			IDisplayable layer = (IDisplayable) node;
 			return layer.isCollection() && (layer.getLayers().length == 0);
+		} else if(node instanceof MapContext){
+			return false;
 		} else {
 			return true;
 		}

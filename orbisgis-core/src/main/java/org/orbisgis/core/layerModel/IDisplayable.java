@@ -211,7 +211,7 @@ public interface IDisplayable {
 	 * @return
 	 *	the ancestors as an array of IDisplayable
 	 */
-	public IDisplayable[] getLayerPath();
+	public Object[] getLayerPath();
 
 	/**
 	 * Try to retrieve the index of the ILayer layer

@@ -42,7 +42,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.gdms.driver.DriverException;
 
@@ -67,8 +66,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
-import java.util.AbstractList;
-import java.util.Collections;
 import java.util.Set;
 import org.orbisgis.core.layerModel.persistence.AbstractLayerType;
 

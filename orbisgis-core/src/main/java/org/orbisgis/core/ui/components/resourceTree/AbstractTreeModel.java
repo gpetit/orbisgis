@@ -57,6 +57,7 @@ public abstract class AbstractTreeModel implements TreeModel {
 		this.tree = tree;
 	}
 
+	@Override
 	public void addTreeModelListener(TreeModelListener l) {
 		treeModelListeners.add(l);
 	}

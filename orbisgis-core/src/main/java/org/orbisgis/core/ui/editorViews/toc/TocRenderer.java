@@ -15,7 +15,7 @@
  *
  * Copyright (C) 2007 Erwan BOCHER, Fernando GONZALEZ CORTES, Thomas LEDUC
  *
- * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT
+ * Copyright (C) 2010 Erwan BOCHER, Alexis GUEGANNO, Maxence LAURENT, Antoine GOURLAY
  *
  * This file is part of OrbisGIS.
  *
@@ -61,6 +61,7 @@ import org.gdms.driver.DriverException;
 import org.orbisgis.core.Services;
 import org.orbisgis.core.layerModel.IDisplayable;
 import org.orbisgis.core.layerModel.ILayer;
+import org.orbisgis.core.layerModel.MapContext;
 import org.orbisgis.core.renderer.legend.Legend;
 import org.orbisgis.core.sif.CRFlowLayout;
 
@@ -82,16 +83,17 @@ public class TocRenderer extends TocAbstractRenderer implements
 		this.toc = toc;
 	}
 
+	@Override
 	public Component getTreeCellRendererComponent(JTree tree, Object value,
 			boolean selected, boolean expanded, boolean leaf, int row,
 			boolean hasFocus) {
-		if (value instanceof ILayer) {
+		if (value instanceof IDisplayable) {
 			ourJPanel = new LayerRenderPanel();
-			ourJPanel.setNodeCosmetic(tree, (ILayer) value, selected, expanded,
+			ourJPanel.setNodeCosmetic(tree, (IDisplayable) value, selected, expanded,
 					leaf, row, hasFocus);
 
 			return ourJPanel.getJPanel();
-		} else {
+		} else if(!(value instanceof MapContext)){
 			TocTreeModel.LegendNode legendNode = (TocTreeModel.LegendNode) value;
 			IDisplayable lay = legendNode.getLayer();
 
@@ -107,19 +109,19 @@ public class TocRenderer extends TocAbstractRenderer implements
                                     }
 
                                     else if (layer.isWMS()) {
-                                            WMSLegendRenderPanel ourJPanel = new WMSLegendRenderPanel();
-                                            ourJPanel.setNodeCosmetic(tree, legendNode.getLayer(),
+                                            WMSLegendRenderPanel ourPanel = new WMSLegendRenderPanel();
+                                            ourPanel.setNodeCosmetic(tree, legendNode.getLayer(),
                                                             legendNode.getLegendIndex(), selected, expanded,
                                                             leaf, row, hasFocus);
-                                            return ourJPanel.getJPanel();
+                                            return ourPanel.getJPanel();
                                     }
 
                                     else {
-                                            RasterLegendRenderPanel ourJPanel = new RasterLegendRenderPanel();
-                                            ourJPanel.setNodeCosmetic(tree, legendNode.getLayer(),
+                                            RasterLegendRenderPanel ourPanel = new RasterLegendRenderPanel();
+                                            ourPanel.setNodeCosmetic(tree, legendNode.getLayer(),
                                                             legendNode.getLegendIndex(), selected, expanded,
                                                             leaf, row, hasFocus);
-                                            return ourJPanel.getJPanel();
+                                            return ourPanel.getJPanel();
                                     }
 
                             } catch (DriverException e) {
@@ -153,6 +155,7 @@ public class TocRenderer extends TocAbstractRenderer implements
 			jpanel.add(iconAndLabel);
 		}
 
+		@Override
 		public void setNodeCosmetic(JTree tree, IDisplayable node, boolean selected,
 				boolean expanded, boolean leaf, int row, boolean hasFocus) {
 			check.setVisible(true);
@@ -192,6 +195,7 @@ public class TocRenderer extends TocAbstractRenderer implements
 			}
 		}
 
+		@Override
 		public Rectangle getCheckBoxBounds() {
 			return check.getBounds();
 		}
@@ -235,6 +239,7 @@ public class TocRenderer extends TocAbstractRenderer implements
 			jpanel.add(pane);
 		}
 
+		@Override
 		public void setNodeCosmetic(JTree tree, IDisplayable node, int legendIndex,
 				boolean selected, boolean expanded, boolean leaf, int row,
 				boolean hasFocus) {
@@ -265,6 +270,7 @@ public class TocRenderer extends TocAbstractRenderer implements
 			}
 		}
 
+		@Override
 		public Rectangle getCheckBoxBounds() {
 			return check.getBounds();
 
