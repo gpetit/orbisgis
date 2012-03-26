@@ -50,6 +50,9 @@ public class HttpRequest {
     private String m_ContentType;
     private HttpParams m_http_params;
 
+    /**
+     * Default constructor.
+     */
     public HttpRequest(){
     	this.m_http_params = new SyncBasicHttpParams();
         HttpProtocolParams.setVersion(this.m_http_params, HttpVersion.HTTP_1_1);
@@ -58,83 +61,164 @@ public class HttpRequest {
         HttpProtocolParams.setUseExpectContinue(this.m_http_params, true);
     }
     
-    //getter m_url
+    /**
+     * Host getter.
+     * 
+     * @return String 
+     */
     public String getHost() {
         return this.m_host;
     }
 
-    //setter m_url
+    /**
+     * Host setter.
+     * 
+     * @param host 
+     */
     public void setHost(String host) {
         this.m_host = host;
     }
 
-    //getter m_port
+    /**
+     * Port getter.
+     * 
+     * @return String 
+     */
     public int getPort() {
         return this.m_port;
     }
 
-    //setter m_port
+    /**
+     * Port setter.
+     * 
+     * @param port 
+     */
     public void setPort(int port) {
         this.m_port = port;
     }
-
+    
+    /**
+     * Getter for the file path on the server.
+     * 
+     * @return String
+     */
     public String getTarget() {
         return this.m_target;
     }
 
+    /**
+     * Target setter.
+     * 
+     * @param target 
+     */
     public void setTarget(String target) {
         this.m_target = target;
     }
 
+    /**
+     * Add parameter.
+     * 
+     * @param parameter
+     * @param value
+     * @throws Exception 
+     */
     public void addParameter(String parameter, String value) throws Exception {
         if (this.m_parameters != null) {
         	this.m_parameters.put(parameter, value);
         }
     }
-
+    
+    /**
+     * Remove parameter.
+     * 
+     * @param parameter
+     * @throws Exception 
+     */
     public void removeParameter(String parameter) throws Exception {
         if (this.m_parameters != null) {
         	this.m_parameters.remove(parameter);
         }
     }
-
+    /**
+     * Clear parameters.
+     */
     public void clearParameter(){
     	this.m_parameters.clear();
     }
     
+    /**
+     * Get response data as a String.
+     * 
+     * @return String
+     * @throws Exception 
+     */
     public String getDataAsString() throws Exception {
         return new String(this.m_data);
     }
     
+    /**
+     * Get reponse data as a byte array.
+     * 
+     * @return byte[]
+     * @throws Exception 
+     */
     public byte[] getDataAsByteArray() throws Exception {
         return m_data;
     }
     
+    /**
+     * Get response type : text, image ...
+     * 
+     * @return String
+     */
     public String getContentType() {
     	return m_ContentType;
     }
     
+    /**
+     * Set user agent.
+     * 
+     * @param userAgent 
+     */
     public void setUserAgent(String userAgent){
     	this.m_userAgent = userAgent;
     	HttpProtocolParams.setUserAgent(this.m_http_params, this.m_userAgent);
     }
     
+    /**
+     * Get user agent.
+     * 
+     * @return String
+     */
     public String getUserAgent(){
     	return this.m_userAgent;
     }
     
+    /**
+     * Encoding setter (UTF-8 by default).
+     * 
+     * @param encoding 
+     */
     public void setEncoding(String encoding){
     	this.m_encoding = encoding;
     	HttpProtocolParams.setContentCharset(this.m_http_params, this.m_encoding);
     }
     
+    /**
+     * Encoding getter.
+     * 
+     * @return String 
+     */
     public String getEncoding() {
     	return this.m_encoding;
     }
     
-    
-    public void GETRequest() throws Exception {
-
+    /**
+     * Send GET request to remote server. 
+     * 
+     * @throws Exception 
+     */
+    public void getRequest() throws Exception {
     	HttpProcessor httpproc = new ImmutableHttpProcessor(new HttpRequestInterceptor[]{
                 // Required protocol interceptors
                 new RequestContent(),
@@ -192,6 +276,11 @@ public class HttpRequest {
         }
     }
 
+    /**
+     * Build resource with these parameters
+     * 
+     * @return String
+     */
     private String buildRequest() {
         String request = this.m_target;
         boolean first = true;
