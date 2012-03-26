@@ -50,6 +50,7 @@ import org.gdms.data.wms.WMSSource;
 import org.gdms.driver.DriverException;
 import org.gdms.driver.MemoryDriver;
 import org.gdms.driver.driverManager.DriverManager;
+import org.gdms.source.stream.StreamSource;
 
 public interface SourceManager {
 
@@ -170,6 +171,17 @@ public interface SourceManager {
          */
         void register(String name, DBSource dbTable);
 
+        /**
+         * Registers a stream source with the specified name
+         *
+         * @param name
+         *            Name to register
+         * @param streamSource
+         *            source to register
+         * @throws SourceAlreadyExistsException
+         */
+        void register(String name, StreamSource streamSource);
+        
         /**
          * Registers a wms source with the specified name
          *

@@ -95,6 +95,8 @@ import org.gdms.driver.postgresql.PostgreSQLDriver;
 import org.gdms.driver.shapefile.ShapefileDriver;
 import org.gdms.source.directory.Source;
 import org.gdms.source.directory.Sources;
+import org.gdms.source.stream.StreamSource;
+import org.gdms.source.stream.StreamSourceDefinition;
 import org.orbisgis.progress.ProgressMonitor;
 import org.orbisgis.utils.FileUtils;
 
@@ -407,6 +409,11 @@ public final class DefaultSourceManager implements SourceManager {
                 register(name, new DBTableSourceDefinition(dbTable));
         }
 
+        @Override
+        public void register(String name, StreamSource streamSource) {
+                register(name, new StreamSourceDefinition(streamSource));
+        }
+        
         @Override
         public void register(String name, WMSSource wmsSource) {
                 register(name, new WMSSourceDefinition(wmsSource));
