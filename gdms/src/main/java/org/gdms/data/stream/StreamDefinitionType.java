@@ -1,4 +1,4 @@
-package org.gdms.source.stream;
+package org.gdms.data.stream;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

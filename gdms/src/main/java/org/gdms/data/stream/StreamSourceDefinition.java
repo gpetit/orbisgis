@@ -1,4 +1,4 @@
-package org.gdms.source.stream;
+package org.gdms.data.stream;
 
 import org.gdms.data.AbstractDataSourceDefinition;
 import org.gdms.data.DataSource;
