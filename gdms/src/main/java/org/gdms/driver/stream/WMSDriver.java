@@ -2,7 +2,9 @@ package org.gdms.driver.stream;
 
 import org.gdms.data.schema.Metadata;
 import org.gdms.data.values.Value;
+import org.gdms.driver.DataSet;
 import org.gdms.driver.DriverException;
+import org.orbisgis.progress.ProgressMonitor;
 
 
 
@@ -36,6 +38,11 @@ public class WMSDriver extends AbstractRasterStreamDriver {
 
     @Override
     public String[] getPrefixes() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public boolean write(DataSet dataSource, ProgressMonitor pm) throws DriverException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

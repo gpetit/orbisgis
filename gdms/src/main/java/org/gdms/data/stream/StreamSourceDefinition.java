@@ -3,11 +3,9 @@ package org.gdms.data.stream;
 import org.gdms.data.AbstractDataSourceDefinition;
 import org.gdms.data.DataSource;
 import org.gdms.data.DataSourceCreationException;
-import org.gdms.data.memory.MemoryDataSourceAdapter;
 import org.gdms.driver.DataSet;
 import org.gdms.driver.Driver;
 import org.gdms.driver.DriverException;
-import org.gdms.driver.MemoryDriver;
 import org.gdms.source.directory.DefinitionType;
 import org.orbisgis.progress.ProgressMonitor;
 import org.apache.log4j.Logger;
@@ -77,7 +75,7 @@ public class StreamSourceDefinition extends AbstractDataSourceDefinition {
     public DataSource createDataSource(String tableName, ProgressMonitor pm) throws DataSourceCreationException {
         LOG.trace("Creating datasource");
         getDriver().setDataSourceFactory(getDataSourceFactory());
-
+        
         StreamDataSourceAdapter sdsa = new StreamDataSourceAdapter(
                 getSource(tableName), m_streamSource, (StreamDriver)getDriver());
         sdsa.setDataSourceFactory(getDataSourceFactory());

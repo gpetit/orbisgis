@@ -7,6 +7,7 @@ import org.gdms.data.schema.DefaultMetadata;
 import org.gdms.data.schema.DefaultSchema;
 import org.gdms.data.schema.Metadata;
 import org.gdms.data.schema.Schema;
+import org.gdms.data.stream.StreamSource;
 import org.gdms.data.types.TypeDefinition;
 import org.gdms.driver.*;
 import org.gdms.driver.geotif.AbstractRasterDriver;
@@ -21,7 +22,7 @@ import org.grap.model.RasterMetadata;
  */
 
 
-public abstract class AbstractRasterStreamDriver extends AbstractDataSet implements StreamDriver {
+public abstract class AbstractRasterStreamDriver extends AbstractDataSet implements StreamReadWriteDriver {
     
     protected GeoRaster geoRaster;
     protected RasterMetadata metadata;
@@ -31,12 +32,12 @@ public abstract class AbstractRasterStreamDriver extends AbstractDataSet impleme
     protected Envelope envelope;
     private static final Logger LOG = Logger.getLogger(AbstractRasterDriver.class);
     protected String url;
-    
+
     @Override
-    public void open() throws DriverException {
+    public void open(StreamSource streamSource) throws DriverException {
         
     }
-
+    
     @Override
     public void close() throws DriverException {
         
@@ -53,11 +54,6 @@ public abstract class AbstractRasterStreamDriver extends AbstractDataSet impleme
     @Override
     public Schema getSchema() throws DriverException {
         return schema;
-    }
-
-    @Override
-    public String[] getStreamExtensions() {
-        return null;
     }
 
     @Override

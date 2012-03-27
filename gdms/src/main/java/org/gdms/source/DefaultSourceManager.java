@@ -97,6 +97,7 @@ import org.gdms.source.directory.Source;
 import org.gdms.source.directory.Sources;
 import org.gdms.data.stream.StreamSource;
 import org.gdms.data.stream.StreamSourceDefinition;
+import org.gdms.driver.stream.SimpleWMSDriver;
 import org.orbisgis.progress.ProgressMonitor;
 import org.orbisgis.utils.FileUtils;
 
@@ -131,6 +132,9 @@ public final class DefaultSourceManager implements SourceManager {
                 dm.registerDriver(PngDriver.class);
                 dm.registerDriver(DXFDriver.class);
                 dm.registerDriver(MifMidDriver.class);
+                
+                dm.registerDriver(SimpleWMSDriver.class);
+                
                 this.dsf = dsf;
                 this.baseDir = baseDir;
                 contextPaths.add("org.gdms.source.directory");

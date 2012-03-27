@@ -44,7 +44,7 @@ public class StreamDataSourceAdapter extends DriverDataSource implements Commite
     public void open() throws DriverException {
         LOG.trace("Opening");
         //Il y aura des arguments pour open dont on aura la valeur grace à def :)
-        driver.open();
+        driver.open(def);
         fireOpen(this);
         DefaultSourceManager sm = (DefaultSourceManager) getDataSourceFactory().getSourceManager();
         sm.addCommitListener(this);
@@ -85,7 +85,7 @@ public class StreamDataSourceAdapter extends DriverDataSource implements Commite
     private void sync() throws DriverException {
         driver.close();
         //Faire ce dont on a besoin en parametre de close et open cf(DBTableDataSourceAdapter)
-        driver.open();
+        driver.open(def);
 
     }
 
@@ -98,7 +98,7 @@ public class StreamDataSourceAdapter extends DriverDataSource implements Commite
         } catch (DriverException e) {
             throw new DriverException("Cannot free resources: stream writen ...", e);
         }
-        driver.open();
+        driver.open(def);
 
 	fireCommit(this);
         
