@@ -33,5 +33,9 @@ public class WMSDriver extends AbstractRasterStreamDriver {
     public Metadata getMetadata() throws DriverException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-    
+
+    @Override
+    public String[] getPrefixes() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

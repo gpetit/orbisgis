@@ -41,7 +41,7 @@ import java.util.Vector;
 
 import org.gdms.data.wms.WMSSource;
 import org.gdms.source.SourceManager;
-import org.gdms.source.stream.StreamSource;
+import org.gdms.data.stream.StreamSource;
 import org.gvsig.remoteClient.wms.WMSClient;
 import org.gvsig.remoteClient.wms.WMSLayer;
 import org.orbisgis.core.DataManager;

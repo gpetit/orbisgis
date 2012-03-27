@@ -95,8 +95,8 @@ import org.gdms.driver.postgresql.PostgreSQLDriver;
 import org.gdms.driver.shapefile.ShapefileDriver;
 import org.gdms.source.directory.Source;
 import org.gdms.source.directory.Sources;
-import org.gdms.source.stream.StreamSource;
-import org.gdms.source.stream.StreamSourceDefinition;
+import org.gdms.data.stream.StreamSource;
+import org.gdms.data.stream.StreamSourceDefinition;
 import org.orbisgis.progress.ProgressMonitor;
 import org.orbisgis.utils.FileUtils;
 
