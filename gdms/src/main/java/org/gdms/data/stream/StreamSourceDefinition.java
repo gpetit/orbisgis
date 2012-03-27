@@ -18,6 +18,8 @@ import org.gdms.driver.driverManager.DriverManager;
 
 /**
  *
+ * Definition of stream source
+ * 
  * @author Vincent Dépériers
  */
 public class StreamSourceDefinition extends AbstractDataSourceDefinition {
@@ -50,7 +52,7 @@ public class StreamSourceDefinition extends AbstractDataSourceDefinition {
 
     private boolean equals(String str, String str2) {
         if (str == null) {
-            return true;
+            return str2 == null;
         } else {
             return str.equals(str2);
         }
@@ -76,11 +78,12 @@ public class StreamSourceDefinition extends AbstractDataSourceDefinition {
         LOG.trace("Creating datasource");
         getDriver().setDataSourceFactory(getDataSourceFactory());
 
-        //TO DO Maybe create a StreamDataSourceAdaptater ?
-        MemoryDataSourceAdapter ds = new MemoryDataSourceAdapter(
-                getSource(tableName), (MemoryDriver) getDriver());
+        StreamDataSourceAdapter sdsa = new StreamDataSourceAdapter(
+                getSource(tableName), m_streamSource, (StreamDriver)getDriver());
+        sdsa.setDataSourceFactory(getDataSourceFactory());
+        
         LOG.trace("Datasource created");
-        return ds;
+        return sdsa;
     }
 
     @Override
