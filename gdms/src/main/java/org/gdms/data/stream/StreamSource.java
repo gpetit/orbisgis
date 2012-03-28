@@ -119,6 +119,7 @@ public class StreamSource implements Serializable {
         return m_host + "//" + m_target + "-" + m_port + "-" + m_layerName + "-" + m_user + "-" + m_password + "-" + m_imageFormat;
     }
 
+    //TODO : give to this function a meaningful name
     public String getDbms() {
         return m_host + ":" + m_port + "//" + m_target + "//request=getMap&layers=" + m_layerName;
     }
