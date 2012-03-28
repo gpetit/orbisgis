@@ -16,7 +16,12 @@ import org.gdms.driver.driverManager.DriverManager;
 
 /**
  *
- * Definition of stream source
+ * <p>Definition of stream source<br>
+ * This is in a way the interface between the management of the data itself and
+ * their integration into orbisgis.<br>
+ * Here we will store the StreamSource to give it as a parameter when we create
+ * the StreamDatasource, through the StreamDataSourceAdapter.
+ * </p>
  * 
  * @author Vincent Dépériers
  */
@@ -30,6 +35,12 @@ public class StreamSourceDefinition extends AbstractDataSourceDefinition {
         this.m_streamSource = streamSource;
     }
 
+    /**
+     * 
+     * @param obj
+     * @return true if the object is an instance of StreamSourceDifinition
+     * having the same attributes values as the m_StreamSource
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof StreamSourceDefinition) {
