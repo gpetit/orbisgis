@@ -20,7 +20,7 @@ import org.gdms.driver.driverManager.DriverManager;
  * This is in a way the interface between the management of the data itself and
  * their integration into orbisgis.<br>
  * Here we will store the StreamSource to give it as a parameter when we create
- * the StreamDatasource, through the StreamDataSourceAdapter.
+ * the {@code StreamDatasource}, through the {@code StreamDataSourceAdapter}.
  * </p>
  * 
  * @author Vincent Dépériers
