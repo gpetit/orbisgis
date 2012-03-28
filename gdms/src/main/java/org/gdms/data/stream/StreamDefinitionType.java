@@ -12,16 +12,14 @@ import org.gdms.source.directory.DefinitionType;
  * @author Vincent Dépériers
  */
 
-    @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "db-definition-type")
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "Stream-definition-type")
 public class StreamDefinitionType extends DefinitionType {
 
         @XmlAttribute(required = true)
         protected String host;
         @XmlAttribute(required = true)
         protected String port;
-        @XmlAttribute(required = true)
-        protected String target;
         @XmlAttribute(name = "layer-name", required = true)
         protected String layerName;
         @XmlAttribute(required = true)
@@ -30,8 +28,6 @@ public class StreamDefinitionType extends DefinitionType {
         protected String password;
         @XmlAttribute(required = true)
         protected String prefix;
-        @XmlAttribute(name = "schema-name", required = true)
-        protected String schemaName;
 
         /**
          * Gets the value of the host property.
@@ -79,30 +75,6 @@ public class StreamDefinitionType extends DefinitionType {
          */
         public void setPort(String value) {
                 this.port = value;
-        }
-
-        /**
-         * Gets the value of the dbName property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getTarget() {
-                return target;
-        }
-
-        /**
-         * Sets the value of the dbName property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setTarget(String value) {
-                this.target = value;
         }
 
         /**
@@ -201,29 +173,6 @@ public class StreamDefinitionType extends DefinitionType {
                 this.prefix = value;
         }
 
-        /**
-         * Gets the value of the schemaName property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getSchemaName() {
-                return schemaName;
-        }
-
-        /**
-         * Sets the value of the schemaName property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setSchemaName(String value) {
-                this.schemaName = value;
-        }
 
         @Override
         public DataSourceDefinition toDataSourceDefinition() {

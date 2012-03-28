@@ -12,34 +12,26 @@ public class StreamSource implements Serializable {
     private static final long serialVersionUID = 0L;
     private String m_host;
     private int m_port;
-    private String m_target;
     private String m_layerName;
-    private String schemaName;
+    //private String schemaName;
     private String m_imageFormat;
     private String m_user;
     private String m_password;
     private String m_prefix;
     private String m_srs;
     
-    public StreamSource(String host, int port, String target, String layerName, String prefix) {
+    public StreamSource(String host, int port, String layerName, String prefix) {
         this.m_host = host;
         this.m_port = port;
-        this.m_target = target;
         this.m_layerName = layerName;
         this.m_prefix = prefix;
     }
     
-    public StreamSource(String host, int port, String target, String layerName,
+    public StreamSource(String host, int port, String layerName,
             String user, String password, String prefix) {
-        this(host, port, target, layerName, prefix);
+        this(host, port, layerName, prefix);
         this.m_user = user;
         this.m_password = password;
-    }
-
-    public StreamSource(String host, int port, String target, String layerName,
-            String user, String password, String schemaName, String prefix) {
-        this(host, port, target, layerName, user, password, prefix);
-        this.schemaName = schemaName;
     }
 
     public String getHost() {
@@ -56,14 +48,6 @@ public class StreamSource implements Serializable {
 
     public void setPort(int port) {
         this.m_port = port;
-    }
-
-    public String getTarget() {
-        return this.m_target;
-    }
-
-    public void setTarget(String target) {
-        this.m_target = target;
     }
 
     public String getLayerName() {
@@ -98,10 +82,6 @@ public class StreamSource implements Serializable {
         this.m_password = password;
     }
 
-    public String getSchemaName() {
-        return schemaName;
-    }
-
     public void setSRS(String srs) {
         this.m_srs = srs;
     }
@@ -116,12 +96,12 @@ public class StreamSource implements Serializable {
      */
     @Override
     public String toString() {
-        return m_host + "//" + m_target + "-" + m_port + "-" + m_layerName + "-" + m_user + "-" + m_password + "-" + m_imageFormat;
+        return m_host + ":" + m_port + "-" + m_layerName + "-" + m_user + "-" + m_password + "-" + m_imageFormat;
     }
 
     //TODO : give to this function a meaningful name
     public String getDbms() {
-        return m_host + ":" + m_port + "//" + m_target + "//request=getMap&layers=" + m_layerName;
+        return m_host + ":" + m_port + "//request=getMap&layers=" + m_layerName;
     }
 
     public String getPrefix() {
