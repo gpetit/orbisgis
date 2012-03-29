@@ -1,9 +1,12 @@
 package org.gdms.driver.stream;
 
+import com.vividsolutions.jts.geom.Envelope;
+import java.awt.Image;
 import org.gdms.data.schema.Metadata;
 import org.gdms.data.values.Value;
 import org.gdms.driver.DataSet;
 import org.gdms.driver.DriverException;
+import org.gvsig.remoteClient.wms.ICancellable;
 import org.orbisgis.progress.ProgressMonitor;
 
 
@@ -45,4 +48,11 @@ public class WMSDriver extends AbstractRasterStreamDriver {
     public boolean write(DataSet dataSource, ProgressMonitor pm) throws DriverException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    @Override
+    public Image getMap(int width, int height, Envelope extent, ICancellable cancel) throws DriverException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+    
+    
 }
