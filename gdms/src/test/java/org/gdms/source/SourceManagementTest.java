@@ -481,8 +481,7 @@ public class SourceManagementTest {
                 testFile = new File(TestBase.internalData + "test.csv");
                 testDB = new DBSource(null, 0, TestBase.backupDir
                         + "testhsqldb", "sa", "", "gisapps", "jdbc:hsqldb:file");
-                testWMS = new StreamSource("127.0.0.1", 80, "cantons", "", "", "wms", "EPSG:1234",
-                        "format/pig");
+                testWMS = new StreamSource("127.0.0.1", 80, "cantons", "wms", "EPSG:1234", "format/pig");
                 obj = new MemoryDataSetDriver();
                 sm.remove(SOURCE);
                 sm.register(SOURCE, testFile);
