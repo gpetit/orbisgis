@@ -29,6 +29,7 @@ package org.orbisgis.core.ui.plugins.editors.mapEditor;
 
 import java.util.Vector;
 import javax.swing.JButton;
+import org.gdms.data.stream.StreamSource;
 import org.gdms.source.SourceManager;
 import org.orbisgis.core.DataManager;
 
@@ -46,7 +47,6 @@ import org.orbisgis.core.ui.plugins.views.mapEditor.MapEditorPlugIn;
 import org.orbisgis.core.ui.preferences.lookandfeel.OrbisGISIcon;
 import org.orbisgis.progress.ProgressMonitor;
 
-import org.gdms.data.wms.WMSSource;
 import org.gvsig.remoteClient.wms.WMSClient;
 import org.gvsig.remoteClient.wms.WMSLayer;
 import org.orbisgis.core.layerModel.LayerException;
@@ -112,8 +112,8 @@ public class AddWMSLayerPlugIn extends AbstractPlugIn {
                                         Object[] layers = layerConfiguration.getSelectedLayers();
                                         for (Object layer : layers) {
                                                 String layerName = ((WMSLayer) layer).getName();
-                                                WMSSource source = new WMSSource(client.getHost(),
-                                                        layerName, srsPanel.getSRS(), validImageFormat);
+                                                StreamSource source = new StreamSource(client.getHost(), 80,
+                                                        layerName, "", "", "wms", srsPanel.getSRS(), validImageFormat);
                                                 DataManager dm = (DataManager) Services.getService(DataManager.class);
                                                 SourceManager sourceManager = dm.getSourceManager();
                                                 String uniqueName = sourceManager.getUniqueName(layerName);

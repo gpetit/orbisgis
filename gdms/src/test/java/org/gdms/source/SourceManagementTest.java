@@ -57,9 +57,9 @@ import org.gdms.data.edition.FakeFileSourceDefinition;
 import org.gdms.data.edition.ReadAndWriteDriver;
 import org.gdms.data.file.FileSourceCreation;
 import org.gdms.data.memory.MemorySourceDefinition;
+import org.gdms.data.stream.StreamSource;
 import org.gdms.data.types.Type;
 import org.gdms.data.types.TypeFactory;
-import org.gdms.data.wms.WMSSource;
 import org.gdms.driver.DriverException;
 import org.gdms.driver.FileDriverRegister;
 import org.gdms.driver.driverManager.DriverLoadException;
@@ -76,7 +76,7 @@ public class SourceManagementTest {
         private DataSourceFactory dsf;
         private File testFile;
         private DBSource testDB;
-        private WMSSource testWMS;
+        private StreamSource testWMS;
         private MemoryDataSetDriver obj;
 
         @Test
@@ -481,7 +481,7 @@ public class SourceManagementTest {
                 testFile = new File(TestBase.internalData + "test.csv");
                 testDB = new DBSource(null, 0, TestBase.backupDir
                         + "testhsqldb", "sa", "", "gisapps", "jdbc:hsqldb:file");
-                testWMS = new WMSSource("127.0.0.1", "cantons", "EPSG:1234",
+                testWMS = new StreamSource("127.0.0.1", 80, "cantons", "", "", "wms", "EPSG:1234",
                         "format/pig");
                 obj = new MemoryDataSetDriver();
                 sm.remove(SOURCE);

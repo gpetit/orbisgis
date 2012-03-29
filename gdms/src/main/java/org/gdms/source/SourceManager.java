@@ -46,7 +46,6 @@ import org.gdms.data.DataSourceFinalizationException;
 import org.gdms.data.NoSuchTableException;
 import org.gdms.data.db.DBSource;
 import org.gdms.data.schema.Schema;
-import org.gdms.data.wms.WMSSource;
 import org.gdms.driver.DriverException;
 import org.gdms.driver.MemoryDriver;
 import org.gdms.driver.driverManager.DriverManager;
@@ -182,16 +181,6 @@ public interface SourceManager {
          */
         void register(String name, StreamSource streamSource);
         
-        /**
-         * Registers a wms source with the specified name
-         *
-         * @param name
-         *            Name to register
-         * @param wmsSource
-         *            source to register
-         * @throws SourceAlreadyExistsException
-         */
-        void register(String name, WMSSource wmsSource);
 
         /**
          * Registers a object with the specified name
@@ -258,10 +247,10 @@ public interface SourceManager {
         /**
          * Registers generating the name automatically
          *
-         * @param wmsSource
+         * @param streamSource
          * @return the name of the registered source
          */
-        String nameAndRegister(WMSSource wmsSource);
+        String nameAndRegister(StreamSource streamSource);
 
         /**
          * Registers generating the name automatically
