@@ -68,7 +68,7 @@ public abstract class AbstractRasterStreamDriver extends AbstractDataSet impleme
 
     @Override
     public int getSupportedType() {
-        return SourceManager.WMS;
+        return SourceManager.STREAM;
     }
 
     /**
@@ -78,7 +78,7 @@ public abstract class AbstractRasterStreamDriver extends AbstractDataSet impleme
      */
     @Override
     public int getType() {
-        return SourceManager.WMS | SourceManager.RASTER;
+        return SourceManager.STREAM | SourceManager.RASTER;
     }
 
     @Override
