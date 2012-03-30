@@ -88,7 +88,7 @@ public class DefaultDataManager implements DataManager {
 				.getDataSourceFactory().getSourceManager().getSource(sourceName);
 		if (src != null) {
 			int type = src.getType();
-			if ((type & (SourceManager.RASTER | SourceManager.VECTORIAL | SourceManager.WMS)) != 0) {
+			if ((type & (SourceManager.RASTER | SourceManager.VECTORIAL | SourceManager.STREAM)) != 0) {
 				try {
 					DataSource ds = ((DataManager) Services
 							.getService(DataManager.class)).getDataSourceFactory()
@@ -115,7 +115,7 @@ public class DefaultDataManager implements DataManager {
         @Override
 	public ILayer createLayer(DataSource sds) throws LayerException {
 		int type = sds.getSource().getType();
-		if ((type & SourceManager.WMS) == SourceManager.WMS) {
+		if ((type & SourceManager.STREAM) == SourceManager.STREAM) {
 			return new WMSLayer(sds.getName(), sds);
 		} else {
 			boolean hasSpatialData = true;

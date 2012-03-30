@@ -131,7 +131,7 @@ public class Renderer {
                 if (layer.isVisible() && extent.intersects(layer.getEnvelope())) {
                     logger.debug(I18N.getString("orbisgis-core.org.orbisgis.renderer.drawing") + layer.getName()); //$NON-NLS-1$
                     long t1 = System.currentTimeMillis();
-                    if (layer.isWMS()) {
+                    if (layer.isStream()) {
                         // Iterate over next layers to make only one call to the
                         // WMS server
 //                        WMSStatus status = (WMSStatus) layer.getWMSConnection().getStatus().clone();
