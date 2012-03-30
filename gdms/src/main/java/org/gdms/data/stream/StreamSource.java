@@ -24,7 +24,7 @@ public class StreamSource implements Serializable {
     public StreamSource(String host, int port, String layerName, String prefix) {
         this(host, port, layerName, prefix, "", "", "", "");
     }
-    
+     
     public StreamSource(String host, int port, String layerName, String prefix,
             String imageFormat, String srs) {
         this(host, port, layerName, prefix, imageFormat, srs, "", "");
