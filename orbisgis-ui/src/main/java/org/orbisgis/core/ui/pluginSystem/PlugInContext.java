@@ -407,7 +407,7 @@ public class PlugInContext {
 						break;
 					case WMS:
 						source = sourceManager.getSource(src);
-						if (!((source.getType() & SourceManager.WMS) == 0))
+						if (!((source.getType() & SourceManager.STREAM) == 0))
 							return false;
 						break;
 					case RASTER:
