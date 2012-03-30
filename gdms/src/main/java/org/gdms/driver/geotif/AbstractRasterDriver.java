@@ -66,6 +66,7 @@ import org.gdms.data.types.Constraint;
 import org.gdms.data.types.RasterTypeConstraint;
 import org.gdms.driver.AbstractDataSet;
 import org.gdms.driver.DataSet;
+import org.gdms.driver.driverManager.DriverManager;
 import org.jproj.CoordinateReferenceSystem;
 
 public abstract class AbstractRasterDriver extends AbstractDataSet implements FileReadWriteDriver {
@@ -214,7 +215,7 @@ public abstract class AbstractRasterDriver extends AbstractDataSet implements Fi
 
         @Override
         public DataSet getTable(String name) {
-                if (!name.equals("main")) {
+                if (!name.equals(DriverManager.DEFAULT_SINGLE_TABLE_NAME)) {
                         return null;
                 }
                 return this;

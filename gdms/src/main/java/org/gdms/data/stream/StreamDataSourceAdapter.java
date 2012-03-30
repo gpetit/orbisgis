@@ -48,7 +48,6 @@ public class StreamDataSourceAdapter extends DriverDataSource implements Commite
     @Override
     public void open() throws DriverException {
         LOG.trace("Opening");
-        //Il y aura des arguments pour open dont on aura la valeur grace à def :)
         driver.open(def);
         fireOpen(this);
         DefaultSourceManager sm = (DefaultSourceManager) getDataSourceFactory().getSourceManager();
@@ -63,16 +62,6 @@ public class StreamDataSourceAdapter extends DriverDataSource implements Commite
         DefaultSourceManager sm = (DefaultSourceManager) getDataSourceFactory().getSourceManager();
         sm.removeCommitListener(this);
     }
-
-//    @Override
-//    public boolean isModified() {
-//        return true;
-//    }
-//
-//    @Override
-//    public boolean isOpen() {
-//        return true;
-//    }
 
     @Override
     public void saveData(DataSource ds) throws DriverException {
@@ -140,8 +129,8 @@ public class StreamDataSourceAdapter extends DriverDataSource implements Commite
         return driver.getMap(width, height, extent, cancel);
     }
 
-//    @Override
-//    public Envelope getFullExtent() throws DriverException {
-//        return ((SimpleWMSDriver)getDriver()).getEnvelope();
-//    }
+    @Override
+    public Envelope getFullExtent() throws DriverException {
+        return ((SimpleWMSDriver)getDriver()).getEnvelope();
+    }
 }

@@ -89,6 +89,8 @@ import com.vividsolutions.jts.index.quadtree.Quadtree;
 import java.util.Vector;
 import org.gdms.data.DataSource;
 import org.gdms.data.indexes.FullIterator;
+import org.gdms.driver.StreamDriver;
+import org.gdms.driver.wms.SimpleWMSDriver;
 import org.orbisgis.core.layerModel.LayerException;
 
 public class Renderer {
@@ -221,7 +223,7 @@ public class Renderer {
         try {
             layer.open();
             
-            Image img = ((WMSLayer)layer).getDriver().getMap(width, height, extent, null);
+            Image img = ((SimpleWMSDriver)layer.getDataSource().getDriver()).getMap(width, height, extent, null);
             g2.drawImage(img, 0, 0, null);
         } catch (DriverException e) {
             Services.getService(ErrorManager.class).error(
