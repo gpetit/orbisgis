@@ -95,7 +95,7 @@ import org.gdms.source.directory.Source;
 import org.gdms.source.directory.Sources;
 import org.gdms.data.stream.StreamSource;
 import org.gdms.data.stream.StreamSourceDefinition;
-import org.gdms.driver.stream.SimpleWMSDriver;
+import org.gdms.driver.wms.SimpleWMSDriver;
 import org.orbisgis.progress.ProgressMonitor;
 import org.orbisgis.utils.FileUtils;
 

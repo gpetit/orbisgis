@@ -1,4 +1,4 @@
-package org.orbisgis.core.layerModel;
+package org.gdms.driver.wms;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -21,11 +21,4 @@ public class WMSClientPool {
 		}
 		return client;
 	}
-        
-        public static void registerClient(WMSClient client) {
-            if(!clients.containsKey(client.getHost())) {
-                clients.put(client.getHost(), client);
-            }
-        }
-
 }

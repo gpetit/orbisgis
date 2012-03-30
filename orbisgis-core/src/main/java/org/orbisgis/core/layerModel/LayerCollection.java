@@ -455,13 +455,6 @@ public class LayerCollection extends AbstractLayer {
 	}
 
 	@Override
-	public WMSConnection getWMSConnection()
-			throws UnsupportedOperationException {
-		throw new UnsupportedOperationException(I18N.getString("orbisgis-core.org.orbisgis.layerModel.LayerCollection.cannotdoThis") //$NON-NLS-1$
-				+ I18N.getString("orbisgis-core.org.orbisgis.layerModel.LayerCollection.operationOnLayerCollection")); //$NON-NLS-1$
-	}
-
-	@Override
 	public boolean isWMS() {
 		return false;
 	}
@@ -471,11 +464,11 @@ public class LayerCollection extends AbstractLayer {
 		return false;
 	}
 
-	@Override
-	public WMSLegend getWMSLegend() {
-		throw new UnsupportedOperationException(I18N.getString("orbisgis-core.org.orbisgis.layerModel.LayerCollection.cannotSet") //$NON-NLS-1$
-				+ I18N.getString("orbisgis-core.org.orbisgis.layerModel.LayerCollection.aLegendOnLayerCollection")); //$NON-NLS-1$
-	}
+//	@Override
+//	public WMSLegend getWMSLegend() {
+//		throw new UnsupportedOperationException(I18N.getString("orbisgis-core.org.orbisgis.layerModel.LayerCollection.cannotSet") //$NON-NLS-1$
+//				+ I18N.getString("orbisgis-core.org.orbisgis.layerModel.LayerCollection.aLegendOnLayerCollection")); //$NON-NLS-1$
+//	}
         
         ///////////Static methods///////////////////////////////
 

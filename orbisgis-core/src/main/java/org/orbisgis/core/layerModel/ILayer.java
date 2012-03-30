@@ -180,7 +180,7 @@ public interface ILayer {
 	 */
 	ILayer[] getRasterLayers() throws DriverException;
 
-	WMSLegend getWMSLegend();
+	//WMSLegend getWMSLegend();
 
 	/**
 	 * Gets all the vectorial layers in the tree under this layer
@@ -314,16 +314,6 @@ public interface ILayer {
 	 * @throws UnsupportedOperationException
 	 */
 	GeoRaster getRaster() throws DriverException, UnsupportedOperationException;
-
-	/**
-	 * Gets an object to manage the WMS contents in this layer.
-	 * 
-	 * @return
-	 * @throws UnsupportedOperationException
-	 *             If this layer is not a WMS layer. This is {@link #isWMS()}
-	 *             returns false
-	 */
-	WMSConnection getWMSConnection() throws UnsupportedOperationException;
 
 	/**
 	 * Gets an array of the selected rows

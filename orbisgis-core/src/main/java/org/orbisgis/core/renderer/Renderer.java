@@ -68,7 +68,6 @@ import org.gvsig.remoteClient.wms.WMSStatus;
 import org.orbisgis.core.Services;
 import org.orbisgis.core.errorManager.ErrorManager;
 import org.orbisgis.core.layerModel.ILayer;
-import org.orbisgis.core.layerModel.WMSConnection;
 import org.orbisgis.core.layerModel.WMSLayer;
 import org.orbisgis.core.map.MapTransform;
 import org.orbisgis.core.renderer.legend.Legend;
@@ -189,32 +188,34 @@ public class Renderer {
         logger.info(I18N.getString("orbisgis-core.org.orbisgis.renderer.totalRenderingTime") + (total2 - total1)); //$NON-NLS-1$
     }
 
-    private boolean sameServer(ILayer layer, ILayer layer2) {
-        return layer.getWMSConnection().getClient().getHost().equals(
-                layer2.getWMSConnection().getClient().getHost());
-    }
+    /*We'll implement back this method later */
+//    private boolean sameServer(ILayer layer, ILayer layer2) {
+//        return layer.getWMSConnection().getClient().getHost().equals(
+//                layer2.getWMSConnection().getClient().getHost());
+//    }
 
-    private void drawWMS(Graphics2D g2, int width, int height, Envelope extent,
-            WMSConnection connection) {
-        WMSStatus status = connection.getStatus();
-        status.setWidth(width);
-        status.setHeight(height);
-        status.setExtent(new Rectangle2D.Double(extent.getMinX(), extent.getMinY(), extent.getWidth(), extent.getHeight()));
-        try {
-            File file = connection.getClient().getMap(status, null);
-            BufferedImage image = ImageIO.read(file);
-            g2.drawImage(image, 0, 0, null);
-        } catch (WMSException e) {
-            Services.getService(ErrorManager.class).error(
-                    I18N.getString("orbisgis-core.org.orbisgis.renderer.cannotGetWMSImage"), e); //$NON-NLS-1$
-        } catch (ServerErrorException e) {
-            Services.getService(ErrorManager.class).error(
-                    I18N.getString("orbisgis-core.org.orbisgis.renderer.cannotGetWMSImage"), e); //$NON-NLS-1$
-        } catch (IOException e) {
-            Services.getService(ErrorManager.class).error(
-                    I18N.getString("orbisgis-core.org.orbisgis.renderer.cannotGetWMSImage"), e); //$NON-NLS-1$
-        }
-    }
+    //This method is now useless
+//    private void drawWMS(Graphics2D g2, int width, int height, Envelope extent,
+//            WMSConnection connection) {
+//        WMSStatus status = connection.getStatus();
+//        status.setWidth(width);
+//        status.setHeight(height);
+//        status.setExtent(new Rectangle2D.Double(extent.getMinX(), extent.getMinY(), extent.getWidth(), extent.getHeight()));
+//        try {
+//            File file = connection.getClient().getMap(status, null);
+//            BufferedImage image = ImageIO.read(file);
+//            g2.drawImage(image, 0, 0, null);
+//        } catch (WMSException e) {
+//            Services.getService(ErrorManager.class).error(
+//                    I18N.getString("orbisgis-core.org.orbisgis.renderer.cannotGetWMSImage"), e); //$NON-NLS-1$
+//        } catch (ServerErrorException e) {
+//            Services.getService(ErrorManager.class).error(
+//                    I18N.getString("orbisgis-core.org.orbisgis.renderer.cannotGetWMSImage"), e); //$NON-NLS-1$
+//        } catch (IOException e) {
+//            Services.getService(ErrorManager.class).error(
+//                    I18N.getString("orbisgis-core.org.orbisgis.renderer.cannotGetWMSImage"), e); //$NON-NLS-1$
+//        }
+//    }
 
     private void drawStreamLayer(Graphics2D g2, ILayer layer, int width, int height, Envelope extent) {
         try {

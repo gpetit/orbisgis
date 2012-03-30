@@ -1,4 +1,4 @@
-package org.gdms.driver.stream;
+package org.gdms.driver.wms;
 
 import com.vividsolutions.jts.geom.Envelope;
 import java.awt.Image;
@@ -6,6 +6,7 @@ import org.gdms.data.schema.Metadata;
 import org.gdms.data.values.Value;
 import org.gdms.driver.DataSet;
 import org.gdms.driver.DriverException;
+import org.gdms.driver.stream.AbstractRasterStreamDriver;
 import org.gvsig.remoteClient.wms.ICancellable;
 import org.orbisgis.progress.ProgressMonitor;
 

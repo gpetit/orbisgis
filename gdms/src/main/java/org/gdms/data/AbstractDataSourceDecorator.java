@@ -309,7 +309,7 @@ public abstract class AbstractDataSourceDecorator extends AbstractDataSource {
          * @see org.gdms.data.DataSource#isOpen()
          */
         @Override
-        public boolean isOpen() {
+        public boolean isOpen() {       
                 return internalDataSource.isOpen();
         }
 
