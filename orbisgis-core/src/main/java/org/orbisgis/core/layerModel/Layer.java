@@ -355,12 +355,7 @@ public class Layer extends GdmsLayer {
     }
 
     @Override
-    public boolean isWMS() {
-        return false;
-    }
-
-    @Override
-    public boolean isStream() {
+    public boolean isStream() throws DriverException {
         return dataSource.isStream();
     }
 
@@ -498,10 +493,4 @@ public class Layer extends GdmsLayer {
         this.selection = newSelection;
         fireSelectionChanged();
     }
-
-
-//    @Override
-//    public WMSLegend getWMSLegend() {
-//        throw new UnsupportedOperationException(I18N.getString("org.orbisgis.layerModel.layer.notAWmsLayer")); //$NON-NLS-1$
-//    }
 }

@@ -89,7 +89,7 @@ public class ZoomToSelectedFeaturesPlugIn extends AbstractPlugIn {
 				ILayer[] layers = mc.getSelectedLayers();
 				Envelope rect = null;
 				for (ILayer lyr : layers) {
-					if (!lyr.isWMS()) {
+					if (!lyr.isStream()) {
 						try {
 							int[] selectedRow = lyr.getSelection();
 
@@ -151,7 +151,7 @@ public class ZoomToSelectedFeaturesPlugIn extends AbstractPlugIn {
 			MapContext mc = (MapContext) mapEditor.getElement().getObject();
 			ILayer[] layers = mc.getLayerModel().getLayersRecursively();
 			for (ILayer lyr : layers) {
-				if (!lyr.isWMS()) {
+				if (!lyr.isStream()) {
 					if (lyr.getSelection().length > 0)
 						isEnabled = true;
 				}

@@ -75,7 +75,7 @@ public class SaveInFilePlugIn extends AbstractPlugIn {
 		MapContext mapContext = getPlugInContext().getMapContext();
 		ILayer[] selectedResources = mapContext.getSelectedLayers();
 		for (ILayer resource : selectedResources) {
-			if (resource.isWMS()) {
+			if (resource.isStream()) {
 				continue;
 			}
 			final SaveFilePanel outfilePanel = new SaveFilePanel(

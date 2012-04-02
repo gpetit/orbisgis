@@ -838,7 +838,7 @@ public interface DataSource extends DataSet {
          * 
          * @return
          */
-        boolean isStream();
+        boolean isStream() throws DriverException;
 
         /**
          * Gets an iterator with edition capabilities.

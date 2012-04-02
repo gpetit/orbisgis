@@ -398,8 +398,9 @@ public abstract class AbstractDataSource extends AbstractDataSet implements Data
         }
         
         @Override
-        public boolean isStream() {
-                return false;
+        public boolean isStream() throws DriverException {
+                Type fieldType = getMetadata().getFieldType(getSpatialFieldIndex());
+                return fieldType.getTypeCode() == Type.STREAM;
         }
 
         @Override
