@@ -279,11 +279,10 @@ public final class MetadataUtilities {
     public static int getSpatialFieldIndex(Metadata metadata)
             throws DriverException {
         int spatialFieldIndex = -1;
-        for (int i = 0; i
-                < metadata.getFieldCount(); i++) {
+        for (int i = 0; i < metadata.getFieldCount(); i++) {
             int typeCode = metadata.getFieldType(i).getTypeCode();
             if ((TypeFactory.isVectorial(typeCode) && typeCode != Type.NULL)
-                    || (typeCode == Type.RASTER)) {
+                    || (typeCode == Type.RASTER) || (typeCode == Type.STREAM)) {
                 spatialFieldIndex = i;
                 break;
             }

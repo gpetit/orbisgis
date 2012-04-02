@@ -38,6 +38,7 @@
  */
 package org.gdms.data.values;
 
+import com.vividsolutions.jts.geom.Envelope;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -627,5 +628,14 @@ public abstract class AbstractValue implements Value {
         @Override
         public int compareTo(Value o) {
                 throw new IncompatibleTypesException("Cannot compare " + this + " and " + o);
+        }
+        
+        @Override
+        public Envelope getAsEnvelope() {
+               if (isNull()) {
+                        return null;
+                }
+                throw new IncompatibleTypesException("This value is not envelope: "
+                        + toString() + "(" + TypeFactory.getTypeName(getType()) + ")");
         }
 }

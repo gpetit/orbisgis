@@ -38,6 +38,7 @@
  */
 package org.gdms.data.values;
 
+import com.vividsolutions.jts.geom.Envelope;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -264,6 +265,9 @@ public interface Value extends Comparable<Value> {
 	 */
 	GeoRaster getAsRaster();
 
+        
+        Envelope getAsEnvelope();
+        
 	/**
 	 * @return this value if it is a numeric value or it can be converted
 	 * 
