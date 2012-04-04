@@ -47,6 +47,7 @@ import org.gdms.data.types.IncompatibleTypesException;
 import org.grap.model.GeoRaster;
 
 import com.vividsolutions.jts.geom.Geometry;
+import org.gdms.data.stream.GeoStream;
 
 /**
  * Base interface for values manipulated by Gdms.
@@ -265,8 +266,14 @@ public interface Value extends Comparable<Value> {
 	 */
 	GeoRaster getAsRaster();
 
-        
-        Envelope getAsEnvelope();
+        /**
+	 * @return this value if it is a stream value or it can be converted
+	 * 
+	 * @throws IncompatibleTypesException
+	 *             if the value is not of the required type or cannot be
+	 *             converted
+	 */
+        GeoStream getAsStream();
         
 	/**
 	 * @return this value if it is a numeric value or it can be converted

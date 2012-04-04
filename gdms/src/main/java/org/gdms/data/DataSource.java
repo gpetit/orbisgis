@@ -59,6 +59,7 @@ import org.grap.model.GeoRaster;
 import org.jproj.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
+import org.gdms.data.stream.GeoStream;
 
 /**
  * Interface to access any data source
@@ -788,6 +789,15 @@ public interface DataSource extends DataSet {
          */
         GeoRaster getRaster(long rowIndex) throws DriverException;
 
+        /**
+         * Gets the stream at the given <code>rowIndex</code> row index.
+         * @param rowIndex a row index
+         * @return a stream object
+         * @throws DriverException
+         */
+        GeoStream getStream(long rowIndex) throws DriverException;
+        
+        
         /**
          * Set the field name for the getGeometry(int) method. If this method is not
          * called, the default geometry is the first spatial field

@@ -50,6 +50,7 @@ import org.grap.model.GeoRaster;
 
 import java.util.Locale;
 import org.apache.log4j.Logger;
+import org.gdms.data.stream.GeoStream;
 import org.gdms.data.types.IncompatibleTypesException;
 import org.gdms.data.types.InvalidTypeException;
 import org.jproj.CoordinateReferenceSystem;
@@ -885,9 +886,9 @@ public final class ValueFactory {
         private ValueFactory() {
         }
         
-        public static EnvelopeValue createValue(Envelope envelope) {
-                if (envelope != null) {
-                        return new DefaultEnvelopeValue(envelope);
+        public static StreamValue createValue(GeoStream geoStream) {
+                if (geoStream != null) {
+                        return new DefaultStreamValue(geoStream);
                 } else {
                         return createNullValue();
                 }

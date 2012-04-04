@@ -43,14 +43,7 @@ public abstract class AbstractRasterStreamDriver extends AbstractDataSet impleme
         
     }
 
-    @Override
-    public void setURL(String url) throws DriverException {
-        this.url = new String(url);
-        schema = new DefaultSchema(getTypeName() + url); // TODO : donner du sens
-        gdmsMetadata = new DefaultMetadata();
-        schema.addTable("main", gdmsMetadata);
-    }
-    
+   
     @Override
     public Schema getSchema() throws DriverException {
         return schema;

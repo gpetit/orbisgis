@@ -84,6 +84,7 @@ import com.vividsolutions.jts.index.quadtree.Quadtree;
 import java.util.Vector;
 import org.gdms.data.DataSource;
 import org.gdms.data.indexes.FullIterator;
+import org.gdms.data.stream.GeoStream;
 import org.gdms.driver.wms.SimpleWMSDriver;
 import org.orbisgis.core.layerModel.LayerException;
 
@@ -126,7 +127,7 @@ public class Renderer {
                 if (layer.isVisible() && extent.intersects(layer.getEnvelope())) {
                     logger.debug(I18N.getString("orbisgis-core.org.orbisgis.renderer.drawing") + layer.getName()); //$NON-NLS-1$
                     long t1 = System.currentTimeMillis();
-                    if (layer.isStream()) {
+//                    if (layer.isStream()) {
                         // Iterate over next layers to make only one call to the
                         // WMS server
 //                        WMSStatus status = (WMSStatus) layer.getWMSConnection().getStatus().clone();
@@ -146,8 +147,8 @@ public class Renderer {
 //                        }
 //                        WMSConnection conn = new WMSConnection(layer.getWMSConnection().getClient(), status);
 //                        drawWMS(g2, width, height, extent, conn);
-                        drawStreamLayer(g2, layer, width, height, extent);
-                    } else {
+                        
+//                    } else {
                         DataSource sds = layer.getDataSource();
                         if (sds != null) {
                             try {
@@ -163,6 +164,8 @@ public class Renderer {
                                                 I18N.getString("orbisgis-core.org.orbisgis.renderer.cannotDrawRaster") //$NON-NLS-1$
                                                 + layer.getName(), e);
                                     }
+                                } else if(sds.isStream()) {
+                                        drawStreamLayer(g2, layer, width, height, extent, pm);
                                 } else {
                                     logger.warn(I18N.getString("orbisgis-core.org.orbisgis.renderer.notDraw") //$NON-NLS-1$
                                             + layer.getName());
@@ -173,7 +176,7 @@ public class Renderer {
                             }
                             pm.progressTo(100 - (100 * i) / layers.length);
                         }
-                    }
+//                    }
                     long t2 = System.currentTimeMillis();
                     logger.info(I18N.getString("orbisgis-core.org.orbisgis.renderer.renderingTime") + (t2 - t1)); //$NON-NLS-1$
                 }
@@ -213,12 +216,16 @@ public class Renderer {
 //        }
 //    }
 
-    private void drawStreamLayer(Graphics2D g2, ILayer layer, int width, int height, Envelope extent) {
+    private void drawStreamLayer(Graphics2D g2, ILayer layer, int width, int height, Envelope extent, ProgressMonitor pm) {
         try {
             layer.open();
             
-            Image img = ((SimpleWMSDriver)layer.getDataSource().getDriver()).getMap(width, height, extent, null);
-            g2.drawImage(img, 0, 0, null);
+            for(int i = 0 ; i < layer.getDataSource().getRowCount() ; i++) {
+                GeoStream geoStream = layer.getDataSource().getStream(i);
+                
+                Image img = geoStream.getMap(width, height, extent, pm);
+                g2.drawImage(img, 0, 0, null);
+            }
         } catch (DriverException e) {
             Services.getService(ErrorManager.class).error(
                     I18N.getString("orbisgis-core.org.orbisgis.renderer.cannotGetWMSImage"), e); //$NON-NLS-1$

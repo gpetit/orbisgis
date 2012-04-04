@@ -49,6 +49,7 @@ import org.gdms.data.types.IncompatibleTypesException;
 import org.grap.model.GeoRaster;
 
 import com.vividsolutions.jts.geom.Geometry;
+import org.gdms.data.stream.GeoStream;
 
 /**
  * Parent wrapper. This class provides very basic implementation of the
@@ -631,11 +632,11 @@ public abstract class AbstractValue implements Value {
         }
         
         @Override
-        public Envelope getAsEnvelope() {
+        public GeoStream getAsStream() {
                if (isNull()) {
                         return null;
                 }
-                throw new IncompatibleTypesException("This value is not envelope: "
+                throw new IncompatibleTypesException("This value is not GeoStream: "
                         + toString() + "(" + TypeFactory.getTypeName(getType()) + ")");
         }
 }

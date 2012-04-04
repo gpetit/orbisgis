@@ -1,6 +1,7 @@
 package org.gdms.data.values;
 
 import com.vividsolutions.jts.geom.Envelope;
+import org.gdms.data.stream.GeoStream;
 import org.gdms.data.types.Type;
 
 /**
@@ -9,18 +10,18 @@ import org.gdms.data.types.Type;
  */
 
 
-public class DefaultEnvelopeValue extends AbstractValue implements EnvelopeValue {
+public class DefaultStreamValue extends AbstractValue implements StreamValue {
 
-        private Envelope m_envelope;
+        private GeoStream m_GeoStream;
         
-        public DefaultEnvelopeValue(Envelope envelope) {
-                this.m_envelope = envelope;
+        public DefaultStreamValue(GeoStream geoStream) {
+                this.m_GeoStream = geoStream;
         }
         
         @Override
-        public BooleanValue equals(Value value) {
-                if (value instanceof Envelope) {
-                        return ValueFactory.createValue(m_envelope.equals(((RasterValue) value).getAsEnvelope()));
+        public BooleanValue equals(Value obj) {
+                if (obj instanceof StreamValue) {
+                        return ValueFactory.createValue(m_GeoStream.equals(((StreamValue) obj).getAsStream()));
                 } else {
                         return ValueFactory.createValue(false);
                 }
@@ -28,7 +29,7 @@ public class DefaultEnvelopeValue extends AbstractValue implements EnvelopeValue
 
         @Override
         public int hashCode() {
-                return this.m_envelope.hashCode();
+                return this.m_GeoStream.hashCode();
         }
 
         @Override
@@ -47,12 +48,12 @@ public class DefaultEnvelopeValue extends AbstractValue implements EnvelopeValue
         }
 
         @Override
-        public void setValue(Envelope value) {
-                this.m_envelope = value;
+        public void setValue(GeoStream value) {
+                this.m_GeoStream = value;
         }
         
         @Override
-        public Envelope getAsEnvelope() {
-                return this.m_envelope;
+        public GeoStream getAsStream() {
+                return this.m_GeoStream;
         }      
 }

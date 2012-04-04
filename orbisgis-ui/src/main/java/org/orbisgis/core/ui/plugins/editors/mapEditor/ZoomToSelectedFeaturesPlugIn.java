@@ -89,9 +89,9 @@ public class ZoomToSelectedFeaturesPlugIn extends AbstractPlugIn {
 				ILayer[] layers = mc.getSelectedLayers();
 				Envelope rect = null;
 				for (ILayer lyr : layers) {
-					if (!lyr.isStream()) {
-						try {
-							int[] selectedRow = lyr.getSelection();
+                                        try {
+                                                if (!lyr.isStream()) {
+                                                        int[] selectedRow = lyr.getSelection();
 
 							DataSource sds = lyr
 									.getDataSource();
@@ -119,12 +119,11 @@ public class ZoomToSelectedFeaturesPlugIn extends AbstractPlugIn {
 								}
 
 							}
-						} catch (DriverException e) {
-							ErrorMessages.error(
-									ErrorMessages.CannotComputeEnvelope, e);
-						}
+                                                }
+					} catch (DriverException e) {
+						ErrorMessages.error(ErrorMessages.CannotComputeEnvelope, e);
 					}
-
+					
 					if (rect != null) {
 						mapEditor.getMapTransform().setExtent(rect);
 
@@ -144,7 +143,8 @@ public class ZoomToSelectedFeaturesPlugIn extends AbstractPlugIn {
 				btn, context);
 	}
 
-	public boolean isEnabled() {
+        @Override
+	public boolean isEnabled() throws Exception{
 		boolean isEnabled = false;
 		MapEditorPlugIn mapEditor = null;
 		if ((mapEditor = getPlugInContext().getMapEditor()) != null) {
